@@ -35,7 +35,8 @@ futerca/
   admins/{emailKey}: true            # email with "." replaced by ","
   players/{playerId}
     name, role: "line" | "keeper", isMonthly, joinDate
-    ratings: { speed, finishing, defense, passing }   # 1-99, used by the draw
+    linePosition: "ataque" | "meio" | "defesa"
+    ratings: { speed, finishing, defense, passing }   # 1-10, used by the draw
     baseline: { goals, assists, saves, titles }       # totals imported from the Sheet
   sessions/{sessionId}               # one Tuesday night
     date, createdAt, status: "draft" | "live" | "finished"
@@ -62,6 +63,7 @@ Database rules:
 - `.read`: public for `futerca/`.
 - `.write`: only when `auth.token.email_verified == true` and `futerca/admins/{emailKey}` exists.
 - `admins/` is writable only from the Firebase console.
+- The first admin is Raiad (`raiadscaggion@gmail.com`). He'll add the others later.
 
 The Firebase web config is public by design and is committed. Rules are the only protection, so they ship in the repo as `database.rules.json`, and a change to them is a change to the app.
 
@@ -95,7 +97,14 @@ Canvas images at 1080x1350 for WhatsApp, shared with `navigator.share` and falli
 
 ## 8. Import from the Sheet
 
-A one-time Node script (`scripts/import-sheet.ts`) reads the old data, either from the Apps Script GET endpoint or from a CSV export. It maps it to `players/` with `baseline` totals, merges duplicate names the way the old app did (accent- and case-insensitive), and prints a dry-run diff before writing anything.
+An admin-only screen imports the CSV exported from the Sheet. It runs in the browser with the admin's own login, so it needs no service key. The CSV stays outside the repo.
+
+The CSV columns are `id, name, goals, assists, championships, speed, finishing, defense, passing, linePosition, role, isMonthly, joinDate`:
+- `role` is `linha` or `goleiro`, and maps to `line` or `keeper`.
+- `goals`, `assists` and `championships` become `baseline.goals`, `baseline.assists` and `baseline.titles`. `baseline.saves` starts at 0, since the Sheet never tracked saves.
+- `isMonthly` is `TRUE` or `FALSE`. `joinDate` may be empty.
+
+The screen parses the file, merges duplicate names (ignoring accents and case), shows a preview, and writes only after the admin confirms.
 
 ## 9. Phases
 

@@ -34,7 +34,8 @@ How to work in this repo. Read it before changing anything. `SPEC.md` says what 
 ```bash
 npm install
 npm run dev          # http://localhost:5173, add --host to test on a phone on the same Wi-Fi
-npm test             # Vitest
+npm test             # Vitest, once
+npm run test:watch   # Vitest in watch mode
 npm run lint
 npm run build        # typecheck and production build
 ```
@@ -67,6 +68,9 @@ When you add or change a script, update this block in the same commit.
 ## Decisions log
 
 Newest first. Format: date, decision, one-line reason.
+
+- 2026-10-28: The Sheet import is an admin screen in the app that reads the CSV, not a Node script. It uses the admin's login, so there's no service key to manage.
+- 2026-10-28: Vite `base` is `/fut-terca/` for builds only, so dev stays on `/`. The deploy workflow runs the tests before building.
 
 - 2026-10-28: Reuse the Firebase project `personal-bc014` under a new root `futerca/`. It's already set up, and the old app's path stays isolated.
 - 2026-10-28: Realtime Database instead of Firestore. It has transactions, the server clock offset, and the live match code from the old app already works on it.
