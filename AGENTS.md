@@ -5,7 +5,7 @@ How to work in this repo. Read it before changing anything. `SPEC.md` says what 
 ## Working agreement
 
 - Plan before code. For anything bigger than a small fix, propose the approach first and wait for an OK.
-- Work phase by phase (`SPEC.md` §9). A phase is done when its acceptance test passes. Don't build ahead.
+- Work phase by phase (`SPEC.md` §10, with the details of the current phase in its own section). A phase is done when its acceptance test passes. Don't build ahead.
 - Ask when the spec leaves a real choice open. When you go ahead on an assumption, say what it is.
 - Don't invent scope. New features need the owner's OK, even small ones.
 - Keep this file current. Durable decisions go in the decisions log at the bottom.

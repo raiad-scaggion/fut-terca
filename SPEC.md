@@ -33,8 +33,9 @@ Everything lives under the root `futerca/`. The old app's path `fut-terca/live` 
 ```
 futerca/
   admins/{emailKey}: true            # email with "." replaced by ","
-  players/{playerId}
-    name, role: "line" | "keeper", isMonthly, joinDate
+  players/{playerId}                 # "p" + Sheet id for imported players, push() keys for new ones
+    name, role: "line" | "keeper", isMonthly, joinDate, active, createdAt
+    legacyId?                        # the Sheet's numeric id, for re-imports
     linePosition: "ataque" | "meio" | "defesa"
     ratings: { speed, finishing, defense, passing }   # 1-10, used by the draw
     baseline: { goals, assists, saves, titles }       # totals imported from the Sheet
@@ -106,9 +107,113 @@ The CSV columns are `id, name, goals, assists, championships, speed, finishing, 
 
 The screen parses the file, merges duplicate names (ignoring accents and case), shows a preview, and writes only after the admin confirms.
 
-## 9. Phases
+## 9. Phase 2 in detail: players and import
 
-Each phase ends with its acceptance test. Don't start a phase until the previous one passes.
+Phase 2 delivers the Jogadores page and the CSV import. It doesn't include the Ranking page (phase 3) or anything from the draw.
+
+### 9.1 Player model and OVR (`src/lib/players.ts`, pure, tested)
+
+The `Player` type mirrors §3. When reading from Firebase, a `normalizePlayer` function fills defaults: ratings 5, `linePosition` "meio", `role` "line", `isMonthly` false, `joinDate` "", `active` true, baseline values 0. It clamps every rating to the 1 to 10 range.
+
+OVR is copied from the old app, so the numbers the group knows stay the same. Each rating is weighted by role and position:
+
+| Profile | speed | finishing | defense | passing |
+|---|---|---|---|---|
+| keeper | 0.24 | 0.10 | 0.52 | 0.14 |
+| ataque | 0.30 | 0.55 | 0.00 | 0.15 |
+| defesa | 0.32 | 0.07 | 0.48 | 0.13 |
+| meio | 0.30 | 0.26 | 0.06 | 0.38 |
+
+- `levelScore(player)` is the weighted sum, on a 1 to 10 scale. The draw in phase 4 balances teams on this value.
+- `displayOvr(player)` is `min(99, round(levelScore * 10))`. To avoid floating point surprises like 85.4999, round `levelScore * 10` to 6 decimals before the final `Math.round`.
+- `displayStat(rating)` is `min(99, rating * 10)`, used for the card's four stats.
+- `cardTier(player)` is "gold" from 75, "silver" from 51 to 74, and "bronze" up to 50.
+- `positionCode(player)` returns "GOL" for keepers and otherwise "ATA", "MEI" or "DEF".
+- `normalizeName(name)` trims, lowercases and strips accents (NFD, then removes combining marks). Duplicate names are detected with it.
+
+Required test cases, all from the real CSV:
+- Neto (meio, 7/6/8/8 for speed/finishing/defense/passing) has OVR 72, silver.
+- JP Canhoto (defesa, 6/7/8/8) has OVR 73, silver.
+- Tier boundaries: 50 is bronze, 51 silver, 74 silver, 75 gold.
+
+### 9.2 CSV import logic (`src/lib/importCsv.ts`, pure, tested)
+
+**Parsing:**
+- The parser handles a UTF-8 BOM, CRLF or LF line endings, quoted fields with commas and doubled quotes, and blank lines. Write it by hand (about 40 lines) rather than adding a dependency.
+- The header must contain every column listed in §8, in any order. If one is missing, the import stops with a message naming it.
+
+**Mapping each row:**
+- `name` is trimmed. A row with an empty name is skipped and reported.
+- `id` becomes `legacyId`. The Firebase key is `p` + id, as in `p69`. Numeric keys would make Realtime Database return an array, so the prefix is required.
+- The four ratings are numbers clamped to 1 to 10. Non-numbers fall back to 5 and are reported as warnings.
+- `goals`, `assists` and `championships` become `baseline.goals`, `baseline.assists` and `baseline.titles`. Non-numbers become 0 with a warning, and `baseline.saves` is 0.
+- `role` maps "goleiro" to "keeper" and anything else to "line". `linePosition` must be "ataque", "meio" or "defesa", otherwise it falls back to "meio" with a warning.
+- `isMonthly` is true only for "TRUE" or "true". `joinDate` must match YYYY-MM-DD, otherwise it's "".
+
+**Duplicate names in the file (same `normalizeName`):** merge them the way the old app did and report each merge.
+- Baseline values are summed and ratings take the highest value.
+- The player is a keeper if either row is, and a mensalista if either row is.
+- The earliest non-empty `joinDate` wins, and so does the first row's id.
+
+**Planning against what's already in the database:** `planImport(rows, existingPlayers)` matches each row to an existing player by `legacyId` first, then by `normalizeName`, and returns:
+- `create`: rows with no match.
+- `update`: matched rows whose name, role, position, ratings, mensalista flag, join date or baseline differ. The update overwrites those fields.
+- `unchanged`: matched rows with no differences.
+- Plus the warnings and the totals of the file: players, keepers, mensalistas, and the sums of goals, assists and titles.
+
+The import never deletes or deactivates anyone, and never touches `active` or `createdAt` on existing players. Running it twice in a row must give 0 creates and 0 updates.
+
+### 9.3 Data access (`src/data/players.ts`)
+
+- `usePlayers()` subscribes to `futerca/players` and returns `{ players, loading, error }`. The list is normalized and sorted by name, using pt-BR collation.
+- `savePlayer(player)`: creates with `push()` when there's no id, otherwise updates. New players get `createdAt: serverTimestamp()` and `active: true`.
+- `setPlayerActive(id, active)`.
+- `applyImport(plan)` writes all creates and updates in a single multi-path `update()`, so a failure leaves nothing half-written.
+
+There's no delete. Match events will point to players, so a player who leaves is deactivated, which hides them from the draw.
+
+### 9.4 Jogadores page (`/jogadores`)
+
+For everyone:
+- A search field (accent- and case-insensitive) and filter chips: Todos, Mensalistas, Goleiros, Inativos. Inactive players show only under Inativos.
+- A grid of cards, 2 columns at 360px and more on wider screens. Each card follows the old app's style: tier colors (gold, silver, bronze), OVR and position code at the top, initials in a circle, the name, and the four stats VEL, PAS, FIN and DEF (`displayStat`). A small "Mensalista" badge shows when it applies.
+- Tapping a card opens a bottom sheet with the full card and the baseline totals: Gols, Assistências, Títulos and Defesas (the last for keepers only). Label it "Totais até a importação". Phase 3 will replace this with the derived totals.
+
+For admins only:
+- A "+ Jogador" button at the top.
+- An "Editar" button in the sheet.
+- An "Importar planilha" link to `/jogadores/importar`.
+
+**Edit form** (the same form for new players):
+- Fields: name (required), Linha/Goleiro toggle, position (Defesa, Meio, Ataque; hidden for keepers), the four ratings (a 1 to 10 stepper each, with a live OVR preview and tier), Mensalista switch, join date, and Ativo switch (edit only).
+- Saving a name that matches another player by `normalizeName` is blocked with "Já existe um jogador com esse nome."
+- Baseline totals don't appear in the form. They only change through the import.
+
+### 9.5 Import screen (`/jogadores/importar`)
+
+- Non-admins see "Só admins podem importar." and a link back.
+- A file picker that accepts `.csv`. After choosing a file, the screen shows:
+  - The file totals: jogadores, goleiros, mensalistas, gols, assistências, títulos.
+  - The plan: N novos, N atualizados, N sem mudança, with the names under each group (collapsed).
+  - Warnings and merges, if any.
+- An "Importar" button writes the plan, then shows "Importação concluída" with a link to Jogadores. It's disabled while writing and when there's nothing to create or update.
+- Any error message says what failed and what to do. For example: "A coluna 'finishing' não está no arquivo. Exporte a aba players da planilha de novo."
+
+### 9.6 Phase 2 acceptance
+
+Using `C:\dev\personal\sandbox\futerca\Fut Terça - players.csv`. Never commit this file:
+
+1. `npm test` passes and covers §9.1 and §9.2: OVR cases, tiers, parsing edge cases, mapping, merge and the second-import case.
+2. The preview shows 48 jogadores, 2 goleiros (Baguete and Xester), 20 mensalistas, 496 gols, 305 assistências and 76 títulos, with 48 novos on the first run.
+3. After importing, `futerca/players` has 48 entries keyed `p<id>`, and the Jogadores page shows 48 cards. Neto shows 72 and silver.
+4. Importing the same file again shows 0 novos, 0 atualizados and 48 sem mudança.
+5. An admin can add a player, edit them, and deactivate them. The player then shows only under Inativos.
+6. Logged out, or logged in as a non-admin: no edit or import controls are visible, and the import route shows the admin message.
+7. `npm run lint` and `npm run build` pass, and every screen works at 360px wide.
+
+## 10. Phases
+
+Each phase ends with its acceptance test. Don't start a phase until the previous one passes. Phases 0 and 1 are done. Phase 2 is detailed in §9.
 
 | # | Phase | Acceptance |
 |---|-------|------------|
@@ -121,7 +226,7 @@ Each phase ends with its acceptance test. Don't start a phase until the previous
 | 6 | Exports | Both images share to WhatsApp from a phone |
 | 7 | Polish and cutover | PWA install works and a real Tuesday runs on the new app |
 
-## 10. Feedback from the group
+## 11. Feedback from the group
 
 Collected by Raiad. Each item and where it lands:
 
