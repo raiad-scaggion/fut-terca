@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AccountButton } from "./components/AccountButton";
 import { TabBar } from "./components/TabBar";
 import { CopaPage } from "./pages/CopaPage";
+import { ImportarJogadoresPage } from "./pages/ImportarJogadoresPage";
 import { JogadoresPage } from "./pages/JogadoresPage";
 import { PartidaPage } from "./pages/PartidaPage";
 import { RankingPage } from "./pages/RankingPage";
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/" element={<Navigate to="/ranking" replace />} />
           <Route path="/ranking" element={<RankingPage />} />
           <Route path="/jogadores" element={<JogadoresPage />} />
+          <Route path="/jogadores/importar" element={<ImportarJogadoresPage />} />
           <Route path="/sorteio" element={<SorteioPage />} />
           <Route path="/copa" element={<CopaPage />} />
           <Route path="/partida" element={<PartidaPage />} />
