@@ -120,3 +120,119 @@ body {
 .tab-bar__item.is-active .tab-bar__icon {
   filter: none;
 }
+
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px var(--gutter);
+  padding-top: calc(8px + env(safe-area-inset-top, 0px));
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+}
+
+.top-bar__brand {
+  color: var(--brand);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.button--ghost {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.account {
+  position: relative;
+}
+
+.account__avatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-weight: 700;
+  background: var(--surface-2);
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.account__avatar.is-admin {
+  border-color: var(--brand);
+}
+
+.account__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.account__panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(300px, calc(100vw - 2 * var(--gutter)));
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.45);
+}
+
+.account__email,
+.account__role {
+  color: var(--muted);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.account__role.is-admin {
+  color: var(--brand);
+  font-weight: 700;
+}
+
+.account__check--ok {
+  color: var(--success);
+}
+
+.account__check--denied,
+.account__error {
+  color: var(--danger);
+}
+
+.account__error {
+  position: absolute;
+  right: 0;
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}

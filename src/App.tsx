@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import { AccountButton } from "./components/AccountButton";
 import { TabBar } from "./components/TabBar";
 import { CopaPage } from "./pages/CopaPage";
 import { JogadoresPage } from "./pages/JogadoresPage";
@@ -9,6 +10,10 @@ import { SorteioPage } from "./pages/SorteioPage";
 export default function App() {
   return (
     <div className="app">
+      <header className="top-bar">
+        <span className="top-bar__brand">Fut de Terça</span>
+        <AccountButton />
+      </header>
       <main className="app__main">
         <Routes>
           <Route path="/" element={<Navigate to="/ranking" replace />} />

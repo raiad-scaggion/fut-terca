@@ -1,0 +1,21 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "fut-terca": {
+      "live": {
+        ".read": true,
+        ".write": true
+      }
+    },
+    "futerca": {
+      ".read": true,
+      "admins": {
+        ".write": false
+      },
+      "$section": {
+        ".write": "$section !== 'admins' && auth != null && auth.token.email_verified === true && root.child('futerca/admins').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true"
+      }
+    }
+  }
+}

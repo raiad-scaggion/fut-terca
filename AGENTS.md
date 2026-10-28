@@ -50,6 +50,13 @@ When you add or change a script, update this block in the same commit.
 - Small commits with a short imperative subject.
 - No AI attribution in commits, pull requests or any text that leaves the machine.
 
+## Firebase
+
+- `database.rules.json` is the copy of record for the database rules. The project has no Firebase CLI deploy, so after changing the file, paste it into the console (Realtime Database → Rules) in the same session, and say so.
+- The rules also keep the old app's `fut-terca/live` open. Leave that block alone while the old app is in use.
+- Admins live at `futerca/admins/{emailKey}: true`, added by hand in the console (Realtime Database → Data). `emailKey` lowercases the email and swaps every "." for ",".
+- Auth uses a Google popup and falls back to a redirect when the browser blocks popups. `raiad-scaggion.github.io` is in the authorized domains.
+
 ## Secrets
 
 - The Firebase web config is public and is committed in `src/data/firebaseConfig.ts`.
@@ -68,6 +75,9 @@ When you add or change a script, update this block in the same commit.
 ## Decisions log
 
 Newest first. Format: date, decision, one-line reason.
+
+- 2026-10-28: Writes are allowed per section under `futerca/` (`$section`), never on `futerca/` itself. In Realtime Database rules a grant on a parent can't be revoked by a child, so a parent grant would let admins edit `admins/`.
+- 2026-10-28: The account panel has a "Testar permissão de gravação" button that writes `futerca/meta/writeCheck`. It checks the rules from a real login without touching real data.
 
 - 2026-10-28: The Sheet import is an admin screen in the app that reads the CSV, not a Node script. It uses the admin's login, so there's no service key to manage.
 - 2026-10-28: Vite `base` is `/fut-terca/` for builds only, so dev stays on `/`. The deploy workflow runs the tests before building.
