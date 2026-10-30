@@ -76,7 +76,8 @@ When you add or change a script, update this block in the same commit.
 
 Newest first. Format: date, decision, one-line reason.
 
-- 2026-10-30: Titles go to the champion team's 4 players, not to the keepers, as the old app did. Keepers play for every team, so the group can revisit this.
+- 2026-10-30: A title goes to the champion team's 4 players and to the keeper who defended that team in the final. The Ranking has a switch to hide keepers, who would otherwise pile up titles.
+- 2026-10-30: Players can be deleted only if they appear in no session, with a confirmation step. Anyone who has played can only be deactivated, because sessions point to them.
 - 2026-10-30: Ranking uses player cards with one tab per stat instead of a table, by request. Inactive players with numbers stay in, players at zero are left out, and ties share a position. Saves have no tab yet; they show on the player sheet.
 
 - 2026-10-30: Imported rows with an invalid id get the key `p_row_N` and no `legacyId`, so a bad cell doesn't stop the import. Such rows can only match by name on a later import.

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
+import { DeletePlayer } from "../components/DeletePlayer";
 import { EmptyState, Page } from "../components/Page";
 import { PlayerCard } from "../components/PlayerCard";
 import { useAuth } from "../data/authContext";
@@ -16,6 +17,7 @@ import {
   type PlayerRatings,
   type PlayerRole,
 } from "../lib/players";
+import { isPlayerInSessions } from "../lib/session";
 import { computeStats } from "../lib/stats";
 
 type FilterKey = "all" | "monthly" | "keepers" | "inactive";
@@ -85,7 +87,7 @@ function createDraftFromPlayer(player: Player): FormDraft {
 export function JogadoresPage() {
   const { isAdmin } = useAuth();
   const { players, loading, error } = usePlayers();
-  const { sessions } = useSessions();
+  const { sessions, loading: sessionsLoading } = useSessions();
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
@@ -577,15 +579,26 @@ export function JogadoresPage() {
                   </div>
 
                   {isAdmin && (
-                    <div className="sheet__actions">
-                      <button
-                        type="button"
-                        className="button button--primary"
-                        onClick={() => openEditPlayer(selectedPlayer)}
-                      >
-                        Editar
-                      </button>
-                    </div>
+                    <>
+                      <div className="sheet__actions">
+                        <button
+                          type="button"
+                          className="button button--primary"
+                          onClick={() => openEditPlayer(selectedPlayer)}
+                        >
+                          Editar
+                        </button>
+                      </div>
+                      <div className="sheet__danger">
+                        <DeletePlayer
+                          key={selectedPlayer.id}
+                          player={selectedPlayer}
+                          stats={selectedStats}
+                          inSessions={sessionsLoading ? null : isPlayerInSessions(selectedPlayer.id, sessions)}
+                          onDeleted={() => setSelectedId(null)}
+                        />
+                      </div>
+                    </>
                   )}
                 </div>
               )

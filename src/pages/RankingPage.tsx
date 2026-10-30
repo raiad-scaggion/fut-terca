@@ -23,7 +23,12 @@ export function RankingPage() {
   const { sessions, loading: sessionsLoading, error: sessionsError } = useSessions();
   const [tab, setTab] = useState(TABS[0]);
 
-  const rows = useMemo(() => buildRanking(players, computeStats(players, sessions), tab.key), [players, sessions, tab]);
+  const [showKeepers, setShowKeepers] = useState(true);
+
+  const rows = useMemo(() => {
+    const listed = showKeepers ? players : players.filter((player) => player.role !== "keeper");
+    return buildRanking(listed, computeStats(players, sessions), tab.key);
+  }, [players, sessions, tab, showKeepers]);
   const error = playersError ?? sessionsError;
 
   return (
@@ -42,6 +47,16 @@ export function RankingPage() {
           </button>
         ))}
       </div>
+
+      <label className="switch-row ranking-keepers">
+        <span className="switch-row__label">Mostrar goleiros</span>
+        <input
+          type="checkbox"
+          className="switch-row__input"
+          checked={showKeepers}
+          onChange={(event) => setShowKeepers(event.target.checked)}
+        />
+      </label>
 
       {error ? (
         <EmptyState>{error}</EmptyState>

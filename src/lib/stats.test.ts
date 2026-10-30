@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { normalizePlayer, type Player } from "./players";
-import { normalizeSession, type Match, type MatchEvent, type Session } from "./session";
+import { isPlayerInSessions, normalizeSession, type Match, type MatchEvent, type Session } from "./session";
 import { buildRanking, computeStats } from "./stats";
 
 const ratings = { speed: 5, finishing: 5, defense: 5, passing: 5 };
@@ -59,11 +59,25 @@ describe("computeStats", () => {
     expect(after.get("ana")?.goals).toBe(0);
   });
 
-  it("gives a title to the champion team's players but not to the keepers", () => {
-    const players = [player("ana", { titles: 2 }), player("bia"), player("gui", {}, { role: "keeper" })];
-    const stats = computeStats(players, [session([], { championId: "t1" })]);
+  it("gives a title to the champion team's players and the keeper who defended it in the final", () => {
+    const keeper = (id: string) => player(id, {}, { role: "keeper" });
+    const players = [player("ana", { titles: 2 }), player("bia"), keeper("gui"), keeper("leo")];
+    const final: Match = { ...match("finished", []), stage: "final", keepers: { home: "gui", away: "leo" } };
+
+    const stats = computeStats(players, [session([final], { championId: "t1" })]);
     expect(stats.get("ana")?.titles).toBe(3);
     expect(stats.get("bia")?.titles).toBe(1);
+    expect(stats.get("gui")?.titles).toBe(1);
+    expect(stats.get("leo")?.titles).toBe(0);
+  });
+
+  it("follows the champion to the away side of the final", () => {
+    const players = [player("gui"), player("leo")];
+    const final: Match = { ...match("finished", []), stage: "final", keepers: { home: "gui", away: "leo" } };
+    const stats = computeStats(players, [
+      session([final], { teams: [{ id: "t2", name: "Time 2", color: "#000", playerIds: [] }], championId: "t2" }),
+    ]);
+    expect(stats.get("leo")?.titles).toBe(1);
     expect(stats.get("gui")?.titles).toBe(0);
   });
 
@@ -104,6 +118,22 @@ describe("buildRanking", () => {
   it("includes inactive players who have numbers and leaves out anyone at zero", () => {
     const list = [player("Ana", { goals: 2 }, { active: false }), player("Teste", {}, { active: false }), player("Bia")];
     expect(names(buildRanking(list, computeStats(list, []), "goals"))).toEqual(["Ana"]);
+  });
+});
+
+describe("isPlayerInSessions", () => {
+  const withKeepers: Match = { ...match("pending", []), keepers: { home: "gui", away: "leo" } };
+
+  it("finds players on teams, as keepers, in a match's goal and in events", () => {
+    const sessions = [session([withKeepers, match("finished", [event("goal", "edu")])])];
+    expect(isPlayerInSessions("ana", sessions)).toBe(true);
+    expect(isPlayerInSessions("gui", sessions)).toBe(true);
+    expect(isPlayerInSessions("leo", sessions)).toBe(true);
+    expect(isPlayerInSessions("edu", sessions)).toBe(true);
+  });
+
+  it("doesn't find a player who never played", () => {
+    expect(isPlayerInSessions("novo", [session([withKeepers])])).toBe(false);
   });
 });
 

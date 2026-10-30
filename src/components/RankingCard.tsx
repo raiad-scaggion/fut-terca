@@ -1,4 +1,4 @@
-import { cardTier, playerInitials, positionCode, type Player } from "../lib/players";
+import { cardTier, displayOvr, playerInitials, positionCode, type Player } from "../lib/players";
 
 type RankingCardProps = {
   player: Player;
@@ -11,7 +11,10 @@ export function RankingCard({ player, position, value, label }: RankingCardProps
   return (
     <div className={`fifa-card fifa-card--${cardTier(player)} ranking-card${player.active ? "" : " is-inactive"}`}>
       <div className="fifa-card__top">
-        <span className="fifa-card__pos">{positionCode(player)}</span>
+        <div className="fifa-card__ovr-block">
+          <span className="fifa-card__ovr">{displayOvr(player)}</span>
+          <span className="fifa-card__pos">{positionCode(player)}</span>
+        </div>
         <span className="ranking-card__position">#{position}</span>
       </div>
       <div className="fifa-card__avatar" aria-hidden="true">

@@ -9,8 +9,17 @@ const EVENT_STAT: Record<MatchEventType, keyof PlayerStats> = {
   save: "saves",
 };
 
+// The keeper who defended the champion's goal in the final wins the title with that team.
+function championKeeperId(session: Session): string | undefined {
+  const final = session.matches.find((match) => match.stage === "final");
+  if (!final?.keepers || !session.championId) {
+    return undefined;
+  }
+  return final.homeId === session.championId ? final.keepers.home : final.keepers.away;
+}
+
 // Season totals are always recomputed from the baseline and the events, so fixing a finished match
-// fixes every table. Keepers play for every team, so a title goes only to the champion team's players.
+// fixes every table.
 export function computeStats(players: Player[], sessions: Session[]): Map<string, PlayerStats> {
   const stats = new Map(players.map((player) => [player.id, { ...player.baseline }]));
 
@@ -29,7 +38,8 @@ export function computeStats(players: Player[], sessions: Session[]): Map<string
     }
 
     const champion = session.teams.find((team) => team.id === session.championId);
-    for (const playerId of champion?.playerIds ?? []) {
+    const keeperId = champion ? championKeeperId(session) : undefined;
+    for (const playerId of [...(champion?.playerIds ?? []), ...(keeperId ? [keeperId] : [])]) {
       const playerStats = stats.get(playerId);
       if (playerStats) {
         playerStats.titles += 1;

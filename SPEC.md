@@ -56,7 +56,7 @@ futerca/
   weekly: { selectedIds[], keeperIds[], mode, manual }   # the draw in progress
 ```
 
-The central rule: **stats are derived, never accumulated.** A player's season total is `baseline` plus the events of every finished match. Titles are `baseline.titles` plus the sessions where the player's team is the champion. Editing a finished match only means adding or removing events, and every table updates itself. Don't write per-player counters anywhere.
+The central rule: **stats are derived, never accumulated.** A player's season total is `baseline` plus the events of every finished match. Titles are `baseline.titles` plus the sessions where the player's team is the champion. The keeper who defended the champion in the final gets the title too. Editing a finished match only means adding or removing events, and every table updates itself. Don't write per-player counters anywhere.
 
 ## 4. Security
 
@@ -72,7 +72,7 @@ The Firebase web config is public by design and is committed. Rules are the only
 
 Bottom tab bar, one page each:
 
-1. **Ranking**: three rankings to pick from (Títulos, Gols, Assistências). Each one shows player cards in order, with the position and that number on the card. Players at zero stay out, and ties share a position.
+1. **Ranking**: three rankings to pick from (Títulos, Gols, Assistências). Each one shows player cards in order, with OVR, position and that number on the card. Players at zero stay out, ties share a position, and a switch shows or hides the keepers.
 2. **Jogadores**: player list and cards. Admins can add or edit players and ratings.
 3. **Sorteio**: pick the week's 16 outfield players and 2 keepers. Balanced draw or manual teams ("picking sides"). A color picker on each team. Export teams image. Confirm creates the session.
 4. **Copa**: round robin, then standings, semis (1st vs 4th, 2nd vs 3rd), 3rd place match and final. Standings update when each match ends. Champion banner and an end-of-day export.
@@ -170,7 +170,7 @@ The import never deletes or deactivates anyone, and never touches `active` or `c
 - `setPlayerActive(id, active)`.
 - `applyImport(plan)` writes all creates and updates in a single multi-path `update()`, so a failure leaves nothing half-written.
 
-There's no delete. Match events will point to players, so a player who leaves is deactivated, which hides them from the draw.
+`deletePlayer(id)` exists only for players who appear in no session. Sessions and match events point to players, so anyone who has played can only be deactivated, which hides them from the draw.
 
 ### 9.4 Jogadores page (`/jogadores`)
 

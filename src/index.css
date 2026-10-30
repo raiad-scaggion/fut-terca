@@ -974,3 +974,51 @@ div.fifa-card {
   font-weight: 800;
   opacity: 0.8;
 }
+
+.ranking-keepers {
+  margin-bottom: 16px;
+}
+
+/* Delete player */
+.button--danger {
+  color: #fff;
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+.button--danger-ghost {
+  width: 100%;
+  color: var(--danger);
+  background: none;
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+}
+
+.sheet__danger {
+  margin-top: 12px;
+}
+
+.delete-player {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  border: 1px solid var(--danger);
+  border-radius: 12px;
+}
+
+.delete-player__text,
+.delete-player__note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.delete-player__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.delete-player__actions .button {
+  flex: 1;
+}

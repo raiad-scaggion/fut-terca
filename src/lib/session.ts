@@ -62,6 +62,21 @@ function stringList(value: unknown): string[] {
   return Object.values(value).filter((item): item is string => typeof item === "string");
 }
 
+// Sessions keep pointing to their players forever, so a player found here can't be deleted.
+export function isPlayerInSessions(playerId: string, sessions: Session[]): boolean {
+  return sessions.some(
+    (session) =>
+      session.keeperIds.includes(playerId) ||
+      session.teams.some((team) => team.playerIds.includes(playerId)) ||
+      session.matches.some(
+        (match) =>
+          match.keepers?.home === playerId ||
+          match.keepers?.away === playerId ||
+          match.events.some((event) => event.playerId === playerId),
+      ),
+  );
+}
+
 export function normalizeSession(id: string, raw: Raw): Session {
   return {
     ...(raw as Omit<Session, "id" | "teams" | "keeperIds" | "matches">),
