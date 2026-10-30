@@ -9,11 +9,14 @@
       }
     },
     "futerca": {
-      ".read": true,
       "admins": {
-        ".write": false
+        ".write": false,
+        "$emailKey": {
+          ".read": "auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase().replace('.', ',') === $emailKey"
+        }
       },
       "$section": {
+        ".read": "$section !== 'admins'",
         ".write": "$section !== 'admins' && auth != null && auth.token.email_verified === true && root.child('futerca/admins').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true"
       }
     }

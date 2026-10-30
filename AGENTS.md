@@ -76,6 +76,8 @@ When you add or change a script, update this block in the same commit.
 
 Newest first. Format: date, decision, one-line reason.
 
+- 2026-10-30: `futerca/admins` is no longer public, and each person can read only their own entry. The list holds friends' personal e-mails. A grant on `futerca/` would cascade to it, so reads are now granted per section.
+
 - 2026-10-30: Photos are cut out in the browser with MediaPipe and saved as small WebP data URLs at `futerca/photos`. Firebase Storage needs the paid plan, and a separate path keeps the player list light. The model loads only when an admin adds a photo.
 - 2026-10-30: Card art lives in one shared SVG definition block (`cardArt.tsx`). A page shows up to 47 cards, so per-card gradients and filters would be too slow on phones.
 - 2026-10-30: Games and averages count only matches played in the app, because the Sheet has no games. Season totals still include the baseline.

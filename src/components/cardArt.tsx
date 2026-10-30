@@ -68,10 +68,10 @@ function Bust({ id, light, mid, deep }: { id: string; light: string; mid: string
       <path d="M292 382C322 412 402 412 432 382C414 374 406 362 403 350C378 372 346 372 321 350C318 362 310 374 292 382Z" fill="#1f2226" />
       <path d="M321 290L403 290L403 350C378 378 346 378 321 350Z" fill={`url(#${id}-neck)`} />
       <ellipse cx="362" cy="332" rx="74" ry="30" fill="url(#fc-bust-chin)" />
-      <path d="M362 132C414 132 448 170 448 228C448 256 440 282 424 304C410 324 388 338 362 338C336 338 314 324 300 304C284 282 276 256 276 228C276 170 310 132 362 132Z" fill={`url(#${id}-head)`} />
-      <path d="M276 232C268 228 262 240 266 258C269 272 276 280 284 278Z" fill={mid} />
-      <path d="M448 232C456 228 462 240 458 258C455 272 448 280 440 278Z" fill={deep} />
-      <path d="M430 168C446 200 448 250 424 304" fill="none" stroke="#fff" strokeOpacity=".28" strokeWidth="3" strokeLinecap="round" />
+      <path d="M362 150C406 150 438 182 438 234C438 262 431 284 417 304C404 322 384 336 362 336C340 336 320 322 307 304C293 284 286 262 286 234C286 182 318 150 362 150Z" fill={`url(#${id}-head)`} />
+      <path d="M284 240C276 182 310 136 364 136C420 136 448 184 440 240C436 218 426 204 410 196C380 208 336 206 312 194C298 204 288 220 284 240Z" fill="url(#fc-bust-hair)" />
+      <path d="M287 236C279 232 274 244 278 260C281 272 287 278 293 276Z" fill={mid} />
+      <path d="M437 236C445 232 450 244 446 260C443 272 437 278 431 276Z" fill={deep} />
     </g>
   );
 }
@@ -133,6 +133,10 @@ export function CardArtDefs() {
           <stop offset="0" stopColor="#8d939d" />
           <stop offset=".45" stopColor="#555a63" />
           <stop offset="1" stopColor="#23262b" />
+        </linearGradient>
+        <linearGradient id="fc-bust-hair" x1=".2" y1="0" x2=".8" y2="1">
+          <stop offset="0" stopColor="#6d727b" />
+          <stop offset="1" stopColor="#2a2d33" />
         </linearGradient>
         <radialGradient id="fc-bust-chin">
           <stop offset="0" stopColor="#16181b" stopOpacity=".65" />

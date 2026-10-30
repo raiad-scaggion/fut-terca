@@ -60,10 +60,10 @@ The central rule: **stats are derived, never accumulated.** A player's season to
 ## 4. Security
 
 Database rules:
-- `.read`: public for `futerca/`.
+- `.read`: public for every section of `futerca/` except `admins`, so nobody can list the admins' e-mails. A signed-in person can read only their own entry there.
 - `.write`: only when `auth.token.email_verified == true` and `futerca/admins/{emailKey}` exists.
 - `admins/` is writable only from the Firebase console.
-- The first admin is Raiad (`raiadscaggion@gmail.com`). He'll add the others later.
+- Admin e-mails never go in this public repo. They are added in the Firebase console.
 
 The Firebase web config is public by design and is committed. Rules are the only protection, so they ship in the repo as `database.rules.json`, and a change to them is a change to the app.
 

@@ -1,1 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0f1115"/><circle cx="32" cy="32" r="20" fill="none" stroke="#f5c842" stroke-width="5"/><polygon points="32,22 41,29 37.5,40 26.5,40 23,29" fill="#f5c842"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><radialGradient id="bg" cx=".5" cy="0" r="1.1"><stop offset="0" stop-color="#2c4a3a"/><stop offset=".55" stop-color="#121a16"/><stop offset="1" stop-color="#0a0d0c"/></radialGradient></defs><rect width="512" height="512" fill="url(#bg)"/>
+    <defs>
+      <linearGradient id="m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3c4"/><stop offset=".3" stop-color="#e9cd7c"/><stop offset=".5" stop-color="#f8e7a8"/><stop offset=".75" stop-color="#c9a24a"/><stop offset="1" stop-color="#a67f2e"/></linearGradient>
+    </defs>
+    <path d="M0 122C42 116 72 88 80 40C150 12 420 12 490 40C498 88 528 116 570 122L570 762C570 790 556 800 530 808C440 834 350 860 285 910C220 860 130 834 40 808C14 800 0 790 0 762Z" transform="translate(79.30000000000001 15.759999999999991) scale(0.62 0.52)" fill="url(#m)" stroke="#fff8dc" stroke-width="6"/>
+    <defs>
+    <radialGradient id="bs" cx=".36" cy=".28" r=".85"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#ece4cf"/><stop offset="1" stop-color="#a99a75"/></radialGradient>
+    <clipPath id="bc"><circle cx="256" cy="244" r="128"/></clipPath>
+  </defs>
+  <circle cx="256" cy="244" r="128" fill="url(#bs)"/>
+  <g clip-path="url(#bc)">
+    <path d="M282.2 158.3L329.4 192.6L379.2 181.2L277.6 107.5ZM345.6 242.4L327.6 297.9L353.8 341.8L392.5 222.4ZM285.2 328.7L226.8 328.7L193.2 367.2L318.8 367.2ZM184.4 297.9L166.4 242.4L119.5 222.4L158.2 341.8ZM182.6 192.6L229.8 158.3L234.4 107.5L132.8 181.2Z" fill="#14170f"/>
+    <path d="M256.0 197.9L299.8 229.8L283.1 281.3L228.9 281.3L212.2 229.8Z" fill="#14170f"/>
+    <path d="M256.0 197.9L256.0 157.0M299.8 229.8L338.8 217.1M283.1 281.3L307.2 314.4M228.9 281.3L204.8 314.4M212.2 229.8L173.2 217.1M229.8 158.3L256.0 157.0L282.2 158.3M329.4 192.6L338.8 217.1L345.6 242.4M327.6 297.9L307.2 314.4L285.2 328.7M226.8 328.7L204.8 314.4L184.4 297.9M166.4 242.4L173.2 217.1L182.6 192.6" fill="none" stroke="#14170f" stroke-width="5.76" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <circle cx="256" cy="244" r="128" fill="none" stroke="#dcc27e" stroke-width="6.4"/></svg>

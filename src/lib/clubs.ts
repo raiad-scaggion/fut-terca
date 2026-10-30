@@ -10,6 +10,7 @@ export const CLUBS: Club[] = [
   { id: "corinthians", name: "Corinthians", file: "corinthians.png" },
   { id: "coritiba", name: "Coritiba", file: "coritiba.svg" },
   { id: "cruzeiro", name: "Cruzeiro", file: "cruzeiro.svg" },
+  { id: "ferroviaria", name: "Ferroviária", file: "ferroviaria.svg" },
   { id: "flamengo", name: "Flamengo", file: "flamengo.svg" },
   { id: "fluminense", name: "Fluminense", file: "fluminense.svg" },
   { id: "gremio", name: "Grêmio", file: "gremio.svg" },

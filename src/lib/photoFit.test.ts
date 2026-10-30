@@ -59,6 +59,18 @@ describe("keepLargestRegion", () => {
     expect(Array.from(alpha)).toEqual([255, 255, 0, 0, 0, 255, 255, 0, 0, 0, 255, 0, 0, 0, 0]);
   });
 
+  it("keeps the soft edge of the person and clears the faint edge of what was removed", () => {
+    const width = 20;
+    const alpha = new Uint8Array(width);
+    alpha.set([255, 255, 255, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 40, 255, 0]);
+
+    keepLargestRegion(alpha, width, 1);
+
+    expect(alpha[3]).toBe(40);
+    expect(alpha[17]).toBe(0);
+    expect(alpha[18]).toBe(0);
+  });
+
   it("doesn't wrap a shape around the edge of the picture", () => {
     const alpha = Uint8Array.from([0, 0, 255, 255, 0, 0, 255, 0, 0]);
 

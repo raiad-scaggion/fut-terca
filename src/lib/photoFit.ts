@@ -5,6 +5,7 @@ const MIN_CONFIDENCE = 0.45;
 const FULL_CONFIDENCE = 0.75;
 const VISIBLE_ALPHA = 128;
 const MIN_PERSON_SHARE = 0.03;
+const SOFT_EDGE_WIDTH = 4;
 
 // A soft ramp instead of a hard cut, so hair and shoulders don't get a jagged edge.
 export function confidenceToAlpha(confidence: number): number {
@@ -51,8 +52,28 @@ export function keepLargestRegion(alpha: Uint8ClampedArray | Uint8Array, width: 
     }
   }
 
+  // The soft edge of the kept shape stays. The faint edge of anything removed must go with it, or a
+  // ghost outline of the other person remains on the card.
+  const keep = Uint8Array.from(regions, (value) => (value === best ? 1 : 0));
+  for (let round = 0; round < SOFT_EDGE_WIDTH; round += 1) {
+    const grown = keep.slice();
+    for (let index = 0; index < keep.length; index += 1) {
+      const x = index % width;
+      if (
+        keep[index] === 1 ||
+        (x > 0 && keep[index - 1] === 1) ||
+        (x < width - 1 && keep[index + 1] === 1) ||
+        keep[index - width] === 1 ||
+        keep[index + width] === 1
+      ) {
+        grown[index] = 1;
+      }
+    }
+    keep.set(grown);
+  }
+
   for (let index = 0; index < alpha.length; index += 1) {
-    if (regions[index] !== best && alpha[index] >= VISIBLE_ALPHA) {
+    if (keep[index] === 0 || (regions[index] !== 0 && regions[index] !== best)) {
       alpha[index] = 0;
     }
   }
