@@ -1,30 +1,27 @@
-import { cardTier, displayOvr, playerInitials, positionCode, type Player } from "../lib/players";
+import type { AwardKey } from "../lib/awards";
+import type { Player } from "../lib/players";
+import { PlayerCard } from "./PlayerCard";
 
 type RankingCardProps = {
   player: Player;
   position: number;
   value: number;
   label: string;
+  award?: AwardKey | null;
+  awardMonth?: string;
+  photo?: string;
+  lead?: boolean;
 };
 
-export function RankingCard({ player, position, value, label }: RankingCardProps) {
+export function RankingCard({ player, position, value, label, award, awardMonth, photo, lead = false }: RankingCardProps) {
   return (
-    <div className={`fifa-card fifa-card--${cardTier(player)} ranking-card${player.active ? "" : " is-inactive"}`}>
-      <div className="fifa-card__top">
-        <div className="fifa-card__ovr-block">
-          <span className="fifa-card__ovr">{displayOvr(player)}</span>
-          <span className="fifa-card__pos">{positionCode(player)}</span>
-        </div>
-        <span className="ranking-card__position">#{position}</span>
-      </div>
-      <div className="fifa-card__avatar" aria-hidden="true">
-        <span className="fifa-card__initials">{playerInitials(player.name)}</span>
-      </div>
-      <div className="fifa-card__name">{player.name}</div>
-      <div className="ranking-card__stat">
-        <span className="ranking-card__value">{value}</span>
+    <article className={`ranking-card${lead ? " ranking-card--lead" : ""}`}>
+      <PlayerCard player={player} award={award} awardMonth={awardMonth} photo={photo} />
+      <div className="ranking-card__result">
+        <span className="ranking-card__position">{position}º</span>
+        <strong className="ranking-card__value">{value}</strong>
         <span className="ranking-card__label">{label}</span>
       </div>
-    </div>
+    </article>
   );
 }

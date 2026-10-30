@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AccountButton } from "./components/AccountButton";
+import { CardArtDefs } from "./components/cardArt";
 import { LiveBar } from "./components/LiveBar";
 import { TabBar } from "./components/TabBar";
 import { CopaPage } from "./pages/CopaPage";
@@ -12,6 +13,7 @@ import { SorteioPage } from "./pages/SorteioPage";
 export default function App() {
   return (
     <div className="app">
+      <CardArtDefs />
       <header className="top-bar">
         <span className="top-bar__brand">Fut de Terça</span>
         <AccountButton />

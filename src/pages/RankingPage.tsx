@@ -3,6 +3,7 @@ import { EmptyState, Page } from "../components/Page";
 import { RankingCard } from "../components/RankingCard";
 import { usePlayers } from "../data/players";
 import { useSessions } from "../data/sessions";
+import { getCurrentAwards, getPlayerAward } from "../lib/awards";
 import {
   buildRanking,
   computeStats,
@@ -49,6 +50,8 @@ export function RankingPage() {
         : computeStats(players, sessions);
     return buildRanking(listed, stats, tab.key);
   }, [players, sessions, tab, showKeepers, scope, month]);
+  const awards = useMemo(() => getCurrentAwards(players, sessions, today), [players, sessions, today]);
+  const awardMonth = monthLabel(awards.month).slice(0, 3);
   const error = playersError ?? sessionsError;
 
   return (
@@ -127,13 +130,16 @@ export function RankingPage() {
         </EmptyState>
       ) : (
         <div className="players-grid">
-          {rows.map((row) => (
+          {rows.map((row, index) => (
             <RankingCard
               key={row.player.id}
               player={row.player}
               position={row.position}
               value={row.value}
               label={row.value === 1 ? tab.singular : tab.plural}
+              award={getPlayerAward(awards, row.player.id)}
+              awardMonth={awardMonth}
+              lead={index === 0}
             />
           ))}
         </div>

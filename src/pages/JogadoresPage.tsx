@@ -6,6 +6,7 @@ import { PlayerCard } from "../components/PlayerCard";
 import { useAuth } from "../data/authContext";
 import { savePlayer, usePlayers } from "../data/players";
 import { useSessions } from "../data/sessions";
+import { getCurrentAwards, getPlayerAward } from "../lib/awards";
 import { CLUBS } from "../lib/clubs";
 import { COUNTRIES, DEFAULT_COUNTRY } from "../lib/countries";
 import {
@@ -20,7 +21,7 @@ import {
   type PlayerRole,
 } from "../lib/players";
 import { isPlayerInSessions } from "../lib/session";
-import { computeStats, formatAverage, perGame, zeroBaselines } from "../lib/stats";
+import { computeStats, formatAverage, monthLabel, perGame, zeroBaselines } from "../lib/stats";
 
 type FilterKey = "all" | "monthly" | "keepers" | "inactive";
 
@@ -121,6 +122,9 @@ export function JogadoresPage() {
         : undefined,
     [selectedPlayer, sessions],
   );
+
+  const awards = useMemo(() => getCurrentAwards(players, sessions, new Date().toLocaleDateString("en-CA")), [players, sessions]);
+  const awardMonth = monthLabel(awards.month).slice(0, 3);
 
   const sheetOpen = selectedPlayer !== null || editingDraft !== null;
 
@@ -301,6 +305,8 @@ export function JogadoresPage() {
             <PlayerCard
               key={player.id}
               player={player}
+              award={getPlayerAward(awards, player.id)}
+              awardMonth={awardMonth}
               onClick={() => {
                 setEditingDraft(null);
                 setFormError("");
@@ -595,7 +601,7 @@ export function JogadoresPage() {
                   </div>
 
                   <div className="player-detail__card-wrap">
-                    <PlayerCard player={selectedPlayer} size="sheet" />
+                    <PlayerCard player={selectedPlayer} size="sheet" award={getPlayerAward(awards, selectedPlayer.id)} awardMonth={awardMonth} />
                   </div>
 
                   <div className="baseline-section">
