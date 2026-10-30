@@ -76,6 +76,11 @@ When you add or change a script, update this block in the same commit.
 
 Newest first. Format: date, decision, one-line reason.
 
+- 2026-10-30: The draw minimizes one cost (team total first, then positions, then repeated pairs) over 40 random starts and picks among the best results. Simpler than the old app's three passes, and a redraw gives different teams.
+- 2026-10-30: Repeated pairs come from past sessions, so nothing extra is stored and discarded draws don't count.
+- 2026-10-30: `weekly` lives in Firebase, not on the phone, so every admin sees the same draw and viewers see the teams. Auto and manual edit the same `teams`, so a draw can be tweaked by hand.
+- 2026-10-30: Confirm creates the session with its 6 group matches and sets `live/sessionId` in one write. A session can be cancelled from Sorteio only until its first match starts.
+
 - 2026-10-30: A title goes to the champion team's 4 players and to the keeper who defended that team in the final. The Ranking has a switch to hide keepers, who would otherwise pile up titles.
 - 2026-10-30: Players can be deleted only if they appear in no session, with a confirmation step. Anyone who has played can only be deactivated, because sessions point to them.
 - 2026-10-30: Ranking uses player cards with one tab per stat instead of a table, by request. Inactive players with numbers stay in, players at zero are left out, and ties share a position. Saves have no tab yet; they show on the player sheet.

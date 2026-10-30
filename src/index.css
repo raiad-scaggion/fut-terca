@@ -1022,3 +1022,288 @@ div.fifa-card {
 .delete-player__actions .button {
   flex: 1;
 }
+
+/* Sorteio */
+.draw-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.draw-section__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.draw-section__title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.draw-subtitle {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.draw-counters {
+  display: flex;
+  gap: 6px;
+}
+
+.draw-counter {
+  padding: 4px 10px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.draw-counter.is-full {
+  color: var(--success);
+  border-color: var(--success);
+}
+
+.draw-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.draw-actions .button {
+  flex: 1;
+}
+
+.draw-button {
+  width: 100%;
+}
+
+.draw-hint,
+.draw-keepers {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.draw-keepers {
+  margin: 12px 0 20px;
+  font-weight: 600;
+}
+
+.pick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+@media (min-width: 520px) {
+  .pick-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.pick-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.pick-chip:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.pick-chip.is-selected {
+  color: var(--brand-ink);
+  background: var(--brand);
+  border-color: var(--brand);
+}
+
+.pick-chip__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pick-chip__ovr {
+  font-size: 0.78rem;
+  font-weight: 800;
+  opacity: 0.75;
+}
+
+.teams-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.team-card {
+  min-width: 0;
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.team-card.is-active {
+  background: var(--surface-2);
+  outline: 2px solid var(--brand);
+}
+
+.team-card__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+}
+
+.team-card__color {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 2px solid rgb(255 255 255 / 0.5);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* Keeps the 44px tap target while the dot stays small. */
+button.team-card__color {
+  position: relative;
+}
+
+button.team-card__color::after {
+  position: absolute;
+  inset: -11px;
+  content: "";
+}
+
+.team-card__color--static {
+  cursor: default;
+}
+
+.team-card__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.team-card__name--button {
+  min-height: 44px;
+  padding: 0;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.team-card__ovr {
+  color: var(--brand);
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.team-card__players {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.team-card__player {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  font-size: 0.82rem;
+  border-top: 1px solid var(--border);
+}
+
+.team-card__player--empty {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.team-card__player-pos {
+  flex: none;
+  width: 28px;
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+.team-card__player-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.team-card__player-ovr {
+  font-weight: 800;
+}
+
+.team-card__remove {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  color: var(--muted);
+  font: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.color-palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.color-palette__swatch {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.color-palette__swatch.is-active {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--bg) inset;
+}

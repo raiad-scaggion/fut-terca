@@ -53,7 +53,7 @@ futerca/
       events/{eventId}: { type: "goal" | "assist" | "save", playerId, teamId, at }
     championId?
   live: { sessionId, matchId }       # what every phone shows right now
-  weekly: { selectedIds[], keeperIds[], mode, manual }   # the draw in progress
+  weekly: { selectedIds[], keeperIds[], mode: "auto" | "manual", teams[]: { color, playerIds[] } }   # the draw in progress
 ```
 
 The central rule: **stats are derived, never accumulated.** A player's season total is `baseline` plus the events of every finished match. Titles are `baseline.titles` plus the sessions where the player's team is the champion. The keeper who defended the champion in the final gets the title too. Editing a finished match only means adding or removing events, and every table updates itself. Don't write per-player counters anywhere.
@@ -213,7 +213,7 @@ Using `C:\dev\personal\sandbox\futerca\Fut Terça - players.csv`. Never commit t
 
 ## 10. Phases
 
-Each phase ends with its acceptance test. Don't start a phase until the previous one passes. Phases 0 to 3 are done. Phase 2 is detailed in §9.
+Each phase ends with its acceptance test. Don't start a phase until the previous one passes. Phases 0 to 4 are done. Phase 2 is detailed in §9.
 
 | # | Phase | Acceptance |
 |---|-------|------------|
