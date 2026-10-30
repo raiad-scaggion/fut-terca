@@ -4,6 +4,7 @@ import { EmptyState, Page } from "../components/Page";
 import { PlayerCard } from "../components/PlayerCard";
 import { useAuth } from "../data/authContext";
 import { savePlayer, usePlayers } from "../data/players";
+import { useSessions } from "../data/sessions";
 import {
   cardTier,
   clampRating,
@@ -15,6 +16,7 @@ import {
   type PlayerRatings,
   type PlayerRole,
 } from "../lib/players";
+import { computeStats } from "../lib/stats";
 
 type FilterKey = "all" | "monthly" | "keepers" | "inactive";
 
@@ -83,6 +85,7 @@ function createDraftFromPlayer(player: Player): FormDraft {
 export function JogadoresPage() {
   const { isAdmin } = useAuth();
   const { players, loading, error } = usePlayers();
+  const { sessions } = useSessions();
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
@@ -94,6 +97,11 @@ export function JogadoresPage() {
   const selectedPlayer = useMemo(
     () => (selectedId ? players.find((p) => p.id === selectedId) ?? null : null),
     [players, selectedId],
+  );
+
+  const selectedStats = useMemo(
+    () => (selectedPlayer ? computeStats([selectedPlayer], sessions).get(selectedPlayer.id) : undefined),
+    [selectedPlayer, sessions],
   );
 
   const sheetOpen = selectedPlayer !== null || editingDraft !== null;
@@ -510,7 +518,8 @@ export function JogadoresPage() {
                 </div>
               </form>
             ) : (
-              selectedPlayer && (
+              selectedPlayer &&
+              selectedStats && (
                 <div className="player-detail">
                   <div className="sheet__header">
                     <h2 className="sheet__title">{selectedPlayer.name}</h2>
@@ -529,7 +538,7 @@ export function JogadoresPage() {
 
                   <div className="baseline-section">
                     <h3 className="baseline-section__title">
-                      Totais até a importação
+                      Totais da temporada
                     </h3>
                     <div
                       className={`baseline-grid${
@@ -540,26 +549,26 @@ export function JogadoresPage() {
                     >
                       <div className="baseline-stat">
                         <span className="baseline-stat__val">
-                          {selectedPlayer.baseline.goals}
+                          {selectedStats.goals}
                         </span>
                         <span className="baseline-stat__label">Gols</span>
                       </div>
                       <div className="baseline-stat">
                         <span className="baseline-stat__val">
-                          {selectedPlayer.baseline.assists}
+                          {selectedStats.assists}
                         </span>
                         <span className="baseline-stat__label">Assistências</span>
                       </div>
                       <div className="baseline-stat">
                         <span className="baseline-stat__val">
-                          {selectedPlayer.baseline.titles}
+                          {selectedStats.titles}
                         </span>
                         <span className="baseline-stat__label">Títulos</span>
                       </div>
                       {selectedPlayer.role === "keeper" && (
                         <div className="baseline-stat">
                           <span className="baseline-stat__val">
-                            {selectedPlayer.baseline.saves}
+                            {selectedStats.saves}
                           </span>
                           <span className="baseline-stat__label">Defesas</span>
                         </div>
