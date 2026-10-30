@@ -119,6 +119,7 @@
 }
 
 .standings .standings__points {
+  font-size: 1.25rem;
   color: var(--text);
   font-family: var(--font-display);
   font-weight: 700;

@@ -1250,3 +1250,7 @@ button.fut-card {
   font-size: 5.5rem;
   line-height: 0.95;
 }
+
+.segmented + .form-field {
+  margin-top: 12px;
+}
