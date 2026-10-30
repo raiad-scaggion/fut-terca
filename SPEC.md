@@ -213,7 +213,7 @@ Using `C:\dev\personal\sandbox\futerca\Fut Terça - players.csv`. Never commit t
 
 ## 10. Phases
 
-Each phase ends with its acceptance test. Don't start a phase until the previous one passes. Phases 0 to 6 are done. Phase 2 is detailed in §9.
+Each phase ends with its acceptance test. Don't start a phase until the previous one passes. Phases 0 to 6 and the build of phase 8 are done. Phase 7 waits for a real Tuesday. Phase 2 is detailed in §9.
 
 | # | Phase | Acceptance |
 |---|-------|------------|

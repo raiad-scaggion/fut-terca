@@ -1,5 +1,5 @@
 import type { NightPlayer, NightResult, NightSummary, ResultSide } from "../lib/nightSummary";
-import { fitText, font, GOLD, renderImage, roundRect, WIDTH } from "./canvas";
+import { displayFont, fitText, font, GOLD, renderImage, roundRect, WIDTH } from "./canvas";
 
 const MARGIN = 40;
 const PANEL_WIDTH = WIDTH - MARGIN * 2;
@@ -35,7 +35,7 @@ function drawChampion(ctx: CanvasRenderingContext2D, champion: NightSummary["cha
   ctx.font = font(800, 26);
   ctx.fillText("CAMPEÃO DA NOITE", center, y + 34);
   ctx.fillStyle = champion.color;
-  ctx.font = font(900, 64);
+  ctx.font = displayFont(700, 86);
   ctx.fillText(champion.name.toUpperCase(), center, y + 90);
   ctx.fillStyle = "#ffffff";
   ctx.font = font(700, 30);
@@ -66,7 +66,7 @@ function drawResult(ctx: CanvasRenderingContext2D, result: NightResult, x: numbe
   drawSide(ctx, result.away, x + COLUMN_WIDTH, y, "right");
 
   ctx.fillStyle = "#ffffff";
-  ctx.font = font(800, 30);
+  ctx.font = displayFont(700, 40);
   ctx.textAlign = "center";
   ctx.fillText(`${result.home.goals} x ${result.away.goals}`, center, y);
 }

@@ -18,7 +18,7 @@ export function TeamCard({ name, color, players, active, onSelect, onRemovePlaye
   const emptySlots = Math.max(0, TEAM_SIZE - players.length);
 
   return (
-    <article className={`team-card${active ? " is-active" : ""}`} style={{ borderTopColor: color }}>
+    <article className={`team-card${active ? " is-active" : ""}`} style={{ boxShadow: `inset 0 3px ${color}` }}>
       <header className="team-card__header">
         {onPickColor ? (
           <button type="button" className="team-card__color" style={{ background: color }} aria-label={`Mudar a cor do ${name}`} onClick={onPickColor} />

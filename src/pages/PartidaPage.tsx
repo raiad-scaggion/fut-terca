@@ -36,14 +36,14 @@ function PlayerRow({ player, team, keeper, events, canEdit, onMark }: PlayerRowP
       <div className="match-player__top">
         <span className="match-player__name">{player.name}</span>
         <span className="match-player__counts">
-          {goals > 0 && <span aria-label={`${goals} gols`}>⚽{goals}</span>}
-          {assists > 0 && <span aria-label={`${assists} assistências`}>🅰️{assists}</span>}
-          {saves > 0 && <span aria-label={`${saves} defesas`}>🧤{saves}</span>}
+          {goals > 0 && <span aria-label={`${goals} gols`}>{goals} G</span>}
+          {assists > 0 && <span aria-label={`${assists} assistências`}>{assists} A</span>}
+          {saves > 0 && <span aria-label={`${saves} defesas`}>{saves} D</span>}
         </span>
       </div>
       {canEdit && (
         <div className="match-player__actions">
-          <button type="button" className="mark-btn" aria-label={`Gol de ${player.name}`} onClick={() => onMark("goal", player.id, team.id)}>
+          <button type="button" className="mark-btn mark-btn--goal" aria-label={`Gol de ${player.name}`} onClick={() => onMark("goal", player.id, team.id)}>
             + Gol
           </button>
           <button type="button" className="mark-btn" aria-label={`Assistência de ${player.name}`} onClick={() => onMark("assist", player.id, team.id)}>
@@ -74,7 +74,7 @@ function TeamColumn({ team, keeperId, byId, events, canEdit, onMark }: TeamColum
   const players = team.playerIds.flatMap((id) => byId.get(id) ?? []);
 
   return (
-    <section className="match-team" style={{ borderTopColor: team.color }} aria-label={team.name}>
+    <section className="match-team" style={{ boxShadow: `inset 0 3px ${team.color}` }} aria-label={team.name}>
       <h2 className="match-team__name">{team.name}</h2>
       <ul className="match-team__players">
         {players.map((player) => (
@@ -198,23 +198,30 @@ function MatchScreen({ session, match, byId, isAdmin }: MatchScreenProps) {
   return (
     <section className="match">
       <header className="match__header">
-        <span className="match__label">{matchLabel(match)}</span>
-        <div className="match__scoreboard">
-          <span className="match__team" style={{ color: home.color }}>
-            {home.name}
-          </span>
-          <span className="match__score">
-            {score.home} x {score.away}
-          </span>
-          <span className="match__team" style={{ color: away.color }}>
-            {away.name}
-          </span>
-        </div>
-        {live ? (
-          <>
+        <div className="match__top">
+          <span className="match__label">{matchLabel(match)}</span>
+          {live ? (
             <div className={`match__clock${remaining < 0 ? " is-over" : ""}`} role="timer">
               {formatClock(remaining)}
             </div>
+          ) : (
+            <span className="match__ended">Partida encerrada</span>
+          )}
+        </div>
+        <div className="match__scoreboard">
+          <span className="match__team">
+            <span className="match__bar" style={{ background: home.color }} aria-hidden="true" />
+            <span className="match__team-name">{home.name}</span>
+          </span>
+          <span className="match__score">{score.home}</span>
+          <span className="match__score">{score.away}</span>
+          <span className="match__team">
+            <span className="match__bar" style={{ background: away.color }} aria-hidden="true" />
+            <span className="match__team-name">{away.name}</span>
+          </span>
+        </div>
+        {live && (
+          <>
             {remaining <= 0 && needsGoldenGoal(match) && <span className="golden-goal">Gol de ouro: o primeiro gol decide</span>}
             {isAdmin && (
               <button
@@ -226,8 +233,6 @@ function MatchScreen({ session, match, byId, isAdmin }: MatchScreenProps) {
               </button>
             )}
           </>
-        ) : (
-          <span className="match__ended">Partida encerrada</span>
         )}
       </header>
 

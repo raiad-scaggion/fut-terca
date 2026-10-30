@@ -1,5 +1,5 @@
 import { cardTier, displayOvr, positionCode, type CardTier, type Player } from "../lib/players";
-import { fitText, font, GOLD, HEIGHT, renderImage, roundRect, WIDTH } from "./canvas";
+import { displayFont, fitText, font, GOLD, HEIGHT, renderImage, roundRect, WIDTH } from "./canvas";
 
 export type TeamsImageData = {
   teams: { name: string; color: string; players: Player[] }[];
@@ -48,7 +48,7 @@ function drawTeamCard(ctx: CanvasRenderingContext2D, team: TeamsImageData["teams
   ctx.fillStyle = "#111111";
   ctx.textBaseline = "middle";
   ctx.textAlign = "left";
-  ctx.font = font(900, 52);
+  ctx.font = displayFont(700, 68);
   ctx.fillText(team.name.toUpperCase(), x + 28, y + BAND_HEIGHT / 2 + 2);
   ctx.textAlign = "right";
   ctx.font = font(700, 28);
@@ -62,7 +62,7 @@ function drawTeamCard(ctx: CanvasRenderingContext2D, team: TeamsImageData["teams
     ctx.fillStyle = TIER_COLORS[cardTier(player)];
     ctx.fill();
     ctx.fillStyle = "#111111";
-    ctx.font = font(800, 32);
+    ctx.font = displayFont(700, 42);
     ctx.textAlign = "center";
     ctx.fillText(String(displayOvr(player)), x + 60, rowY + 2);
 
@@ -97,7 +97,7 @@ export function renderTeamsImage(data: TeamsImageData, photo: File | null): Prom
     }
 
     ctx.fillStyle = GOLD;
-    ctx.font = font(800, 46);
+    ctx.font = displayFont(700, 60);
     ctx.fillText(fitText(ctx, `"${caption}"`, WIDTH - MARGIN * 2), WIDTH / 2, HEIGHT - 84);
   });
 }

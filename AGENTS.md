@@ -76,6 +76,11 @@ When you add or change a script, update this block in the same commit.
 
 Newest first. Format: date, decision, one-line reason.
 
+- 2026-10-30: Photos are cut out in the browser with MediaPipe and saved as small WebP data URLs at `futerca/photos`. Firebase Storage needs the paid plan, and a separate path keeps the player list light. The model loads only when an admin adds a photo.
+- 2026-10-30: Card art lives in one shared SVG definition block (`cardArt.tsx`). A page shows up to 47 cards, so per-card gradients and filters would be too slow on phones.
+- 2026-10-30: Games and averages count only matches played in the app, because the Sheet has no games. Season totals still include the baseline.
+- 2026-10-30: Real club crests are used by the owner's decision, since the app is non-commercial.
+
 - 2026-10-30: The PWA has a manifest and no service worker. The app needs the live database anyway, and without a cache no phone can get stuck on an old version during a match.
 
 - 2026-10-30: Exports draw a preview first and share on a separate tap. Phones refuse a share when the tap that asked for it is too old, and drawing a photo takes a moment.

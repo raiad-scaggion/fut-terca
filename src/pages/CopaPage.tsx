@@ -156,7 +156,7 @@ export function CopaPage() {
   return (
     <Page title="Copa" subtitle={champion ? "A copa acabou" : "Fase de grupos, mata-mata e o campeão da noite"}>
       {champion && (
-        <section className="champion" style={{ borderColor: champion.color }}>
+        <section className="champion">
           <span className="champion__label">Campeão da noite</span>
           <strong className="champion__team" style={{ color: champion.color }}>
             {champion.name}

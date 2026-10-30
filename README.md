@@ -6,8 +6,8 @@ Every Tuesday 18 people play: 16 outfield players in 4 teams of 4, and 2 goalkee
 
 ## What it does
 
-- **Ranking**: season goals, assists, saves and titles.
-- **Jogadores**: player cards with ratings.
+- **Ranking**: goals, assists, goals + assists, saves and titles, for the season or for one month.
+- **Jogadores**: FIFA-style cards with ratings, flag, club crest and a photo, whose background is removed on the phone. Each month, the previous month's Craque, Artilheiro, Garçom and Paredão get a special card.
 - **Sorteio**: pick who's playing, then let the app balance the teams or build them by hand. Choose the team colors and send the teams to WhatsApp as an image.
 - **Copa**: group stage table, playoffs and the champion.
 - **Partida**: timer, score, and goals, assists and saves marked per player. Every phone shows the same match live.
@@ -47,6 +47,8 @@ Every push to `main` publishes the site to GitHub Pages through GitHub Actions.
 ## Credits
 
 The background photos in the exported images come from Wikimedia Commons under free licenses, and each image prints its author's credit. The full list lives in `public/backgrounds/CREDITS.md`.
+
+Club crests belong to their clubs and are used in this non-commercial friends' app. Sources are in `public/crests/CREDITS.md`, and flags in `public/flags/CREDITS.md`.
 
 ## History
 

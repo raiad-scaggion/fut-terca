@@ -4,10 +4,15 @@ export const WIDTH = 1080;
 export const HEIGHT = 1350;
 export const GOLD = "#f5c842";
 
-const FONT_FAMILY = 'Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+const FONT_FAMILY = '"Sofia Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+const DISPLAY_FAMILY = '"Sofia Sans Extra Condensed", "Arial Narrow", sans-serif';
 
 export function font(weight: number, size: number): string {
   return `${weight} ${size}px ${FONT_FAMILY}`;
+}
+
+export function displayFont(weight: number, size: number): string {
+  return `${weight} ${size}px ${DISPLAY_FAMILY}`;
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -89,7 +94,7 @@ function drawHeader(ctx: CanvasRenderingContext2D, subtitle: string) {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillStyle = GOLD;
-  ctx.font = font(900, 92);
+  ctx.font = displayFont(700, 124);
   ctx.fillText("FUT DE TERÇA", WIDTH / 2, 84);
   ctx.fillStyle = "#ffffff";
   ctx.font = font(600, 32);
@@ -118,6 +123,8 @@ export async function renderImage(
     return null;
   }
 
+  // Canvas text doesn't wait for web fonts by itself, and a first export would fall back to a system font.
+  await Promise.all([document.fonts.load(displayFont(700, 64)), document.fonts.load(font(700, 34))]).catch(() => undefined);
   const credit = await drawBackground(ctx, photo);
   drawHeader(ctx, subtitle);
   drawContent(ctx);

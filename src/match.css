@@ -12,12 +12,11 @@
   padding: 0 14px;
   color: var(--text);
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: none;
-  background: var(--surface-2);
-  border: 1px solid var(--brand);
-  border-radius: 999px;
-  box-shadow: 0 8px 20px rgb(0 0 0 / 0.45);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
 }
 
 .live-bar__dot {
@@ -35,15 +34,22 @@
 
 .live-bar__score {
   flex: none;
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 .live-bar__clock {
   flex: none;
   margin-left: auto;
-  font-weight: 800;
+  color: var(--brand);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 .live-bar__clock.is-over,
@@ -60,9 +66,8 @@
 .cup-dot {
   flex: none;
   display: inline-block;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+  width: 4px;
+  height: 15px;
 }
 
 .cup-section {
@@ -74,26 +79,32 @@
   border-collapse: collapse;
   font-size: 0.875rem;
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 .standings th,
 .standings td {
   height: 44px;
   padding: 0 4px;
+  color: var(--muted);
   text-align: center;
-  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 .standings thead th {
   height: 32px;
   color: var(--muted);
   font-size: 0.75rem;
-  border-top: 0;
 }
 
 .standings .standings__team {
-  font-weight: 700;
+  color: var(--text);
+  font-weight: 600;
   text-align: left;
+}
+
+.standings thead .standings__team {
+  color: var(--muted);
 }
 
 .standings tbody .standings__team {
@@ -107,34 +118,31 @@
   color: var(--muted);
 }
 
-.standings__points {
-  color: var(--brand);
-  font-weight: 800;
+.standings .standings__points {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-weight: 700;
 }
 
 .cup-match {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 12px;
+  padding: 10px 0;
   color: var(--text);
   text-decoration: none;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-bottom: 1px solid var(--border);
 }
 
 .cup-match__label {
   color: var(--muted);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: 0.8125rem;
+  font-weight: 600;
 }
 
 .cup-match__line {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: 1fr 70px 1fr;
   align-items: center;
   gap: 10px;
 }
@@ -149,10 +157,11 @@
 
 .cup-match__team:last-child {
   flex-direction: row-reverse;
+  text-align: right;
 }
 
 .cup-match__team.is-winner {
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .cup-match__team-name {
@@ -162,9 +171,12 @@
 }
 
 .cup-match__score {
-  font-size: 1.1rem;
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  text-align: center;
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 .cup-match__note {
@@ -176,7 +188,7 @@
 .cup-match__live {
   color: var(--danger);
   font-size: 0.8rem;
-  font-weight: 800;
+  font-weight: 600;
   text-align: center;
 }
 
@@ -188,29 +200,30 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   margin-bottom: 20px;
   padding: 20px 16px;
   text-align: center;
   background: var(--surface);
-  border: 2px solid var(--brand);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
 }
 
 .champion__label {
   color: var(--muted);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 0.8125rem;
+  font-weight: 600;
 }
 
 .champion__team {
-  font-size: 1.75rem;
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-size: 3rem;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .champion__players {
+  color: var(--muted);
   font-size: 0.875rem;
 }
 
@@ -223,10 +236,12 @@
 
 .minutes-stepper__value {
   min-width: 48px;
+  font-family: var(--font-display);
   font-size: 1.75rem;
-  font-weight: 900;
+  font-weight: 600;
   text-align: center;
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 /* Match screen */
@@ -234,56 +249,88 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 10px;
+  margin: 0 calc(-1 * var(--gutter)) 16px;
+  padding: 12px var(--gutter);
+  background: linear-gradient(var(--surface-2), var(--surface));
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.match__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  margin-bottom: 16px;
+  width: 100%;
 }
 
 .match__label {
   color: var(--muted);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: 0.8125rem;
+  font-weight: 600;
 }
 
 .match__scoreboard {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto auto minmax(0, 1fr);
   align-items: center;
   gap: 12px;
   width: 100%;
 }
 
+.match__bar {
+  flex: none;
+  width: 4px;
+  height: 18px;
+}
+
 .match__team {
-  font-weight: 800;
-  text-align: right;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-weight: 600;
 }
 
 .match__team:last-child {
-  text-align: left;
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.match__team-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .match__score {
-  font-size: 2.5rem;
-  font-weight: 900;
-  line-height: 1.1;
+  font-family: var(--font-display);
+  font-size: 4.6rem;
+  font-weight: 600;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 .match__clock {
-  font-size: 2.25rem;
-  font-weight: 800;
+  color: var(--brand);
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 600;
   line-height: 1;
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 .match__clock-button {
-  min-width: 200px;
+  width: 100%;
 }
 
 .match__ended {
   color: var(--muted);
-  font-weight: 700;
+  font-size: 0.8125rem;
+  font-weight: 600;
 }
 
 .match__teams {
@@ -295,18 +342,18 @@
 
 .match-team {
   min-width: 0;
-  padding: 8px;
+  padding: 10px;
   overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-top: 4px solid var(--border);
   border-radius: var(--radius);
 }
 
 .match-team__name {
   margin: 0 0 4px;
-  font-size: 0.95rem;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
 }
 
 .match-team__players {
@@ -316,14 +363,8 @@
 }
 
 .match-player {
-  padding: 6px 0;
-  border-top: 1px solid var(--border);
-}
-
-.match-player.is-keeper {
-  margin: 4px -8px -8px;
-  padding: 6px 8px 8px;
-  background: var(--surface-2);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
 }
 
 .match-player__top {
@@ -338,7 +379,7 @@
   min-width: 0;
   overflow: hidden;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -346,9 +387,12 @@
 .match-player__counts {
   display: flex;
   flex: none;
-  gap: 4px;
-  font-size: 0.72rem;
-  font-weight: 700;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 .match-player__actions {
@@ -363,21 +407,22 @@
   padding: 0 2px;
   color: var(--text);
   font: inherit;
-  font-size: 0.78rem;
-  font-weight: 700;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  background: none;
+  border: 1px solid #ffffff24;
+  border-radius: 6px;
   cursor: pointer;
 }
 
-.is-keeper .mark-btn {
-  background: var(--surface);
+.mark-btn--goal {
+  color: var(--bg);
+  background: var(--text);
+  border-color: var(--text);
 }
 
 .mark-btn--save {
   grid-column: 1 / -1;
-  color: var(--brand);
 }
 
 .match-log {
@@ -397,7 +442,7 @@
   gap: 8px;
   min-height: 44px;
   font-size: 0.875rem;
-  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 .match-log__text {
@@ -414,8 +459,8 @@
   padding: 0 8px;
   color: var(--danger);
   font: inherit;
-  font-size: 0.8rem;
-  font-weight: 700;
+  font-size: 0.8125rem;
+  font-weight: 600;
   background: none;
   border: 0;
   cursor: pointer;
@@ -437,16 +482,18 @@
   gap: 8px;
   padding: 12px;
   background: var(--surface);
-  border: 1px solid var(--brand);
-  border-radius: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
 }
 
 .golden-goal {
+  width: 100%;
   padding: 6px 14px;
-  color: var(--brand-ink);
+  color: var(--brand);
   font-size: 0.875rem;
-  font-weight: 800;
+  font-weight: 600;
   text-align: center;
-  background: var(--brand);
-  border-radius: 999px;
+  background: none;
+  border: 1px solid var(--brand);
+  border-radius: 6px;
 }
