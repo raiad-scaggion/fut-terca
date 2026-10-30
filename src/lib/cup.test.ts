@@ -8,6 +8,7 @@ import {
   getStandings,
   isNextRoundLocked,
   matchLabel,
+  needsGoldenGoal,
   type RawSession,
 } from "./cup";
 import { normalizeSession, type Match } from "./session";
@@ -33,7 +34,7 @@ function byLabel(raw: RawSession, label: string): Match {
   return match;
 }
 
-function play(raw: RawSession, matchId: string, homeGoals: number, awayGoals: number, winnerId: string | null = null): RawSession {
+function play(raw: RawSession, matchId: string, homeGoals: number, awayGoals: number): RawSession {
   const match = raw.matches?.[matchId] as Record<string, string>;
   const goals = (teamId: string, count: number, side: string) =>
     Object.fromEntries(
@@ -54,7 +55,7 @@ function play(raw: RawSession, matchId: string, homeGoals: number, awayGoals: nu
       },
     },
   };
-  const finished = applyFinishMatch(live, "s1", matchId, winnerId, 100);
+  const finished = applyFinishMatch(live, "s1", matchId, 100);
   if (!finished) {
     throw new Error("Match didn't finish");
   }
@@ -72,14 +73,13 @@ function playGroup(raw: RawSession): RawSession {
 }
 
 describe("getMatchScore and getMatchWinnerId", () => {
-  const match = (goals: string[], winnerId?: string): Match => ({
+  const match = (goals: string[], stage: Match["stage"] = "group"): Match => ({
     id: "m",
     number: 1,
-    stage: "semi",
+    stage,
     homeId: "a",
     awayId: "b",
     status: "finished",
-    winnerId,
     events: goals.map((teamId, index) => ({ id: `e${index}`, type: "goal", playerId: "x", teamId, at: 0 })),
   });
 
@@ -87,13 +87,12 @@ describe("getMatchScore and getMatchWinnerId", () => {
     const withAssist = match(["a", "b", "a"]);
     withAssist.events.push({ id: "e9", type: "assist", playerId: "x", teamId: "b", at: 0 });
     expect(getMatchScore(withAssist)).toEqual({ home: 2, away: 1 });
-    expect(getMatchWinnerId(withAssist)).toBe("a");
+    expect(getMatchWinnerId(read(newCup()), withAssist)).toBe("a");
   });
 
-  it("uses winnerId only on a tie, so a later score fix beats a stale pick", () => {
-    expect(getMatchWinnerId(match(["a", "b"], "b"))).toBe("b");
-    expect(getMatchWinnerId(match(["a"], "b"))).toBe("a");
-    expect(getMatchWinnerId(match([]))).toBeNull();
+  it("has no winner in a tied group match or final", () => {
+    expect(getMatchWinnerId(read(newCup()), match(["a", "b"]))).toBeNull();
+    expect(getMatchWinnerId(read(newCup()), match(["a", "b"], "final"))).toBeNull();
   });
 });
 
@@ -114,11 +113,55 @@ describe("getStandings", () => {
     expect(table.filter((row) => row.points === 1)).toHaveLength(2);
   });
 
-  it("orders by points, then goal difference, then goals scored", () => {
-    let cup = play(newCup(), "m1", 1, 0);
-    cup = play(cup, "m2", 3, 0);
-    const [top] = getStandings(read(cup));
-    expect(top.goalDiff).toBe(3);
+  // Results as [winner or home, other, their goals, other's goals].
+  function group(results: [string, string, number, number][]): RawSession {
+    return results.reduce((cup, [a, b, goalsA, goalsB]) => {
+      const match = read(cup).matches.find((item) => [item.homeId, item.awayId].includes(a) && [item.homeId, item.awayId].includes(b));
+      if (!match) {
+        throw new Error(`No match ${a} x ${b}`);
+      }
+      return match.homeId === a ? play(cup, match.id, goalsA, goalsB) : play(cup, match.id, goalsB, goalsA);
+    }, newCup());
+  }
+  const order = (raw: RawSession) => getStandings(read(raw)).map((row) => row.team.id);
+
+  it("puts the winner of the direct match first, even with a worse goal difference", () => {
+    const cup = group([
+      ["t2", "t1", 1, 0],
+      ["t1", "t3", 9, 0],
+      ["t4", "t1", 1, 0],
+      ["t3", "t2", 1, 0],
+      ["t4", "t2", 1, 0],
+      ["t3", "t4", 1, 0],
+    ]);
+    const table = getStandings(read(cup));
+    expect(table.slice(2).map((row) => row.points)).toEqual([3, 3]);
+    expect(table.slice(2).map((row) => row.team.id)).toEqual(["t2", "t1"]);
+    expect(table[3].goalDiff).toBeGreaterThan(table[2].goalDiff);
+  });
+
+  it("goes to goal difference when the direct match was a draw", () => {
+    const cup = group([
+      ["t1", "t2", 1, 1],
+      ["t1", "t3", 1, 0],
+      ["t2", "t3", 5, 0],
+      ["t4", "t1", 1, 0],
+      ["t4", "t2", 1, 0],
+      ["t3", "t4", 1, 0],
+    ]);
+    expect(order(cup).indexOf("t2")).toBeLessThan(order(cup).indexOf("t1"));
+  });
+
+  it("with three teams level, compares only their games, then the numbers", () => {
+    const cup = group([
+      ["t1", "t2", 1, 0],
+      ["t2", "t3", 1, 0],
+      ["t3", "t1", 3, 0],
+      ["t1", "t4", 1, 0],
+      ["t2", "t4", 1, 0],
+      ["t3", "t4", 1, 0],
+    ]);
+    expect(order(cup)).toEqual(["t3", "t2", "t1", "t4"]);
   });
 });
 
@@ -151,12 +194,35 @@ describe("the whole cup", () => {
     expect(cup.status).toBe("finished");
   });
 
-  it("settles a tied knockout match with the chosen winner", () => {
+  it("sends the higher-placed team through a tied semi", () => {
     let cup = playGroup(newCup());
-    cup = play(cup, byLabel(cup, "Semifinal 1").id, 1, 1, "t4");
+    cup = play(cup, byLabel(cup, "Semifinal 1").id, 1, 1);
+    cup = play(cup, byLabel(cup, "Semifinal 2").id, 2, 2);
+    expect(byLabel(cup, "Final")).toMatchObject({ homeId: "t1", awayId: "t2" });
+    expect(byLabel(cup, "Disputa de 3º lugar")).toMatchObject({ homeId: "t4", awayId: "t3" });
+  });
+
+  it("gives a tied 3rd place match to the higher-placed team, home or away", () => {
+    let cup = playGroup(newCup());
+    cup = play(cup, byLabel(cup, "Semifinal 1").id, 1, 0);
     cup = play(cup, byLabel(cup, "Semifinal 2").id, 1, 0);
-    expect(byLabel(cup, "Final")).toMatchObject({ homeId: "t4", awayId: "t2" });
-    expect(byLabel(cup, "Disputa de 3º lugar")).toMatchObject({ homeId: "t1", awayId: "t3" });
+    cup = play(cup, byLabel(cup, "Disputa de 3º lugar").id, 1, 1);
+    const third = byLabel(cup, "Disputa de 3º lugar");
+    expect(third.homeId).toBe("t4");
+    expect(getMatchWinnerId(read(cup), third)).toBe("t3");
+  });
+
+  it("won't end a tied final, and the golden goal ends it", () => {
+    let cup = playGroup(newCup());
+    cup = play(cup, byLabel(cup, "Semifinal 1").id, 1, 0);
+    cup = play(cup, byLabel(cup, "Semifinal 2").id, 1, 0);
+    const finalId = byLabel(cup, "Final").id;
+
+    expect(() => play(cup, finalId, 1, 1)).toThrow("didn't finish");
+    expect(needsGoldenGoal(byLabel(cup, "Final"))).toBe(true);
+
+    const finished = play(cup, finalId, 1, 2);
+    expect(finished.championId).toBe("t2");
   });
 
   it("carries the last match's length to the new matches", () => {
@@ -190,14 +256,14 @@ describe("applyFinishMatch", () => {
       ...cup,
       matches: { ...cup.matches, m1: { ...cup.matches?.m1, status: "live", timer: { durationSec: 600, running: true, startedAt: 40, elapsedMs: 0 } } },
     };
-    const timer = applyFinishMatch(running, "s1", "m1", null, 100)?.matches?.m1.timer;
+    const timer = applyFinishMatch(running, "s1", "m1", 100)?.matches?.m1.timer;
     expect(timer).toMatchObject({ running: false, elapsedMs: 60 });
   });
 
   it("aborts when the match already ended on another phone", () => {
     const cup = play(newCup(), "m1", 1, 0);
-    expect(applyFinishMatch(cup, "s1", "m1", null, 100)).toBeUndefined();
-    expect(applyFinishMatch(cup, "s1", "m2", null, 100)).toBeUndefined();
+    expect(applyFinishMatch(cup, "s1", "m1", 100)).toBeUndefined();
+    expect(applyFinishMatch(cup, "s1", "m2", 100)).toBeUndefined();
   });
 });
 
@@ -208,7 +274,7 @@ describe("applyFinishEdit", () => {
       ...Array.from({ length: homeGoals }, (_, index) => [`h${index}`, { type: "goal", playerId: "x", teamId: match.homeId, at: 0 }]),
       ...Array.from({ length: awayGoals }, (_, index) => [`a${index}`, { type: "goal", playerId: "x", teamId: match.awayId, at: 0 }]),
     ]);
-    const edited = applyFinishEdit({ ...raw, matches: { ...raw.matches, [matchId]: { ...raw.matches?.[matchId], events } } }, "s1", matchId, null);
+    const edited = applyFinishEdit({ ...raw, matches: { ...raw.matches, [matchId]: { ...raw.matches?.[matchId], events } } }, "s1", matchId);
     if (!edited) {
       throw new Error("Edit failed");
     }
@@ -250,9 +316,10 @@ describe("applyFinishEdit", () => {
     expect(cup.championId).toBe("t1");
 
     expect(fixResult(cup, byLabel(cup, "Final").id, 0, 1).championId).toBe("t2");
+    expect(() => fixResult(cup, byLabel(cup, "Final").id, 1, 1)).toThrow("Edit failed");
   });
 
   it("only applies to finished matches", () => {
-    expect(applyFinishEdit(newCup(), "s1", "m1", null)).toBeUndefined();
+    expect(applyFinishEdit(newCup(), "s1", "m1")).toBeUndefined();
   });
 });

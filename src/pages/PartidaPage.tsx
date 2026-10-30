@@ -9,7 +9,7 @@ import { usePlayers } from "../data/players";
 import { useSessions } from "../data/sessions";
 import { useMatchEffects } from "../hooks/useMatchEffects";
 import { formatClock, getRemainingMs } from "../lib/clock";
-import { getMatchScore, isKnockout, isNextRoundLocked, matchLabel } from "../lib/cup";
+import { getMatchScore, getMatchWinnerId, isNextRoundLocked, isTied, matchLabel, needsGoldenGoal } from "../lib/cup";
 import type { Player } from "../lib/players";
 import type { Match, MatchEvent, MatchEventType, Session, Team } from "../lib/session";
 
@@ -87,30 +87,23 @@ function TeamColumn({ team, keeperId, byId, events, canEdit, onMark }: TeamColum
 }
 
 type FinishPanelProps = {
+  session: Session;
   match: Match;
   home: Team;
   away: Team;
   confirmLabel: string;
-  onConfirm: (winnerId: string | null) => void;
+  onConfirm: () => void;
   onBack: () => void;
 };
 
-function FinishPanel({ match, home, away, confirmLabel, onConfirm, onBack }: FinishPanelProps) {
+function FinishPanel({ session, match, home, away, confirmLabel, onConfirm, onBack }: FinishPanelProps) {
   const score = getMatchScore(match);
 
-  if (isKnockout(match) && score.home === score.away) {
+  if (needsGoldenGoal(match)) {
     return (
-      <div className="finish-panel" role="alertdialog" aria-label="Quem passou?">
-        <strong>Empate! Quem passou?</strong>
-        <p className="delete-player__text">No mata-mata alguém precisa seguir. Escolha quem venceu nos pênaltis.</p>
-        <div className="delete-player__actions">
-          <button type="button" className="button button--primary" onClick={() => onConfirm(home.id)}>
-            {home.name}
-          </button>
-          <button type="button" className="button button--primary" onClick={() => onConfirm(away.id)}>
-            {away.name}
-          </button>
-        </div>
+      <div className="finish-panel" role="alertdialog" aria-label="Final empatada">
+        <strong>A final não termina empatada</strong>
+        <p className="delete-player__text">Vale o gol de ouro: a partida continua e o primeiro gol decide. Marque o gol para encerrar.</p>
         <button type="button" className="button button--ghost" onClick={onBack}>
           Voltar
         </button>
@@ -118,17 +111,23 @@ function FinishPanel({ match, home, away, confirmLabel, onConfirm, onBack }: Fin
     );
   }
 
+  const winnerId = getMatchWinnerId(session, match);
+  const tiedKnockout = match.stage !== "group" && isTied(match);
+
   return (
     <div className="finish-panel" role="alertdialog" aria-label={confirmLabel}>
       <strong>{confirmLabel}?</strong>
       <p className="delete-player__text">
         {home.name} {score.home} x {score.away} {away.name}
       </p>
+      {tiedKnockout && (
+        <p className="delete-player__text">Empate: {winnerId === home.id ? home.name : away.name} vence por ter ficado à frente na fase de grupos.</p>
+      )}
       <div className="delete-player__actions">
         <button type="button" className="button button--ghost" onClick={onBack}>
           Voltar
         </button>
-        <button type="button" className="button button--primary" onClick={() => onConfirm(null)}>
+        <button type="button" className="button button--primary" onClick={onConfirm}>
           {confirmLabel}
         </button>
       </div>
@@ -177,15 +176,15 @@ function MatchScreen({ session, match, byId, isAdmin }: MatchScreenProps) {
 
   const mark: Mark = (type, playerId, teamId) => void attempt(() => addEvent(session.id, match.id, type, playerId, teamId));
 
-  const handleFinish = (winnerId: string | null) =>
+  const handleFinish = () =>
     attempt(async () => {
-      await finishMatch(session.id, match.id, winnerId);
+      await finishMatch(session.id, match.id);
       navigate("/copa");
     });
 
-  const handleFinishEdit = (winnerId: string | null) =>
+  const handleFinishEdit = () =>
     attempt(async () => {
-      await finishEdit(session.id, match.id, winnerId);
+      await finishEdit(session.id, match.id);
       setEditing(false);
       setPanel(null);
     });
@@ -216,6 +215,7 @@ function MatchScreen({ session, match, byId, isAdmin }: MatchScreenProps) {
             <div className={`match__clock${remaining < 0 ? " is-over" : ""}`} role="timer">
               {formatClock(remaining)}
             </div>
+            {remaining <= 0 && needsGoldenGoal(match) && <span className="golden-goal">Gol de ouro: o primeiro gol decide</span>}
             {isAdmin && (
               <button
                 type="button"
@@ -261,7 +261,7 @@ function MatchScreen({ session, match, byId, isAdmin }: MatchScreenProps) {
 
       {isAdmin && live && (
         <div className="match__footer">
-          {panel === "finish" && <FinishPanel match={match} home={home} away={away} confirmLabel="Encerrar partida" onConfirm={handleFinish} onBack={() => setPanel(null)} />}
+          {panel === "finish" && <FinishPanel session={session} match={match} home={home} away={away} confirmLabel="Encerrar partida" onConfirm={handleFinish} onBack={() => setPanel(null)} />}
           {panel === "cancel" && (
             <div className="delete-player" role="alertdialog" aria-label="Cancelar partida">
               <strong>Cancelar esta partida?</strong>
@@ -301,7 +301,7 @@ function MatchScreen({ session, match, byId, isAdmin }: MatchScreenProps) {
           )}
           {editing &&
             (panel === "finish" ? (
-              <FinishPanel match={match} home={home} away={away} confirmLabel="Concluir correção" onConfirm={handleFinishEdit} onBack={() => setPanel(null)} />
+              <FinishPanel session={session} match={match} home={home} away={away} confirmLabel="Concluir correção" onConfirm={handleFinishEdit} onBack={() => setPanel(null)} />
             ) : (
               <button type="button" className="button button--primary match__wide" onClick={() => setPanel("finish")}>
                 Concluir correção

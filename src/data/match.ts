@@ -45,9 +45,9 @@ export async function removeEvent(sessionId: string, matchId: string, eventId: s
   await remove(dbRef(`${matchPath(sessionId, matchId)}/events/${eventId}`));
 }
 
-export async function finishMatch(sessionId: string, matchId: string, winnerId: string | null): Promise<void> {
+export async function finishMatch(sessionId: string, matchId: string): Promise<void> {
   const { committed, snapshot } = await runTransaction(dbRef(`sessions/${sessionId}`), (raw: RawSession | null) =>
-    raw ? applyFinishMatch(raw, sessionId, matchId, winnerId, serverNow()) : raw,
+    raw ? applyFinishMatch(raw, sessionId, matchId, serverNow()) : raw,
   );
   if (committed) {
     const cupOver = (snapshot.val() as RawSession).status === "finished";
@@ -55,9 +55,9 @@ export async function finishMatch(sessionId: string, matchId: string, winnerId: 
   }
 }
 
-export async function finishEdit(sessionId: string, matchId: string, winnerId: string | null): Promise<void> {
+export async function finishEdit(sessionId: string, matchId: string): Promise<void> {
   await runTransaction(dbRef(`sessions/${sessionId}`), (raw: RawSession | null) =>
-    raw ? applyFinishEdit(raw, sessionId, matchId, winnerId) : raw,
+    raw ? applyFinishEdit(raw, sessionId, matchId) : raw,
   );
 }
 

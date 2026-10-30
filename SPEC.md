@@ -49,7 +49,6 @@ futerca/
       keepers: { home: playerId, away: playerId }
       status: "pending" | "live" | "finished"
       timer: { durationSec, running, startedAt, elapsedMs }
-      winnerId?                      # only for a tied knockout match (penalties)
       events/{eventId}: { type: "goal" | "assist" | "save", playerId, teamId, at }
     championId?
   live: { sessionId, matchId }       # what every phone shows right now
@@ -75,7 +74,7 @@ Bottom tab bar, one page each:
 1. **Ranking**: three rankings to pick from (Títulos, Gols, Assistências). Each one shows player cards in order, with OVR, position and that number on the card. Players at zero stay out, ties share a position, and a switch shows or hides the keepers.
 2. **Jogadores**: player list and cards. Admins can add or edit players and ratings.
 3. **Sorteio**: pick the week's 16 outfield players and 2 keepers. Balanced draw or manual teams ("picking sides"). A color picker on each team. Export teams image. Confirm creates the session.
-4. **Copa**: round robin, then standings, semis (1st vs 4th, 2nd vs 3rd), 3rd place match and final. Standings update when each match ends. Champion banner and an end-of-day export.
+4. **Copa**: round robin, then standings, semis (1st vs 4th, 2nd vs 3rd), 3rd place match and final. Standings update when each match ends. Teams level on points are separated by confronto direto, then victories, goal difference and goals scored. Champion banner and an end-of-day export.
 5. **Partida**: the live match.
 
 A fixed bar above the tab bar shows the live score and clock on every page while a match runs. Tapping it opens Partida.
@@ -86,7 +85,8 @@ A fixed bar above the tab bar shows the live score and clock on every page while
 - Timer with a chosen length. A started match opens with the clock stopped, and an admin starts it on the whistle. It uses Firebase's server clock offset, so every phone shows the same time. When time runs out, the phone whistles and vibrates and the clock keeps counting in red.
 - Each side lists its 4 players and its keeper with "+ Gol" and "+ Assist.". The keeper also has "+ Defesa".
 - The event log is shown with undo.
-- A tied knockout match asks who went through.
+- There are no penalties. A tied semi or 3rd place match goes to the team that finished higher in the group stage.
+- The final can't end tied. If it's level when time runs out, it goes on with "Gol de ouro": the first goal wins, and an admin then ends the match.
 - An admin can fix a finished match in place: its events change while it stays finished, and "Concluir correção" re-syncs the cup. Pending knockout matches follow the new result. Rounds already started keep their matchups, and the screen says so. A fixed final changes the champion.
 - The screen stays awake (Wake Lock) while open.
 

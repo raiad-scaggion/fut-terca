@@ -440,3 +440,13 @@
   border: 1px solid var(--brand);
   border-radius: 12px;
 }
+
+.golden-goal {
+  padding: 6px 14px;
+  color: var(--brand-ink);
+  font-size: 0.875rem;
+  font-weight: 800;
+  text-align: center;
+  background: var(--brand);
+  border-radius: 999px;
+}

@@ -25,8 +25,14 @@ export function matchLabel(match: Match): string {
   return match.label ?? `Jogo ${match.number}`;
 }
 
-export function isKnockout(match: Match): boolean {
-  return match.stage !== "group";
+export function isTied(match: Match): boolean {
+  const score = getMatchScore(match);
+  return score.home === score.away;
+}
+
+// The final is the only match that can't end level: it goes on until a golden goal.
+export function needsGoldenGoal(match: Match): boolean {
+  return match.stage === "final" && isTied(match);
 }
 
 export function getMatchScore(match: Match): { home: number; away: number } {
@@ -37,21 +43,58 @@ export function getMatchScore(match: Match): { home: number; away: number } {
   };
 }
 
-// A knockout match can't end tied, so a draw needs winnerId (penalties or the group's own rule).
-export function getMatchWinnerId(match: Match): string | null {
+// There are no penalties. A tied semi or 3rd place match goes to whoever finished higher in the group.
+export function getMatchWinnerId(session: Session, match: Match): string | null {
   const score = getMatchScore(match);
-  if (score.home === score.away) {
-    return match.winnerId ?? null;
+  if (score.home !== score.away) {
+    return score.home > score.away ? match.homeId : match.awayId;
   }
-  return score.home > score.away ? match.homeId : match.awayId;
+  if (match.stage === "group" || match.stage === "final") {
+    return null;
+  }
+  const table = getStandings(session).map((row) => row.team.id);
+  return table.indexOf(match.homeId) < table.indexOf(match.awayId) ? match.homeId : match.awayId;
 }
 
-function getMatchLoserId(match: Match): string | null {
-  const winnerId = getMatchWinnerId(match);
+function getMatchLoserId(session: Session, match: Match): string | null {
+  const winnerId = getMatchWinnerId(session, match);
   if (!winnerId) {
     return null;
   }
   return winnerId === match.homeId ? match.awayId : match.homeId;
+}
+
+function pointsAmong(session: Session, teamIds: string[]): Map<string, number> {
+  const points = new Map(teamIds.map((id) => [id, 0]));
+  const add = (id: string, value: number) => points.set(id, (points.get(id) ?? 0) + value);
+
+  for (const match of session.matches) {
+    if (match.stage !== "group" || match.status !== "finished" || !points.has(match.homeId) || !points.has(match.awayId)) {
+      continue;
+    }
+    const score = getMatchScore(match);
+    if (score.home === score.away) {
+      add(match.homeId, 1);
+      add(match.awayId, 1);
+    } else {
+      add(score.home > score.away ? match.homeId : match.awayId, 3);
+    }
+  }
+  return points;
+}
+
+// Confronto direto first: the games among the teams level on points. If it separates only some of
+// them, the rest are compared again among themselves. Then victories, goal difference, goals scored.
+function breakTie(session: Session, rows: StandingRow[]): StandingRow[] {
+  if (rows.length < 2) {
+    return rows;
+  }
+  const direct = pointsAmong(session, rows.map((row) => row.team.id));
+  const levels = [...new Set(direct.values())].sort((a, b) => b - a);
+  if (levels.length > 1) {
+    return levels.flatMap((level) => breakTie(session, rows.filter((row) => direct.get(row.team.id) === level)));
+  }
+  return [...rows].sort((a, b) => b.wins - a.wins || b.goalDiff - a.goalDiff || b.goalsFor - a.goalsFor);
 }
 
 // Counts group matches only, and only once they end, so the table never moves during a match.
@@ -88,9 +131,9 @@ export function getStandings(session: Session): StandingRow[] {
     }
   }
 
-  return [...rows.values()]
-    .map((row) => ({ ...row, points: row.wins * 3 + row.draws, goalDiff: row.goalsFor - row.goalsAgainst }))
-    .sort((a, b) => b.points - a.points || b.goalDiff - a.goalDiff || b.goalsFor - a.goalsFor);
+  const table = [...rows.values()].map((row) => ({ ...row, points: row.wins * 3 + row.draws, goalDiff: row.goalsFor - row.goalsAgainst }));
+  const levels = [...new Set(table.map((row) => row.points))].sort((a, b) => b - a);
+  return levels.flatMap((points) => breakTie(session, table.filter((row) => row.points === points)));
 }
 
 type PlayoffChange = {
@@ -134,8 +177,8 @@ function getPlayoffChanges(session: Session): PlayoffChange[] {
   if (!first || !second || first.status !== "finished" || second.status !== "finished") {
     return changes;
   }
-  const [loser1, loser2] = [getMatchLoserId(first), getMatchLoserId(second)];
-  const [winner1, winner2] = [getMatchWinnerId(first), getMatchWinnerId(second)];
+  const [loser1, loser2] = [getMatchLoserId(session, first), getMatchLoserId(session, second)];
+  const [winner1, winner2] = [getMatchWinnerId(session, first), getMatchWinnerId(session, second)];
   if (loser1 && loser2 && winner1 && winner2) {
     place("third", THIRD, loser1, loser2);
     place("final", FINAL, winner1, winner2);
@@ -145,7 +188,7 @@ function getPlayoffChanges(session: Session): PlayoffChange[] {
 
 export function getChampionId(session: Session): string | null {
   const final = session.matches.find((match) => match.stage === "final");
-  return final?.status === "finished" ? getMatchWinnerId(final) : null;
+  return final?.status === "finished" ? getMatchWinnerId(session, final) : null;
 }
 
 export function getChampion(session: Session): Team | null {
@@ -179,21 +222,26 @@ function syncCup(raw: RawSession, sessionId: string): RawSession {
   return { ...next, championId, status: championId ? "finished" : "live" };
 }
 
+function isTiedFinal(raw: RawSession, sessionId: string, matchId: string): boolean {
+  const match = normalizeSession(sessionId, raw).matches.find((item) => item.id === matchId);
+  return Boolean(match && needsGoldenGoal(match));
+}
+
 // Both return the new session for a transaction, or undefined to abort it. A second phone that
-// finishes the same match at the same moment aborts here.
-export function applyFinishMatch(raw: RawSession, sessionId: string, matchId: string, winnerId: string | null, now: number): RawSession | undefined {
+// finishes the same match at the same moment aborts here, and so does a final that's still level.
+export function applyFinishMatch(raw: RawSession, sessionId: string, matchId: string, now: number): RawSession | undefined {
   const match = raw.matches?.[matchId];
-  if (!match || match.status !== "live") {
+  if (!match || match.status !== "live" || isTiedFinal(raw, sessionId, matchId)) {
     return undefined;
   }
   const timer = stopTimer(match.timer as MatchTimer, now);
-  return syncCup({ ...raw, matches: { ...raw.matches, [matchId]: { ...match, status: "finished", timer, winnerId } } }, sessionId);
+  return syncCup({ ...raw, matches: { ...raw.matches, [matchId]: { ...match, status: "finished", timer } } }, sessionId);
 }
 
-export function applyFinishEdit(raw: RawSession, sessionId: string, matchId: string, winnerId: string | null): RawSession | undefined {
+export function applyFinishEdit(raw: RawSession, sessionId: string, matchId: string): RawSession | undefined {
   const match = raw.matches?.[matchId];
-  if (!match || match.status !== "finished") {
+  if (!match || match.status !== "finished" || isTiedFinal(raw, sessionId, matchId)) {
     return undefined;
   }
-  return syncCup({ ...raw, matches: { ...raw.matches, [matchId]: { ...match, winnerId } } }, sessionId);
+  return syncCup(raw, sessionId);
 }

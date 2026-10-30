@@ -76,10 +76,12 @@ When you add or change a script, update this block in the same commit.
 
 Newest first. Format: date, decision, one-line reason.
 
+- 2026-10-30: Group table order is points, confronto direto, victories, goal difference, goals scored. With 3 or more teams level, confronto direto uses only the games among them and repeats if it separates just some. The group defined the first two criteria; the last two are our assumption.
+- 2026-10-30: No penalties, so `winnerId` is gone. A tied semi or 3rd place match is decided by the group table, and the final can't finish level (Gol de ouro).
+
 - 2026-10-30: Fixing a finished match edits its events in place instead of reopening it, so the numbers don't dip during the fix.
 - 2026-10-30: A started match has its clock stopped until an admin taps "Iniciar cronômetro", because teams are rarely ready at the moment the match opens.
 - 2026-10-30: The cup's rules are pure functions over the raw session (`src/lib/cup.ts`), so the transaction code in `src/data/match.ts` stays thin and the whole cup is tested without Firebase.
-- 2026-10-30: Group ties in the table break by points, goal difference, goals scored, then team order.
 
 - 2026-10-30: The draw minimizes one cost (team total first, then positions, then repeated pairs) over 40 random starts and picks among the best results. Simpler than the old app's three passes, and a redraw gives different teams.
 - 2026-10-30: Repeated pairs come from past sessions, so nothing extra is stored and discarded draws don't count.

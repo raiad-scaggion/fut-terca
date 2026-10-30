@@ -28,7 +28,7 @@ type MatchRowProps = {
 function MatchRow({ session, match, canStart, onStart }: MatchRowProps) {
   const team = (id: string) => session.teams.find((item) => item.id === id);
   const score = getMatchScore(match);
-  const winnerId = match.status === "finished" ? getMatchWinnerId(match) : null;
+  const winnerId = match.status === "finished" ? getMatchWinnerId(session, match) : null;
   const tiedWinner = match.stage !== "group" && winnerId && score.home === score.away ? team(winnerId) : null;
 
   const body = (
@@ -39,7 +39,7 @@ function MatchRow({ session, match, canStart, onStart }: MatchRowProps) {
         <span className="cup-match__score">{match.status === "pending" ? "x" : `${score.home} x ${score.away}`}</span>
         <TeamName team={team(match.awayId)} winner={winnerId === match.awayId} />
       </div>
-      {tiedWinner && <span className="cup-match__note">Passou: {tiedWinner.name}</span>}
+      {tiedWinner && <span className="cup-match__note">{tiedWinner.name} vence pela classificação</span>}
       {match.status === "live" && <span className="cup-match__live">Ao vivo</span>}
     </>
   );

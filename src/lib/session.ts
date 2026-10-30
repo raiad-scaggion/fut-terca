@@ -23,7 +23,6 @@ export type Match = {
   keepers?: { home: string; away: string };
   status: MatchStatus;
   timer?: MatchTimer;
-  winnerId?: string;
   events: MatchEvent[];
 };
 
