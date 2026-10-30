@@ -83,11 +83,11 @@ A fixed bar above the tab bar shows the live score and clock on every page while
 ## 6. Live match
 
 - Starting a match asks which keeper defends each side. It preselects the previous match's choice.
-- Timer with a chosen length. It uses Firebase's server clock offset, so every phone shows the same time. When time runs out, the phone whistles and vibrates and the clock keeps counting in red.
+- Timer with a chosen length. A started match opens with the clock stopped, and an admin starts it on the whistle. It uses Firebase's server clock offset, so every phone shows the same time. When time runs out, the phone whistles and vibrates and the clock keeps counting in red.
 - Each side lists its 4 players and its keeper with "+ Gol" and "+ Assist.". The keeper also has "+ Defesa".
 - The event log is shown with undo.
 - A tied knockout match asks who went through.
-- Finished matches can be reopened by an admin to fix events.
+- An admin can fix a finished match in place: its events change while it stays finished, and "Concluir correção" re-syncs the cup. Pending knockout matches follow the new result. Rounds already started keep their matchups, and the screen says so. A fixed final changes the champion.
 - The screen stays awake (Wake Lock) while open.
 
 ## 7. Exports

@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AccountButton } from "./components/AccountButton";
+import { LiveBar } from "./components/LiveBar";
 import { TabBar } from "./components/TabBar";
 import { CopaPage } from "./pages/CopaPage";
 import { ImportarJogadoresPage } from "./pages/ImportarJogadoresPage";
@@ -24,9 +25,11 @@ export default function App() {
           <Route path="/sorteio" element={<SorteioPage />} />
           <Route path="/copa" element={<CopaPage />} />
           <Route path="/partida" element={<PartidaPage />} />
+          <Route path="/partida/:sessionId/:matchId" element={<PartidaPage />} />
           <Route path="*" element={<Navigate to="/ranking" replace />} />
         </Routes>
       </main>
+      <LiveBar />
       <TabBar />
     </div>
   );

@@ -21,3 +21,14 @@ export function formatClock(ms: number): string {
   const seconds = String(totalSeconds % 60).padStart(2, "0");
   return `${ms < 0 ? "+" : ""}${minutes}:${seconds}`;
 }
+
+export function startTimer(timer: MatchTimer, now: number): MatchTimer {
+  return timer.running ? timer : { ...timer, running: true, startedAt: now };
+}
+
+export function stopTimer(timer: MatchTimer, now: number): MatchTimer {
+  if (!timer.running) {
+    return timer;
+  }
+  return { ...timer, running: false, startedAt: 0, elapsedMs: timer.elapsedMs + Math.max(0, now - timer.startedAt) };
+}

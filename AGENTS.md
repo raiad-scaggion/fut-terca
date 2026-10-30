@@ -76,6 +76,11 @@ When you add or change a script, update this block in the same commit.
 
 Newest first. Format: date, decision, one-line reason.
 
+- 2026-10-30: Fixing a finished match edits its events in place instead of reopening it, so the numbers don't dip during the fix.
+- 2026-10-30: A started match has its clock stopped until an admin taps "Iniciar cronômetro", because teams are rarely ready at the moment the match opens.
+- 2026-10-30: The cup's rules are pure functions over the raw session (`src/lib/cup.ts`), so the transaction code in `src/data/match.ts` stays thin and the whole cup is tested without Firebase.
+- 2026-10-30: Group ties in the table break by points, goal difference, goals scored, then team order.
+
 - 2026-10-30: The draw minimizes one cost (team total first, then positions, then repeated pairs) over 40 random starts and picks among the best results. Simpler than the old app's three passes, and a redraw gives different teams.
 - 2026-10-30: Repeated pairs come from past sessions, so nothing extra is stored and discarded draws don't count.
 - 2026-10-30: `weekly` lives in Firebase, not on the phone, so every admin sees the same draw and viewers see the teams. Auto and manual edit the same `teams`, so a draw can be tweaked by hand.

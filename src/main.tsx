@@ -4,6 +4,7 @@ import { HashRouter } from "react-router-dom";
 import App from "./App";
 import { AuthProvider } from "./data/auth";
 import "./index.css";
+import "./match.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
