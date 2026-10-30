@@ -13,6 +13,7 @@ import "@fontsource/sofia-sans-extra-condensed/latin-600.css";
 import "@fontsource/sofia-sans-extra-condensed/latin-700.css";
 import "./index.css";
 import "./match.css";
+import "./photo.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

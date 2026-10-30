@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { DeletePlayer } from "../components/DeletePlayer";
 import { EmptyState, Page } from "../components/Page";
+import { PhotoEditor } from "../components/PhotoEditor";
 import { PlayerCard } from "../components/PlayerCard";
 import { useAuth } from "../data/authContext";
+import { removePhoto, usePhotos } from "../data/photos";
 import { savePlayer, usePlayers } from "../data/players";
 import { useSessions } from "../data/sessions";
 import { getCurrentAwards, getPlayerAward } from "../lib/awards";
@@ -125,6 +127,10 @@ export function JogadoresPage() {
 
   const awards = useMemo(() => getCurrentAwards(players, sessions, new Date().toLocaleDateString("en-CA")), [players, sessions]);
   const awardMonth = monthLabel(awards.month).slice(0, 3);
+
+  const photos = usePhotos();
+  const [editingPhoto, setEditingPhoto] = useState(false);
+  const [removingPhoto, setRemovingPhoto] = useState(false);
 
   const sheetOpen = selectedPlayer !== null || editingDraft !== null;
 
@@ -307,6 +313,7 @@ export function JogadoresPage() {
               player={player}
               award={getPlayerAward(awards, player.id)}
               awardMonth={awardMonth}
+              photo={photos[player.id]}
               onClick={() => {
                 setEditingDraft(null);
                 setFormError("");
@@ -601,7 +608,31 @@ export function JogadoresPage() {
                   </div>
 
                   <div className="player-detail__card-wrap">
-                    <PlayerCard player={selectedPlayer} size="sheet" award={getPlayerAward(awards, selectedPlayer.id)} awardMonth={awardMonth} />
+                    <PlayerCard player={selectedPlayer} size="sheet" award={getPlayerAward(awards, selectedPlayer.id)} awardMonth={awardMonth} photo={photos[selectedPlayer.id]} />
+                    {isAdmin && (
+                      <div className="player-detail__photo-actions">
+                        <button type="button" className="button button--ghost" onClick={() => setEditingPhoto(true)}>
+                          {photos[selectedPlayer.id] ? "Trocar foto" : "Adicionar foto"}
+                        </button>
+                        {photos[selectedPlayer.id] && (
+                          <button
+                            type="button"
+                            className="button button--ghost"
+                            disabled={removingPhoto}
+                            onClick={async () => {
+                              setRemovingPhoto(true);
+                              try {
+                                await removePhoto(selectedPlayer.id);
+                              } finally {
+                                setRemovingPhoto(false);
+                              }
+                            }}
+                          >
+                            Remover foto
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <div className="baseline-section">
@@ -701,6 +732,9 @@ export function JogadoresPage() {
             )}
           </div>
         </div>
+      )}
+      {editingPhoto && selectedPlayer && (
+        <PhotoEditor playerId={selectedPlayer.id} playerName={selectedPlayer.name} onClose={() => setEditingPhoto(false)} />
       )}
     </Page>
   );

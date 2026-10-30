@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { EmptyState, Page } from "../components/Page";
 import { RankingCard } from "../components/RankingCard";
+import { usePhotos } from "../data/photos";
 import { usePlayers } from "../data/players";
 import { useSessions } from "../data/sessions";
 import { getCurrentAwards, getPlayerAward } from "../lib/awards";
@@ -34,6 +35,7 @@ export function RankingPage() {
   const { players, loading: playersLoading, error: playersError } = usePlayers();
   const { sessions, loading: sessionsLoading, error: sessionsError } = useSessions();
   const today = new Date().toLocaleDateString("en-CA");
+  const photos = usePhotos();
   const [tab, setTab] = useState(TABS[0]);
   const [scope, setScope] = useState<"season" | "month">("season");
   const [month, setMonth] = useState(monthOf(today));
@@ -139,6 +141,7 @@ export function RankingPage() {
               label={row.value === 1 ? tab.singular : tab.plural}
               award={getPlayerAward(awards, row.player.id)}
               awardMonth={awardMonth}
+              photo={photos[row.player.id]}
               lead={index === 0}
             />
           ))}

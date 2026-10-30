@@ -1,0 +1,39 @@
+/* Photo editor */
+.photo-pick {
+  display: grid;
+  gap: 12px;
+}
+
+.photo-working {
+  padding: 32px 0;
+  text-align: center;
+}
+
+.photo-stage {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  aspect-ratio: 1;
+  margin: 0 auto 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, #f8e7a8, #c9a24a);
+  cursor: grab;
+  touch-action: none;
+}
+
+.photo-zoom input {
+  width: 100%;
+  min-height: 44px;
+  accent-color: var(--brand);
+}
+
+.player-detail__photo-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.player-detail__photo-actions .button {
+  flex: 1;
+}

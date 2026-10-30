@@ -1,4 +1,4 @@
-import { onValue, push, remove, serverTimestamp, set, update } from "firebase/database";
+import { onValue, push, serverTimestamp, set, update } from "firebase/database";
 import { useEffect, useState } from "react";
 import type { ImportPlan } from "../lib/importCsv";
 import {
@@ -143,7 +143,7 @@ export async function setPlayerActive(id: string, active: boolean): Promise<void
 }
 
 export async function deletePlayer(id: string): Promise<void> {
-  await remove(dbRef(`players/${id}`));
+  await update(dbRef(""), { [`players/${id}`]: null, [`photos/${id}`]: null });
 }
 
 export async function applyImport(plan: ImportPlan): Promise<void> {
