@@ -5,6 +5,7 @@ import { CardArtDefs } from "./components/cardArt";
 import { LiveBar } from "./components/LiveBar";
 import { EmptyState } from "./components/Page";
 import { TabBar } from "./components/TabBar";
+import { WhatsNew } from "./components/WhatsNew";
 import { RankingPage } from "./pages/RankingPage";
 
 const RELOAD_KEY = "reloaded-for-new-version";
@@ -41,6 +42,7 @@ export default function App() {
   return (
     <div className="app">
       <CardArtDefs />
+      <WhatsNew />
       <header className="top-bar">
         <span className="top-bar__brand">Fut de Terça</span>
         <AccountButton />
