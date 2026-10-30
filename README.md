@@ -15,6 +15,10 @@ Every Tuesday 18 people play: 16 outfield players in 4 teams of 4, and 2 goalkee
 
 Anyone with the link can follow along. Only admins, who sign in with Google, can change anything.
 
+## Installing on the phone
+
+Open https://raiad-scaggion.github.io/fut-terca/ and add it to the home screen. On Android, use Chrome's menu and "Instalar app" or "Adicionar à tela inicial". On iPhone, use Safari's share button and "Adicionar à Tela de Início".
+
 ## Stack
 
 Vite, React and TypeScript, Firebase Realtime Database and Auth (free plan), Vitest, hosted on GitHub Pages.

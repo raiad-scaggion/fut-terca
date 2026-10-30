@@ -213,7 +213,7 @@ Using `C:\dev\personal\sandbox\futerca\Fut Terça - players.csv`. Never commit t
 
 ## 10. Phases
 
-Each phase ends with its acceptance test. Don't start a phase until the previous one passes. Phases 0 to 5 are done. Phase 2 is detailed in §9.
+Each phase ends with its acceptance test. Don't start a phase until the previous one passes. Phases 0 to 6 are done. Phase 2 is detailed in §9.
 
 | # | Phase | Acceptance |
 |---|-------|------------|
@@ -226,7 +226,18 @@ Each phase ends with its acceptance test. Don't start a phase until the previous
 | 6 | Exports | Both images share to WhatsApp from a phone |
 | 7 | Polish and cutover | PWA install works and a real Tuesday runs on the new app |
 
-## 11. Feedback from the group
+## 11. Cutover checklist
+
+Before the first real Tuesday on this app:
+
+1. Add the other admins at `futerca/admins`, so the night doesn't depend on one phone.
+2. If the Sheet changed after the import of 2026-10-28, export the CSV again and import it. From this night on, stats live here and the Sheet stops being updated.
+3. Tap "Limpar" in Sorteio to clear test picks.
+4. Share the link and the install steps from the README with the group.
+
+After that night: if it went well, the old app can be retired. Removing the `fut-terca/live` block from the rules is a separate decision, made only once nobody uses the old app.
+
+## 12. Feedback from the group
 
 Collected by Raiad. Each item and where it lands:
 

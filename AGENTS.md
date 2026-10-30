@@ -76,6 +76,8 @@ When you add or change a script, update this block in the same commit.
 
 Newest first. Format: date, decision, one-line reason.
 
+- 2026-10-30: The PWA has a manifest and no service worker. The app needs the live database anyway, and without a cache no phone can get stuck on an old version during a match.
+
 - 2026-10-30: Exports draw a preview first and share on a separate tap. Phones refuse a share when the tap that asked for it is too old, and drawing a photo takes a moment.
 - 2026-10-30: The night summary lists all players of the night instead of a top 3, because the group's feedback asked for everyone's stats.
 - 2026-10-30: Canvas code lives in `src/exports/`, apart from `src/lib/`, because it needs the browser. What goes on the images comes from pure functions like `src/lib/nightSummary.ts`.
