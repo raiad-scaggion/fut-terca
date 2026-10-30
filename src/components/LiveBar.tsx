@@ -9,7 +9,8 @@ export function LiveBar() {
   const { pathname } = useLocation();
   const now = useNow(Boolean(match?.timer?.running));
 
-  if (!session || !match || pathname.startsWith("/partida")) {
+  // The home screen already leads with the live score.
+  if (!session || !match || pathname === "/" || pathname.startsWith("/partida")) {
     return null;
   }
 

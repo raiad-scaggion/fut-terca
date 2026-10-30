@@ -6,6 +6,7 @@ Every Tuesday 18 people play: 16 outfield players in 4 teams of 4, and 2 goalkee
 
 ## What it does
 
+- **Início**: countdown to Tuesday, the cup in progress or the live score, then the special cards of the month and the last champion.
 - **Ranking**: goals, assists, goals + assists, saves and titles, for the season or for one month.
 - **Jogadores**: FIFA-style cards with ratings, flag, club crest and a photo, whose background is removed on the phone. Each month, the previous month's Craque, Artilheiro, Garçom and Paredão get a special card.
 - **Sorteio**: pick who's playing, then let the app balance the teams or build them by hand. Choose the team colors and send the teams to WhatsApp as an image.

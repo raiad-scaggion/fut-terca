@@ -76,6 +76,7 @@ When you add or change a script, update this block in the same commit.
 
 Newest first. Format: date, decision, one-line reason.
 
+- 2026-10-30: Início is the landing page and takes the Partida tab's place. Six tabs don't fit a 360px phone, and a match is always reachable from Início, the Copa or the live bar.
 - 2026-10-30: `futerca/admins` is no longer public, and each person can read only their own entry. The list holds friends' personal e-mails. A grant on `futerca/` would cascade to it, so reads are now granted per section.
 
 - 2026-10-30: Photos are cut out in the browser with MediaPipe and saved as small WebP data URLs at `futerca/photos`. Firebase Storage needs the paid plan, and a separate path keeps the player list light. The model loads only when an admin adds a photo.

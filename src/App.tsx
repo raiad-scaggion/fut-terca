@@ -1,12 +1,12 @@
 import { lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Link, Navigate, Route, Routes } from "react-router-dom";
 import { AccountButton } from "./components/AccountButton";
 import { CardArtDefs } from "./components/cardArt";
 import { LiveBar } from "./components/LiveBar";
 import { EmptyState } from "./components/Page";
 import { TabBar } from "./components/TabBar";
 import { WhatsNew } from "./components/WhatsNew";
-import { RankingPage } from "./pages/RankingPage";
+import { HomePage } from "./pages/HomePage";
 
 const RELOAD_KEY = "reloaded-for-new-version";
 
@@ -36,6 +36,7 @@ const JogadoresPage = lazy(() =>
   loadPage(() => import("./pages/JogadoresPage")).then((module) => ({ default: module.JogadoresPage })),
 );
 const PartidaPage = lazy(() => loadPage(() => import("./pages/PartidaPage")).then((module) => ({ default: module.PartidaPage })));
+const RankingPage = lazy(() => loadPage(() => import("./pages/RankingPage")).then((module) => ({ default: module.RankingPage })));
 const SorteioPage = lazy(() => loadPage(() => import("./pages/SorteioPage")).then((module) => ({ default: module.SorteioPage })));
 
 export default function App() {
@@ -44,13 +45,15 @@ export default function App() {
       <CardArtDefs />
       <WhatsNew />
       <header className="top-bar">
-        <span className="top-bar__brand">Fut de Terça</span>
+        <Link to="/" className="top-bar__brand">
+          Fut de Terça
+        </Link>
         <AccountButton />
       </header>
       <main className="app__main">
         <Suspense fallback={<EmptyState>Carregando...</EmptyState>}>
           <Routes>
-            <Route path="/" element={<Navigate to="/ranking" replace />} />
+            <Route path="/" element={<HomePage />} />
             <Route path="/ranking" element={<RankingPage />} />
             <Route path="/jogadores" element={<JogadoresPage />} />
             <Route path="/jogadores/importar" element={<ImportarJogadoresPage />} />
@@ -58,7 +61,7 @@ export default function App() {
             <Route path="/copa" element={<CopaPage />} />
             <Route path="/partida" element={<PartidaPage />} />
             <Route path="/partida/:sessionId/:matchId" element={<PartidaPage />} />
-            <Route path="*" element={<Navigate to="/ranking" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
       </main>

@@ -71,13 +71,14 @@ The Firebase web config is public by design and is committed. Rules are the only
 
 Bottom tab bar, one page each:
 
+0. **Início**: the landing screen. The top changes with the moment: countdown to Tuesday, cup in progress or live score. Below it, last month's special cards (or the season's leaders when there are none) and the last champion.
 1. **Ranking**: three rankings to pick from (Títulos, Gols, Assistências). Each one shows player cards in order, with OVR, position and that number on the card. Players at zero stay out, ties share a position, and a switch shows or hides the keepers.
 2. **Jogadores**: player list and cards. Admins can add or edit players and ratings.
 3. **Sorteio**: pick the week's 16 outfield players and 2 keepers. Balanced draw or manual teams ("picking sides"). A color picker on each team. Export teams image. Confirm creates the session.
 4. **Copa**: round robin, then standings, semis (1st vs 4th, 2nd vs 3rd), 3rd place match and final. Standings update when each match ends. Teams level on points are separated by confronto direto, then victories, goal difference and goals scored. Champion banner and an end-of-day export.
-5. **Partida**: the live match.
+5. **Partida**: the live match. It has no tab of its own: it opens from Início, the Copa or the live bar.
 
-A fixed bar above the tab bar shows the live score and clock on every page while a match runs. Tapping it opens Partida.
+A fixed bar above the tab bar shows the live score and clock on every page but Início, which already leads with them, while a match runs. Tapping it opens Partida.
 
 ## 6. Live match
 

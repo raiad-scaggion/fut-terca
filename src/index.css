@@ -133,6 +133,129 @@ body {
   font-family: var(--font-display);
   font-size: 1.35rem;
   font-weight: 600;
+  text-decoration: none;
+}
+
+/* Home */
+.home-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-height: 248px;
+  margin: calc(-1 * var(--gutter)) calc(-1 * var(--gutter)) 0;
+  padding: 36px var(--gutter) 28px;
+  overflow: hidden;
+  background: radial-gradient(120% 110% at 50% 0, #2c4a3a, #121a16 58%, var(--bg));
+  border-bottom: 1px solid var(--border);
+}
+
+.home-hero > :not(.home-hero__pitch) {
+  position: relative;
+}
+
+.home-hero__pitch {
+  position: absolute;
+  right: -48px;
+  bottom: 0;
+  width: 240px;
+  height: 120px;
+  color: rgb(243 241 234 / 0.16);
+}
+
+.home-hero__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 4.5rem;
+  font-weight: 600;
+  line-height: 0.95;
+  text-wrap: balance;
+}
+
+.home-hero__text {
+  margin: 4px 0 0;
+  font-size: 1.0625rem;
+}
+
+.home-hero__status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.home-hero__action {
+  margin-top: 16px;
+}
+
+.home-score {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 4px 12px;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.home-score__team {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-score__goals + .home-score__team {
+  text-align: right;
+}
+
+.home-score__goals {
+  font-family: var(--font-display);
+  font-size: 3.25rem;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+.home-score__clock {
+  grid-column: 1 / -1;
+  color: var(--brand);
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+.home-score__clock.is-over {
+  color: var(--danger);
+}
+
+.home__section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.home__award {
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.home__ranking {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.home__champion {
+  margin-bottom: 0;
 }
 
 .button {
