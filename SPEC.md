@@ -225,6 +225,7 @@ Each phase ends with its acceptance test. Don't start a phase until the previous
 | 5 | Copa and live match | The full night flow works on two phones: keepers, saves, playoffs, editing a finished match, the fixed live bar |
 | 6 | Exports | Both images share to WhatsApp from a phone |
 | 7 | Polish and cutover | PWA install works and a real Tuesday runs on the new app |
+| 8 | Premium look, FIFA cards, photos, monthly awards | See §13 |
 
 ## 11. Cutover checklist
 
@@ -248,3 +249,37 @@ Collected by Raiad. Each item and where it lands:
 5. Exporting the night's results with champion and stats (Xana): phase 6.
 6. Separate pages instead of one long page (Xana): phase 0.
 7. Keepers in the teams, with a save stat (Neithan): phases 3 and 5.
+
+## 13. Phase 8: premium look, cards and monthly awards
+
+Direction: "Noite de estádio", premium version. The approved reference is `C:\dev\personal\sandbox\futerca\board\ui-board.png`, outside the repo.
+
+### 13.1 Player fields
+
+- `nationality`: lowercase ISO code, default `br`. `club`: a club id from `src/lib/clubs.ts`, or empty.
+- Photos live at `futerca/photos/{playerId}`, apart from `players`, so the player list stays light.
+
+### 13.2 Stats
+
+- A game is a finished match. Outfield players count the finished matches of their team. A keeper counts the matches they defended.
+- The Sheet has no games, so games and averages use only matches played in the app. Season totals still include the baseline.
+- Keepers can score and assist, so the match screen keeps giving them the same buttons as everyone, plus the save.
+
+### 13.3 Ranking
+
+- Temporada or Mês, with a month picker when Mês is on.
+- Tabs: Gols, Assistências, G+A, Defesas, Títulos.
+- The month view counts only that month, with no baseline.
+
+### 13.4 Monthly awards
+
+The awards of a month come from the matches of that month and show on the cards during the next month.
+
+| Award | Criterion | Card |
+|---|---|---|
+| Craque do Mês | most goals + assists | black and gold, concentric lines |
+| Artilheiro | most goals | red, speed streaks |
+| Garçom | most assists | green, passing curves |
+| Paredão | most saves | blue, brick wall |
+
+Ties all win. Nobody wins with zero. A player who wins more than one shows the highest card, in the order above. A special card never changes the overall.
