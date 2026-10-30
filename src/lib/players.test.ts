@@ -21,6 +21,8 @@ describe("normalizePlayer", () => {
       name: "Teste",
       role: "line",
       linePosition: "meio",
+      nationality: "br",
+      club: "",
       isMonthly: false,
       joinDate: "",
       active: true,
@@ -35,6 +37,8 @@ describe("normalizePlayer", () => {
       name: "Baguete",
       role: "keeper",
       linePosition: "meio",
+      nationality: "AR",
+      club: "corinthians",
       isMonthly: true,
       joinDate: "2026-01-15",
       active: false,
@@ -45,11 +49,24 @@ describe("normalizePlayer", () => {
     });
 
     expect(player.role).toBe("keeper");
+    expect(player.nationality).toBe("ar");
+    expect(player.club).toBe("corinthians");
     expect(player.isMonthly).toBe(true);
     expect(player.joinDate).toBe("2026-01-15");
     expect(player.active).toBe(false);
     expect(player.legacyId).toBe(34);
     expect(player.baseline).toEqual({ goals: 1, assists: 5, saves: 3, titles: 0 });
+  });
+
+  it("falls back for unknown nationality or club", () => {
+    const player = normalizePlayer("p2", {
+      name: "Outro",
+      nationality: "xx",
+      club: "inexistente",
+    });
+
+    expect(player.nationality).toBe("br");
+    expect(player.club).toBe("");
   });
 });
 

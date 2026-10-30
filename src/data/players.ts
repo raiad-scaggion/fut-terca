@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 import type { ImportPlan } from "../lib/importCsv";
 import {
   clampRating,
+  normalizeClub,
   normalizeJoinDate,
   normalizeLinePosition,
+  normalizeNationality,
   normalizePlayer,
   normalizeRole,
   type LinePosition,
@@ -25,6 +27,8 @@ export type PlayerInput = {
   name: string;
   role: PlayerRole;
   linePosition: LinePosition;
+  nationality: string;
+  club: string;
   ratings: PlayerRatings;
   isMonthly: boolean;
   joinDate: string;
@@ -81,6 +85,8 @@ export async function savePlayer(input: PlayerInput): Promise<string> {
   const name = input.name.trim();
   const role = normalizeRole(input.role);
   const linePosition = normalizeLinePosition(input.linePosition);
+  const nationality = normalizeNationality(input.nationality);
+  const club = normalizeClub(input.club);
   const isMonthly = Boolean(input.isMonthly);
   const joinDate = normalizeJoinDate(input.joinDate);
   const ratings: PlayerRatings = {
@@ -96,6 +102,8 @@ export async function savePlayer(input: PlayerInput): Promise<string> {
       name,
       role,
       linePosition,
+      nationality,
+      club,
       isMonthly,
       joinDate,
       active: true,
@@ -115,6 +123,8 @@ export async function savePlayer(input: PlayerInput): Promise<string> {
     name,
     role,
     linePosition,
+    nationality,
+    club,
     isMonthly,
     joinDate,
     ratings,

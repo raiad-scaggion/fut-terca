@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { normalizePlayer, type Player } from "./players";
 import { isPlayerInSessions, normalizeSession, type Match, type MatchEvent, type Session } from "./session";
-import { buildRanking, computeStats } from "./stats";
+import {
+  buildRanking,
+  computeStats,
+  formatAverage,
+  listMonths,
+  monthLabel,
+  perGame,
+  previousMonth,
+} from "./stats";
 
 const ratings = { speed: 5, finishing: 5, defense: 5, passing: 5 };
 
@@ -33,7 +41,7 @@ function session(matches: Match[], extra: Partial<Session> = {}): Session {
 describe("computeStats", () => {
   it("returns the baseline when there are no sessions", () => {
     const stats = computeStats([player("ana", { goals: 3, assists: 2, titles: 1 })], []);
-    expect(stats.get("ana")).toEqual({ goals: 3, assists: 2, saves: 0, titles: 1 });
+    expect(stats.get("ana")).toEqual({ goals: 3, assists: 2, saves: 0, titles: 1, games: 0 });
   });
 
   it("adds goals, assists and saves from finished matches to the baseline", () => {
@@ -41,8 +49,45 @@ describe("computeStats", () => {
     const finished = match("finished", [event("goal", "ana"), event("assist", "ana"), event("save", "gui")]);
 
     const stats = computeStats(players, [session([finished])]);
-    expect(stats.get("ana")).toEqual({ goals: 4, assists: 1, saves: 0, titles: 0 });
+    expect(stats.get("ana")).toEqual({ goals: 4, assists: 1, saves: 0, titles: 0, games: 1 });
     expect(stats.get("gui")?.saves).toBe(2);
+  });
+
+  it("counts games of a player and of a keeper, and only counts a keeper when they defended", () => {
+    const players = [player("ana"), player("caio"), player("gui"), player("leo")];
+    const m1: Match = {
+      ...match("finished", []),
+      homeId: "t1",
+      awayId: "t2",
+      keepers: { home: "gui", away: "leo" },
+    };
+    const m2: Match = {
+      ...match("finished", []),
+      id: "m2",
+      homeId: "t1",
+      awayId: "t3",
+      keepers: { home: "gui", away: "gui" },
+    };
+    const m3: Match = {
+      ...match("live", []),
+      id: "m3",
+      homeId: "t1",
+      awayId: "t2",
+      keepers: { home: "leo", away: "gui" },
+    };
+    const s = session([m1, m2, m3], {
+      teams: [
+        { id: "t1", name: "Time 1", color: "#fff", playerIds: ["ana"] },
+        { id: "t2", name: "Time 2", color: "#000", playerIds: ["caio"] },
+      ],
+      keeperIds: ["gui", "leo"],
+    });
+
+    const stats = computeStats(players, [s]);
+    expect(stats.get("ana")?.games).toBe(2);
+    expect(stats.get("caio")?.games).toBe(1);
+    expect(stats.get("gui")?.games).toBe(2);
+    expect(stats.get("leo")?.games).toBe(1);
   });
 
   it("ignores matches that haven't finished", () => {
@@ -118,6 +163,49 @@ describe("buildRanking", () => {
   it("includes inactive players who have numbers and leaves out anyone at zero", () => {
     const list = [player("Ana", { goals: 2 }, { active: false }), player("Teste", {}, { active: false }), player("Bia")];
     expect(names(buildRanking(list, computeStats(list, []), "goals"))).toEqual(["Ana"]);
+  });
+
+  it("ranks contributions by goals plus assists", () => {
+    const stats = computeStats(players, []);
+    const contrib = buildRanking(players, stats, "contributions");
+    expect(names(contrib)).toEqual(["Caio", "Ana", "Bia", "Duda"]);
+    expect(contrib.map((row) => row.value)).toEqual([18, 6, 6, 1]);
+  });
+});
+
+describe("period and average helpers", () => {
+  it("lists months with sessions plus today's month, newest first, without repeats", () => {
+    const sessions = [
+      session([], { id: "s1", date: "2026-09-10" }),
+      session([], { id: "s2", date: "2026-11-03" }),
+      session([], { id: "s3", date: "2026-09-24" }),
+    ];
+    expect(listMonths(sessions, "2026-10-30")).toEqual(["2026-11", "2026-10", "2026-09"]);
+    expect(listMonths(sessions, "2026-11-15")).toEqual(["2026-11", "2026-09"]);
+  });
+
+  it("computes the previous month across year boundaries", () => {
+    expect(previousMonth("2027-01")).toBe("2026-12");
+    expect(previousMonth("2026-11")).toBe("2026-10");
+    expect(previousMonth("2026-03")).toBe("2026-02");
+  });
+
+  it("formats month labels in Portuguese", () => {
+    expect(monthLabel("2026-11")).toBe("novembro de 2026");
+    expect(monthLabel("2026-01")).toBe("janeiro de 2026");
+    expect(monthLabel("2026-03")).toBe("março de 2026");
+  });
+
+  it("computes per-game averages and returns 0 when games is 0", () => {
+    expect(perGame(5, 0)).toBe(0);
+    expect(perGame(0, 0)).toBe(0);
+    expect(perGame(2, 3)).toBeCloseTo(0.6667, 4);
+  });
+
+  it("formats averages with two decimals and a comma", () => {
+    expect(formatAverage(0.6667)).toBe("0,67");
+    expect(formatAverage(1)).toBe("1,00");
+    expect(formatAverage(0)).toBe("0,00");
   });
 });
 

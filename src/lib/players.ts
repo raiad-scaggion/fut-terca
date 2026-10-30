@@ -1,3 +1,6 @@
+import { getClub } from "./clubs";
+import { COUNTRIES, DEFAULT_COUNTRY } from "./countries";
+
 export type PlayerRole = "line" | "keeper";
 export type LinePosition = "ataque" | "meio" | "defesa";
 export type CardTier = "gold" | "silver" | "bronze";
@@ -26,6 +29,8 @@ export type Player = {
   createdAt: number;
   legacyId?: number;
   linePosition: LinePosition;
+  nationality: string;
+  club: string;
   ratings: PlayerRatings;
   baseline: PlayerBaseline;
 };
@@ -89,6 +94,24 @@ export function normalizeName(name: string): string {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
+const COUNTRY_CODES = new Set(COUNTRIES.map((country) => country.code));
+
+export function normalizeNationality(value: unknown): string {
+  if (typeof value !== "string") {
+    return DEFAULT_COUNTRY;
+  }
+  const lower = value.trim().toLowerCase();
+  return COUNTRY_CODES.has(lower) ? lower : DEFAULT_COUNTRY;
+}
+
+export function normalizeClub(value: unknown): string {
+  if (typeof value !== "string") {
+    return "";
+  }
+  const trimmed = value.trim();
+  return getClub(trimmed) ? trimmed : "";
+}
+
 export function normalizePlayer(id: string, raw: Record<string, unknown>): Player {
   const rawRatings =
     raw.ratings && typeof raw.ratings === "object"
@@ -111,6 +134,8 @@ export function normalizePlayer(id: string, raw: Record<string, unknown>): Playe
         ? raw.createdAt
         : 0,
     linePosition: normalizeLinePosition(raw.linePosition),
+    nationality: normalizeNationality(raw.nationality),
+    club: normalizeClub(raw.club),
     ratings: {
       speed: clampRating(rawRatings.speed, 5),
       finishing: clampRating(rawRatings.finishing, 5),

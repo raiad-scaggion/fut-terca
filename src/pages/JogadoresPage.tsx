@@ -6,6 +6,8 @@ import { PlayerCard } from "../components/PlayerCard";
 import { useAuth } from "../data/authContext";
 import { savePlayer, usePlayers } from "../data/players";
 import { useSessions } from "../data/sessions";
+import { CLUBS } from "../lib/clubs";
+import { COUNTRIES, DEFAULT_COUNTRY } from "../lib/countries";
 import {
   cardTier,
   clampRating,
@@ -18,7 +20,7 @@ import {
   type PlayerRole,
 } from "../lib/players";
 import { isPlayerInSessions } from "../lib/session";
-import { computeStats } from "../lib/stats";
+import { computeStats, formatAverage, perGame, zeroBaselines } from "../lib/stats";
 
 type FilterKey = "all" | "monthly" | "keepers" | "inactive";
 
@@ -53,6 +55,8 @@ type FormDraft = {
   name: string;
   role: PlayerRole;
   linePosition: LinePosition;
+  nationality: string;
+  club: string;
   ratings: PlayerRatings;
   isMonthly: boolean;
   joinDate: string;
@@ -64,6 +68,8 @@ function createEmptyDraft(): FormDraft {
     name: "",
     role: "line",
     linePosition: "meio",
+    nationality: DEFAULT_COUNTRY,
+    club: "",
     ratings: { speed: 5, finishing: 5, defense: 5, passing: 5 },
     isMonthly: false,
     joinDate: "",
@@ -77,6 +83,8 @@ function createDraftFromPlayer(player: Player): FormDraft {
     name: player.name,
     role: player.role,
     linePosition: player.linePosition,
+    nationality: player.nationality,
+    club: player.club,
     ratings: { ...player.ratings },
     isMonthly: player.isMonthly,
     joinDate: player.joinDate,
@@ -103,6 +111,14 @@ export function JogadoresPage() {
 
   const selectedStats = useMemo(
     () => (selectedPlayer ? computeStats([selectedPlayer], sessions).get(selectedPlayer.id) : undefined),
+    [selectedPlayer, sessions],
+  );
+
+  const selectedAppStats = useMemo(
+    () =>
+      selectedPlayer
+        ? computeStats(zeroBaselines([selectedPlayer]), sessions).get(selectedPlayer.id)
+        : undefined,
     [selectedPlayer, sessions],
   );
 
@@ -199,6 +215,8 @@ export function JogadoresPage() {
         name: trimmedName,
         role: editingDraft.role,
         linePosition: editingDraft.linePosition,
+        nationality: editingDraft.nationality,
+        club: editingDraft.club,
         ratings: editingDraft.ratings,
         isMonthly: editingDraft.isMonthly,
         joinDate: editingDraft.joinDate,
@@ -357,6 +375,47 @@ export function JogadoresPage() {
                     required
                     autoFocus
                   />
+                </label>
+
+                <label className="form-field">
+                  <span className="form-field__label">Nacionalidade</span>
+                  <select
+                    className="text-input"
+                    value={editingDraft.nationality}
+                    onChange={(e) =>
+                      setEditingDraft({
+                        ...editingDraft,
+                        nationality: e.target.value,
+                      })
+                    }
+                  >
+                    {COUNTRIES.map((country) => (
+                      <option key={country.code} value={country.code}>
+                        {country.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="form-field">
+                  <span className="form-field__label">Time do coração</span>
+                  <select
+                    className="text-input"
+                    value={editingDraft.club}
+                    onChange={(e) =>
+                      setEditingDraft({
+                        ...editingDraft,
+                        club: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="">Nenhum</option>
+                    {CLUBS.map((club) => (
+                      <option key={club.id} value={club.id}>
+                        {club.name}
+                      </option>
+                    ))}
+                  </select>
                 </label>
 
                 <div className="form-field">
@@ -521,7 +580,8 @@ export function JogadoresPage() {
               </form>
             ) : (
               selectedPlayer &&
-              selectedStats && (
+              selectedStats &&
+              selectedAppStats && (
                 <div className="player-detail">
                   <div className="sheet__header">
                     <h2 className="sheet__title">{selectedPlayer.name}</h2>
@@ -575,6 +635,36 @@ export function JogadoresPage() {
                           <span className="baseline-stat__label">Defesas</span>
                         </div>
                       )}
+                      <div className="baseline-stat">
+                        <span className="baseline-stat__val">
+                          {selectedAppStats.games}
+                        </span>
+                        <span className="baseline-stat__label">Jogos</span>
+                      </div>
+                      <div className="baseline-stat">
+                        <span className="baseline-stat__val">
+                          {selectedAppStats.games === 0
+                            ? "-"
+                            : formatAverage(perGame(selectedAppStats.goals, selectedAppStats.games))}
+                        </span>
+                        <span className="baseline-stat__label">Gols/jogo</span>
+                      </div>
+                      <div className="baseline-stat">
+                        <span className="baseline-stat__val">
+                          {selectedAppStats.games === 0
+                            ? "-"
+                            : formatAverage(perGame(selectedAppStats.assists, selectedAppStats.games))}
+                        </span>
+                        <span className="baseline-stat__label">Assist./jogo</span>
+                      </div>
+                      <div className="baseline-stat">
+                        <span className="baseline-stat__val">
+                          {selectedAppStats.games === 0
+                            ? "-"
+                            : formatAverage(perGame(selectedAppStats.saves, selectedAppStats.games))}
+                        </span>
+                        <span className="baseline-stat__label">Defesas/jogo</span>
+                      </div>
                     </div>
                   </div>
 
