@@ -89,21 +89,7 @@ export function normalizeName(name: string): string {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
-export function normalizePlayer(
-  idOrRaw: string | Record<string, unknown>,
-  maybeRaw?: Record<string, unknown>,
-): Player {
-  const id =
-    typeof idOrRaw === "string"
-      ? idOrRaw
-      : typeof maybeRaw === "string"
-        ? maybeRaw
-        : typeof idOrRaw.id === "string"
-          ? idOrRaw.id
-          : "";
-  const raw: Record<string, unknown> =
-    typeof idOrRaw === "string" ? (maybeRaw ?? {}) : idOrRaw;
-
+export function normalizePlayer(id: string, raw: Record<string, unknown>): Player {
   const rawRatings =
     raw.ratings && typeof raw.ratings === "object"
       ? (raw.ratings as Record<string, unknown>)

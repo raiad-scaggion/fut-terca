@@ -369,6 +369,8 @@ export function planImport(
   const create: ImportedPlayer[] = [];
   const update: ImportedPlayer[] = [];
   const unchanged: ImportedPlayer[] = [];
+  const warnings = [...parsed.warnings];
+  const matchedIds = new Set<string>();
 
   for (const row of parsed.rows) {
     const matched =
@@ -379,6 +381,13 @@ export function planImport(
       create.push(row);
       continue;
     }
+
+    // One row can match by id and another by name. Applying both would silently lose one of them.
+    if (matchedIds.has(matched.id)) {
+      warnings.push(`${row.name}: corresponde a '${matched.name}', que já está em outra linha. Linha ignorada.`);
+      continue;
+    }
+    matchedIds.add(matched.id);
 
     const targetRow: ImportedPlayer = {
       ...row,
@@ -396,7 +405,7 @@ export function planImport(
     create,
     update,
     unchanged,
-    warnings: parsed.warnings,
+    warnings,
     merges: parsed.merges,
     totals: parsed.totals,
   };

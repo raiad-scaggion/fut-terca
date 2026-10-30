@@ -76,6 +76,7 @@ When you add or change a script, update this block in the same commit.
 
 Newest first. Format: date, decision, one-line reason.
 
+- 2026-10-30: Imported rows with an invalid id get the key `p_row_N` and no `legacyId`, so a bad cell doesn't stop the import. Such rows can only match by name on a later import.
 - 2026-10-28: Writes are allowed per section under `futerca/` (`$section`), never on `futerca/` itself. In Realtime Database rules a grant on a parent can't be revoked by a child, so a parent grant would let admins edit `admins/`.
 - 2026-10-28: The account panel has a "Testar permissão de gravação" button that writes `futerca/meta/writeCheck`. It checks the rules from a real login without touching real data.
 

@@ -169,4 +169,22 @@ describe("planImport", () => {
     expect(plan.update).toHaveLength(2);
     expect(plan.update.map((p) => p.id)).toEqual(["p69", "-PushKey1"]);
   });
+
+  it("never applies two rows to the same player", () => {
+    const existing = [
+      normalizePlayer("p69", {
+        name: "Neto",
+        legacyId: 69,
+        linePosition: "meio",
+        ratings: { speed: 7, finishing: 6, defense: 8, passing: 8 },
+        baseline: { goals: 2, assists: 0, saves: 0, titles: 1 },
+      }),
+    ];
+    const csv = [HEADER, "69,Netinho,2,0,1,7,6,8,8,meio,linha,FALSE,", "70,Neto,9,9,9,7,6,8,8,meio,linha,FALSE,"].join("\n");
+
+    const plan = planImport(csv, existing);
+    expect(plan.update.map((p) => p.name)).toEqual(["Netinho"]);
+    expect(plan.create).toHaveLength(0);
+    expect(plan.warnings).toHaveLength(1);
+  });
 });

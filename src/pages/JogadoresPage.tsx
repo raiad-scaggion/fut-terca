@@ -103,7 +103,7 @@ export function JogadoresPage() {
       return undefined;
     }
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === "Escape" && !saving) {
         setSelectedId(null);
         setEditingDraft(null);
         setFormError("");
@@ -111,7 +111,7 @@ export function JogadoresPage() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [sheetOpen]);
+  }, [sheetOpen, saving]);
 
   const filteredPlayers = useMemo(() => {
     const query = normalizeName(search);
