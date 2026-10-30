@@ -72,7 +72,7 @@ The Firebase web config is public by design and is committed. Rules are the only
 
 Bottom tab bar, one page each:
 
-1. **Ranking**: season table with goals, assists, saves, titles and OVR. Sortable.
+1. **Ranking**: three rankings to pick from (Títulos, Gols, Assistências). Each one shows player cards in order, with the position and that number on the card. Players at zero stay out, and ties share a position.
 2. **Jogadores**: player list and cards. Admins can add or edit players and ratings.
 3. **Sorteio**: pick the week's 16 outfield players and 2 keepers. Balanced draw or manual teams ("picking sides"). A color picker on each team. Export teams image. Confirm creates the session.
 4. **Copa**: round robin, then standings, semis (1st vs 4th, 2nd vs 3rd), 3rd place match and final. Standings update when each match ends. Champion banner and an end-of-day export.

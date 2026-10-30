@@ -83,20 +83,27 @@ describe("buildRanking", () => {
   const players = [
     player("Bia", { goals: 5, assists: 1 }),
     player("Ana", { goals: 5, assists: 1 }),
-    player("Caio", { goals: 5, assists: 9 }),
+    player("Caio", { goals: 9, assists: 9 }),
     player("Duda", { goals: 1, titles: 7 }),
   ];
   const names = (rows: { player: Player }[]) => rows.map((row) => row.player.name);
 
-  it("sorts by the chosen column and breaks ties by goals, assists and name", () => {
+  it("ranks by the chosen stat and shows that stat's value", () => {
     const stats = computeStats(players, []);
-    expect(names(buildRanking(players, stats, "goals"))).toEqual(["Caio", "Ana", "Bia", "Duda"]);
-    expect(names(buildRanking(players, stats, "titles"))[0]).toBe("Duda");
+    const goals = buildRanking(players, stats, "goals");
+    expect(names(goals)).toEqual(["Caio", "Ana", "Bia", "Duda"]);
+    expect(goals[0].value).toBe(9);
+    expect(names(buildRanking(players, stats, "titles"))).toEqual(["Duda"]);
   });
 
-  it("keeps inactive players only while they have numbers", () => {
+  it("gives tied players the same position and skips the next one", () => {
+    const goals = buildRanking(players, computeStats(players, []), "goals");
+    expect(goals.map((row) => row.position)).toEqual([1, 2, 2, 4]);
+  });
+
+  it("includes inactive players who have numbers and leaves out anyone at zero", () => {
     const list = [player("Ana", { goals: 2 }, { active: false }), player("Teste", {}, { active: false }), player("Bia")];
-    expect(names(buildRanking(list, computeStats(list, []), "goals"))).toEqual(["Ana", "Bia"]);
+    expect(names(buildRanking(list, computeStats(list, []), "goals"))).toEqual(["Ana"]);
   });
 });
 

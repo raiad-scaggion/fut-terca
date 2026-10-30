@@ -943,85 +943,34 @@ div.fifa-card {
 }
 
 /* Ranking */
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+.ranking-tabs {
+  margin-bottom: 16px;
 }
 
-.ranking {
+.ranking-card__position {
+  font-size: 1.1rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.ranking-card__stat {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 5px;
   width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-  font-variant-numeric: tabular-nums;
+  padding-top: 6px;
+  border-top: 1px solid rgb(0 0 0 / 0.2);
 }
 
-.ranking th,
-.ranking td {
-  padding: 0;
-  text-align: center;
+.ranking-card__value {
+  font-size: 1.6rem;
+  font-weight: 900;
+  line-height: 1.1;
 }
 
-.ranking tbody tr {
-  height: 48px;
-  border-top: 1px solid var(--border);
-}
-
-.ranking tbody tr.is-inactive {
-  opacity: 0.6;
-}
-
-.ranking td.is-active {
-  color: var(--brand);
+.ranking-card__label {
+  font-size: 0.72rem;
   font-weight: 800;
-}
-
-.ranking__position {
-  width: 28px;
-  color: var(--muted);
-  font-size: 0.8rem;
-}
-
-.ranking .ranking__name {
-  width: 38%;
-  padding-right: 8px;
-  overflow: hidden;
-  font-weight: 600;
-  text-align: left;
-}
-
-.ranking__player {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.ranking__pos {
-  display: block;
-  color: var(--muted);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-}
-
-.ranking__sort {
-  width: 100%;
-  min-height: 44px;
-  padding: 0;
-  color: var(--muted);
-  font: inherit;
-  font-size: 0.78rem;
-  font-weight: 800;
-  background: none;
-  border: 0;
-  cursor: pointer;
-}
-
-.ranking__sort.is-active {
-  color: var(--brand);
+  opacity: 0.8;
 }

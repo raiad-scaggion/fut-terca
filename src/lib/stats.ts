@@ -40,26 +40,30 @@ export function computeStats(players: Player[], sessions: Session[]): Map<string
   return stats;
 }
 
-export type RankingKey = keyof PlayerStats | "ovr";
-
-export type RankingRow = PlayerStats & {
+export type RankingRow = {
   player: Player;
-  ovr: number;
+  value: number;
+  position: number;
 };
 
-// A player who left stays in the ranking while they have numbers. One with none has nothing to show.
-export function buildRanking(players: Player[], stats: Map<string, PlayerStats>, sortBy: RankingKey): RankingRow[] {
-  return players
-    .map((player) => {
-      const playerStats = stats.get(player.id) ?? player.baseline;
-      return { ...playerStats, player, ovr: displayOvr(player) };
-    })
-    .filter((row) => row.player.active || row.goals + row.assists + row.saves + row.titles > 0)
+// Only players with something to show are listed, including ones who left the group. Equal values
+// share a position (1, 2, 2, 4), since nobody really beat anybody on a tie.
+export function buildRanking(players: Player[], stats: Map<string, PlayerStats>, key: keyof PlayerStats): RankingRow[] {
+  const sorted = players
+    .map((player) => ({ player, value: (stats.get(player.id) ?? player.baseline)[key] }))
+    .filter((row) => row.value > 0)
     .sort(
       (a, b) =>
-        b[sortBy] - a[sortBy] ||
-        b.goals - a.goals ||
-        b.assists - a.assists ||
+        b.value - a.value ||
+        displayOvr(b.player) - displayOvr(a.player) ||
         a.player.name.localeCompare(b.player.name, "pt-BR", { sensitivity: "base" }),
     );
+
+  let position = 0;
+  return sorted.map((row, index) => {
+    if (index === 0 || row.value !== sorted[index - 1].value) {
+      position = index + 1;
+    }
+    return { ...row, position };
+  });
 }
