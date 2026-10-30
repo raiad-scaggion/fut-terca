@@ -24,4 +24,4 @@ Club crests belong to their clubs. They are used here in a non-commercial app fo
 | sao-paulo | https://commons.wikimedia.org/wiki/File:S%C3%A3o_Paulo_Futebol_Clube_logo_(2022).svg |
 | vasco | https://pt.wikipedia.org/wiki/Ficheiro:EscudoDoVascoDaGama.svg |
 | vitoria | https://commons.wikimedia.org/wiki/File:Esporte_Clube_Vit%C3%B3ria_(2024).svg |
-| ferroviaria | https://commons.wikimedia.org/wiki/File:Associa%C3%A7%C3%A3o_Ferrovi%C3%A1ria_de_Esportes_logo.svg |
+| ferroviaria | https://football-logos.cc/brazil/ferroviaria |
