@@ -1,12 +1,15 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { ExportImage } from "../components/ExportImage";
 import { EmptyState, Page } from "../components/Page";
 import { StartMatchSheet } from "../components/StartMatchSheet";
 import { useAuth } from "../data/authContext";
 import { useLive } from "../data/live";
 import { usePlayers } from "../data/players";
 import { useSessions } from "../data/sessions";
+import { renderSummaryImage } from "../exports/summaryImage";
 import { getChampion, getMatchScore, getMatchWinnerId, getStandings, matchLabel } from "../lib/cup";
+import { buildNightSummary, dayLabel, sessionDate } from "../lib/nightSummary";
 import type { Match, Session, Team } from "../lib/session";
 
 function TeamName({ team, winner }: { team?: Team; winner: boolean }) {
@@ -115,7 +118,7 @@ function Standings({ session }: { session: Session }) {
 
 export function CopaPage() {
   const { isAdmin } = useAuth();
-  const { players } = usePlayers();
+  const { players, loading: playersLoading } = usePlayers();
   const { sessions, loading } = useSessions();
   const live = useLive();
   const [starting, setStarting] = useState<Match | null>(null);
@@ -143,6 +146,8 @@ export function CopaPage() {
   }
 
   const champion = getChampion(session);
+  // The image is frozen when it opens, so the button waits for the names to arrive.
+  const summary = playersLoading ? null : buildNightSummary(session, byId);
   const group = session.matches.filter((match) => match.stage === "group");
   const knockout = session.matches.filter((match) => match.stage !== "group");
   const canStart = isAdmin && !live.matchId && session.id === live.sessionId;
@@ -158,6 +163,15 @@ export function CopaPage() {
           </strong>
           <span className="champion__players">{champion.playerIds.flatMap((id) => byId.get(id)?.name ?? []).join(", ")}</span>
         </section>
+      )}
+
+      {summary && (
+        <ExportImage
+          label="Exportar resumo da noite"
+          title="Resumo da noite"
+          fileName="resumo-fut-de-terca.png"
+          render={(photo) => renderSummaryImage(summary, dayLabel(sessionDate(session.date)), photo)}
+        />
       )}
 
       <Standings session={session} />

@@ -1,11 +1,14 @@
 import { useMemo, useState } from "react";
+import { ExportImage } from "../components/ExportImage";
 import { EmptyState, Page } from "../components/Page";
 import { TeamCard } from "../components/TeamCard";
 import { useAuth } from "../data/authContext";
 import { usePlayers } from "../data/players";
 import { useSessions } from "../data/sessions";
 import { cancelSession, confirmSession, updateWeekly, useWeekly } from "../data/weekly";
+import { renderTeamsImage, type TeamsImageData } from "../exports/teamsImage";
 import { buildPairHistory } from "../lib/draw";
+import { dayLabel, sessionDate } from "../lib/nightSummary";
 import { displayOvr, normalizeName, type Player } from "../lib/players";
 import type { Session } from "../lib/session";
 import {
@@ -51,6 +54,17 @@ function PickChip({ player, selected, disabled, onClick }: { player: Player; sel
   );
 }
 
+function ExportTeams({ data }: { data: TeamsImageData }) {
+  return (
+    <ExportImage
+      label="Exportar imagem dos times"
+      title="Imagem dos times"
+      fileName="times-fut-de-terca.png"
+      render={(photo) => renderTeamsImage(data, photo)}
+    />
+  );
+}
+
 function LiveSessionView({ session, byId, isAdmin }: { session: Session; byId: Map<string, Player>; isAdmin: boolean }) {
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState("");
@@ -73,6 +87,14 @@ function LiveSessionView({ session, byId, isAdmin }: { session: Session; byId: M
         ))}
       </div>
       <p className="draw-keepers">Goleiros: {pickPlayers(session.keeperIds, byId).map((player) => player.name).join(" e ")}</p>
+
+      <ExportTeams
+        data={{
+          teams: session.teams.map((team) => ({ name: team.name, color: team.color, players: pickPlayers(team.playerIds, byId) })),
+          keepers: pickPlayers(session.keeperIds, byId),
+          day: dayLabel(sessionDate(session.date)),
+        }}
+      />
 
       {isAdmin && !started && (
         <div className="draw-section">
@@ -143,16 +165,25 @@ export function SorteioPage() {
   }
 
   const hasTeams = weekly.teams.some((team) => team.playerIds.length > 0);
+  const ready = isReadyToConfirm(weekly);
+  const imageData: TeamsImageData = {
+    teams: weekly.teams.map((team, index) => ({ name: `Time ${index + 1}`, color: team.color, players: pickPlayers(team.playerIds, byId) })),
+    keepers: pickPlayers(weekly.keeperIds, byId),
+    day: dayLabel(new Date()),
+  };
 
   if (!isAdmin) {
     return (
       <Page title="Sorteio" subtitle="Quem joga hoje e como ficam os times">
         {hasTeams ? (
-          <div className="teams-grid">
-            {weekly.teams.map((team, index) => (
-              <TeamCard key={index} name={`Time ${index + 1}`} color={team.color} players={pickPlayers(team.playerIds, byId)} />
-            ))}
-          </div>
+          <>
+            <div className="teams-grid">
+              {weekly.teams.map((team, index) => (
+                <TeamCard key={index} name={`Time ${index + 1}`} color={team.color} players={pickPlayers(team.playerIds, byId)} />
+              ))}
+            </div>
+            {ready && <ExportTeams data={imageData} />}
+          </>
         ) : (
           <EmptyState>Os times ainda não saíram. Assim que forem sorteados, aparecem aqui.</EmptyState>
         )}
@@ -165,7 +196,6 @@ export function SorteioPage() {
   const unassigned = pickPlayers(unassignedPlayerIds(weekly), byId);
   const lineFull = weekly.selectedIds.length >= WEEKLY_LINE_PLAYERS;
   const keepersFull = weekly.keeperIds.length >= WEEKLY_KEEPERS;
-  const ready = isReadyToConfirm(weekly);
   const manual = weekly.mode === "manual";
 
   const handleAssign = async (playerId: string) => {
@@ -334,6 +364,7 @@ export function SorteioPage() {
 
       <section className="draw-section">
         {!ready && <p className="draw-hint">{missingForConfirm(weekly)}</p>}
+        {ready && <ExportTeams data={imageData} />}
         <button type="button" className="button button--primary draw-button" disabled={!ready || confirming} onClick={handleConfirm}>
           {confirming ? "Confirmando..." : "Confirmar times"}
         </button>

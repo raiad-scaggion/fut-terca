@@ -10,7 +10,7 @@ const EVENT_STAT: Record<MatchEventType, keyof PlayerStats> = {
 };
 
 // The keeper who defended the champion's goal in the final wins the title with that team.
-function championKeeperId(session: Session): string | undefined {
+export function championKeeperId(session: Session): string | undefined {
   const final = session.matches.find((match) => match.stage === "final");
   if (!final?.keepers || !session.championId) {
     return undefined;

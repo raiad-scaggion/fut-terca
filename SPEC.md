@@ -92,9 +92,9 @@ A fixed bar above the tab bar shows the live score and clock on every page while
 
 ## 7. Exports
 
-Canvas images at 1080x1350 for WhatsApp, shared with `navigator.share` and falling back to a download:
-- **Teams**: the 4 teams, keepers, a random caption and a background photo (freely licensed Wikimedia Commons photos with credit lines, carried over from the old app), or a photo from the phone.
-- **Night summary**: the champion and its players, every result, and the night's top scorers, assists and saves.
+Canvas images at 1080x1350 for WhatsApp. Exporting opens a preview with "Trocar fundo", "Foto do celular" and "Compartilhar", which uses `navigator.share` and falls back to a download. Anyone can export, since it writes nothing:
+- **Teams**: the 4 teams, keepers, a random caption and a background photo (freely licensed Wikimedia Commons photos with credit lines, carried over from the old app), or a photo from the phone. Available once the teams are complete.
+- **Night summary**: the champion, its players and the keeper of the final, every result, and the goals, assists and saves of every player of the night, best numbers first. Available once the cup has a champion.
 
 ## 8. Import from the Sheet
 
@@ -213,7 +213,7 @@ Using `C:\dev\personal\sandbox\futerca\Fut Terça - players.csv`. Never commit t
 
 ## 10. Phases
 
-Each phase ends with its acceptance test. Don't start a phase until the previous one passes. Phases 0 to 4 are done. Phase 2 is detailed in §9.
+Each phase ends with its acceptance test. Don't start a phase until the previous one passes. Phases 0 to 5 are done. Phase 2 is detailed in §9.
 
 | # | Phase | Acceptance |
 |---|-------|------------|
