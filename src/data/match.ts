@@ -1,9 +1,10 @@
-import { push, remove, runTransaction, set, update } from "firebase/database";
+import { push, runTransaction } from "firebase/database";
 import { startTimer, stopTimer, type MatchTimer } from "../lib/clock";
 import { applyFinishEdit, applyFinishMatch, type RawSession } from "../lib/cup";
-import type { MatchEventType } from "../lib/session";
+import type { MatchEvent, MatchEventType } from "../lib/session";
 import { serverNow } from "./clock";
 import { dbRef } from "./firebase";
+import { logOnly, writeWithLog } from "./log";
 
 const matchPath = (sessionId: string, matchId: string) => `sessions/${sessionId}/matches/${matchId}`;
 
@@ -18,11 +19,12 @@ export async function startMatch(
   if (!committed) {
     return false;
   }
-  await update(dbRef(matchPath(sessionId, matchId)), {
-    status: "live",
-    keepers,
-    timer: { durationSec, running: false, startedAt: 0, elapsedMs: 0 },
-  });
+  const path = matchPath(sessionId, matchId);
+  await writeWithLog({ action: "match.start", sessionId, matchId }, () => ({
+    [`${path}/status`]: "live",
+    [`${path}/keepers`]: keepers,
+    [`${path}/timer`]: { durationSec, running: false, startedAt: 0, elapsedMs: 0 },
+  }));
   return true;
 }
 
@@ -37,12 +39,16 @@ export async function setTimerRunning(sessionId: string, matchId: string, runnin
 
 // Each event gets its own key, so two phones marking at once never overwrite each other.
 export async function addEvent(sessionId: string, matchId: string, type: MatchEventType, playerId: string, teamId: string): Promise<void> {
-  const eventRef = push(dbRef(`${matchPath(sessionId, matchId)}/events`));
-  await set(eventRef, { type, playerId, teamId, at: serverNow() });
+  const eventId = push(dbRef(`${matchPath(sessionId, matchId)}/events`)).key ?? "";
+  await writeWithLog({ action: "event.add", sessionId, matchId, playerId, eventType: type }, (logId) => ({
+    [`${matchPath(sessionId, matchId)}/events/${eventId}`]: { type, playerId, teamId, at: serverNow(), logId },
+  }));
 }
 
-export async function removeEvent(sessionId: string, matchId: string, eventId: string): Promise<void> {
-  await remove(dbRef(`${matchPath(sessionId, matchId)}/events/${eventId}`));
+export async function removeEvent(sessionId: string, matchId: string, event: MatchEvent): Promise<void> {
+  await writeWithLog({ action: "event.remove", sessionId, matchId, playerId: event.playerId, eventType: event.type }, () => ({
+    [`${matchPath(sessionId, matchId)}/events/${event.id}`]: null,
+  }));
 }
 
 export async function finishMatch(sessionId: string, matchId: string): Promise<void> {
@@ -51,23 +57,28 @@ export async function finishMatch(sessionId: string, matchId: string): Promise<v
   );
   if (committed) {
     const cupOver = (snapshot.val() as RawSession).status === "finished";
-    await update(dbRef("live"), cupOver ? { matchId: null, sessionId: null } : { matchId: null });
+    await writeWithLog({ action: "match.finish", sessionId, matchId }, () =>
+      cupOver ? { "live/matchId": null, "live/sessionId": null } : { "live/matchId": null },
+    );
   }
 }
 
 export async function finishEdit(sessionId: string, matchId: string): Promise<void> {
-  await runTransaction(dbRef(`sessions/${sessionId}`), (raw: RawSession | null) =>
+  const { committed } = await runTransaction(dbRef(`sessions/${sessionId}`), (raw: RawSession | null) =>
     raw ? applyFinishEdit(raw, sessionId, matchId) : raw,
   );
+  if (committed) {
+    await logOnly({ action: "match.fix", sessionId, matchId });
+  }
 }
 
 export async function cancelMatch(sessionId: string, matchId: string, durationSec: number): Promise<void> {
   const path = matchPath(sessionId, matchId);
-  await update(dbRef(""), {
+  await writeWithLog({ action: "match.cancel", sessionId, matchId }, () => ({
     [`${path}/status`]: "pending",
     [`${path}/keepers`]: null,
     [`${path}/events`]: null,
     [`${path}/timer`]: { durationSec, running: false, startedAt: 0, elapsedMs: 0 },
     "live/matchId": null,
-  });
+  }));
 }

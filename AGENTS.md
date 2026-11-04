@@ -55,6 +55,8 @@ When you add or change a script, update this block in the same commit.
 - `database.rules.json` is the copy of record for the database rules. The project has no Firebase CLI deploy, so after changing the file, paste it into the console (Realtime Database → Rules) in the same session, and say so.
 - The rules also keep the old app's `fut-terca/live` open. Leave that block alone while the old app is in use.
 - Admins live at `futerca/admins/{emailKey}: true`, added by hand in the console (Realtime Database → Data). `emailKey` lowercases the email and swaps every "." for ",".
+- Owners live at `futerca/owners/{emailKey}: true`, the same way. Only owners can read the change log at `futerca/log`.
+- Every admin write goes through `writeWithLog` in `src/data/log.ts`. A new write path must too, and player or event writes must stamp the `logId`, or the rules refuse them.
 - Auth uses a Google popup and falls back to a redirect when the browser blocks popups. `raiad-scaggion.github.io` is in the authorized domains.
 
 ## Secrets
@@ -76,6 +78,7 @@ When you add or change a script, update this block in the same commit.
 
 Newest first. Format: date, decision, one-line reason.
 
+- 2026-11-04: Every admin change writes an entry to `futerca/log` in the same write, readable only by the owner. Someone changed ratings and nobody could tell who, since the database keeps no history. The rules were checked in the Firebase emulator before shipping.
 - 2026-11-04: Explanations live in a tap-to-open "i" instead of text under each screen. Phones have no hover, and the notes below the table pushed it down and went unread.
 - 2026-11-04: Goals, assists and titles are averaged per night, on the player sheet and in the Ranking table. Saves and goals conceded stay per game in goal. A night has many short games, so per-game numbers looked tiny and said little.
 - 2026-11-04: The Ranking table is split into Linha and Goleiros, built in `lib/table.ts`. Each match is credited to the slot the player had in it, so someone who keeps goal for a night shows in both tables. Keepers have different numbers (conceded, clean sheets, howlers) that make no sense for outfield players.

@@ -32,7 +32,7 @@ export function DeletePlayer({ player, stats, inSessions, onDeleted }: DeletePla
     setDeleting(true);
     setError("");
     try {
-      await deletePlayer(player.id);
+      await deletePlayer(player);
       onDeleted();
     } catch {
       setError("Não deu para excluir. Tente de novo.");

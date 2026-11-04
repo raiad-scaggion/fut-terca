@@ -1,7 +1,8 @@
-import { onValue, push, runTransaction, serverTimestamp, update } from "firebase/database";
+import { onValue, push, runTransaction, serverTimestamp } from "firebase/database";
 import { useEffect, useState } from "react";
 import { buildSession, normalizeWeekly, type Weekly } from "../lib/weekly";
 import { dbRef } from "./firebase";
+import { writeWithLog } from "./log";
 
 export type WeeklyState = {
   weekly: Weekly;
@@ -33,13 +34,13 @@ function today(): string {
 
 // One multi-path write, so a session and the pointer to it can't exist without each other.
 export async function confirmSession(weekly: Weekly): Promise<void> {
-  const sessionId = push(dbRef("sessions")).key;
-  await update(dbRef(""), {
+  const sessionId = push(dbRef("sessions")).key ?? "";
+  await writeWithLog({ action: "session.create", sessionId }, () => ({
     [`sessions/${sessionId}`]: buildSession(weekly, today(), serverTimestamp()),
     "live/sessionId": sessionId,
-  });
+  }));
 }
 
 export async function cancelSession(sessionId: string): Promise<void> {
-  await update(dbRef(""), { [`sessions/${sessionId}`]: null, "live/sessionId": null });
+  await writeWithLog({ action: "session.cancel", sessionId }, () => ({ [`sessions/${sessionId}`]: null, "live/sessionId": null }));
 }

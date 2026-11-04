@@ -32,6 +32,9 @@ const CopaPage = lazy(() => loadPage(() => import("./pages/CopaPage")).then((mod
 const ImportarJogadoresPage = lazy(() =>
   loadPage(() => import("./pages/ImportarJogadoresPage")).then((module) => ({ default: module.ImportarJogadoresPage })),
 );
+const HistoricoPage = lazy(() =>
+  loadPage(() => import("./pages/HistoricoPage")).then((module) => ({ default: module.HistoricoPage })),
+);
 const JogadoresPage = lazy(() =>
   loadPage(() => import("./pages/JogadoresPage")).then((module) => ({ default: module.JogadoresPage })),
 );
@@ -59,6 +62,7 @@ export default function App() {
             <Route path="/jogadores/importar" element={<ImportarJogadoresPage />} />
             <Route path="/sorteio" element={<SorteioPage />} />
             <Route path="/copa" element={<CopaPage />} />
+            <Route path="/historico" element={<HistoricoPage />} />
             <Route path="/partida" element={<PartidaPage />} />
             <Route path="/partida/:sessionId/:matchId" element={<PartidaPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />

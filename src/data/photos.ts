@@ -1,6 +1,7 @@
-import { onValue, remove, set } from "firebase/database";
+import { onValue } from "firebase/database";
 import { useSyncExternalStore } from "react";
 import { dbRef } from "./firebase";
+import { writeWithLog } from "./log";
 
 type Photos = Record<string, string>;
 
@@ -31,9 +32,9 @@ export function usePhotos(): Photos {
 }
 
 export function savePhoto(playerId: string, photo: string): Promise<void> {
-  return set(dbRef(`photos/${playerId}`), photo);
+  return writeWithLog({ action: "photo.save", playerId }, () => ({ [`photos/${playerId}`]: photo }));
 }
 
 export function removePhoto(playerId: string): Promise<void> {
-  return remove(dbRef(`photos/${playerId}`));
+  return writeWithLog({ action: "photo.remove", playerId }, () => ({ [`photos/${playerId}`]: null }));
 }

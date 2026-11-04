@@ -1,5 +1,6 @@
-import { onValue, push, serverTimestamp, set, update } from "firebase/database";
+import { onValue, push, serverTimestamp } from "firebase/database";
 import { useEffect, useState } from "react";
+import { diffPlayer, type PlayerFields } from "../lib/changeLog";
 import type { ImportPlan } from "../lib/importCsv";
 import {
   clampRating,
@@ -15,6 +16,7 @@ import {
   type PlayerRole,
 } from "../lib/players";
 import { dbRef } from "./firebase";
+import { writeWithLog } from "./log";
 
 export type PlayersState = {
   players: Player[];
@@ -81,7 +83,7 @@ export function usePlayers(): PlayersState {
   return { players, loading, error };
 }
 
-export async function savePlayer(input: PlayerInput): Promise<string> {
+export async function savePlayer(input: PlayerInput, previous?: Player): Promise<string> {
   const name = input.name.trim();
   const role = normalizeRole(input.role);
   const linePosition = normalizeLinePosition(input.linePosition);
@@ -97,29 +99,32 @@ export async function savePlayer(input: PlayerInput): Promise<string> {
   };
 
   if (!input.id) {
-    const newRef = push(dbRef("players"));
-    await set(newRef, {
-      name,
-      role,
-      linePosition,
-      nationality,
-      club,
-      isMonthly,
-      joinDate,
-      active: true,
-      createdAt: serverTimestamp(),
-      ratings,
-      baseline: {
-        goals: 0,
-        assists: 0,
-        saves: 0,
-        titles: 0,
+    const id = push(dbRef("players")).key ?? "";
+    await writeWithLog({ action: "player.create", playerId: id, playerName: name }, (logId) => ({
+      [`players/${id}`]: {
+        logId,
+        name,
+        role,
+        linePosition,
+        nationality,
+        club,
+        isMonthly,
+        joinDate,
+        active: true,
+        createdAt: serverTimestamp(),
+        ratings,
+        baseline: {
+          goals: 0,
+          assists: 0,
+          saves: 0,
+          titles: 0,
+        },
       },
-    });
-    return newRef.key ?? "";
+    }));
+    return id;
   }
 
-  const updates: Record<string, unknown> = {
+  const updates: PlayerFields = {
     name,
     role,
     linePosition,
@@ -134,52 +139,61 @@ export async function savePlayer(input: PlayerInput): Promise<string> {
     updates.active = input.active;
   }
 
-  await update(dbRef(`players/${input.id}`), updates);
-  return input.id;
+  const id = input.id;
+  const changes = previous ? diffPlayer(previous, updates) : undefined;
+  await writeWithLog({ action: "player.edit", playerId: id, playerName: name, changes }, (logId) =>
+    Object.fromEntries(Object.entries({ ...updates, logId }).map(([key, value]) => [`players/${id}/${key}`, value])),
+  );
+  return id;
 }
 
-export async function setPlayerActive(id: string, active: boolean): Promise<void> {
-  await update(dbRef(`players/${id}`), { active });
-}
-
-export async function deletePlayer(id: string): Promise<void> {
-  await update(dbRef(""), { [`players/${id}`]: null, [`photos/${id}`]: null });
+export async function deletePlayer(player: Pick<Player, "id" | "name">): Promise<void> {
+  await writeWithLog({ action: "player.delete", playerId: player.id, playerName: player.name }, () => ({
+    [`players/${player.id}`]: null,
+    [`photos/${player.id}`]: null,
+  }));
 }
 
 export async function applyImport(plan: ImportPlan): Promise<void> {
-  const payload: Record<string, unknown> = {};
-
-  for (const row of plan.create) {
-    payload[row.id] = {
-      name: row.name,
-      role: row.role,
-      linePosition: row.linePosition,
-      isMonthly: row.isMonthly,
-      joinDate: row.joinDate,
-      active: true,
-      createdAt: serverTimestamp(),
-      ...(row.legacyId !== undefined ? { legacyId: row.legacyId } : {}),
-      ratings: row.ratings,
-      baseline: row.baseline,
-    };
-  }
-
-  for (const row of plan.update) {
-    payload[`${row.id}/name`] = row.name;
-    payload[`${row.id}/role`] = row.role;
-    payload[`${row.id}/linePosition`] = row.linePosition;
-    payload[`${row.id}/isMonthly`] = row.isMonthly;
-    payload[`${row.id}/joinDate`] = row.joinDate;
-    if (row.legacyId !== undefined) {
-      payload[`${row.id}/legacyId`] = row.legacyId;
-    }
-    payload[`${row.id}/ratings`] = row.ratings;
-    payload[`${row.id}/baseline`] = row.baseline;
-  }
-
-  if (Object.keys(payload).length === 0) {
+  const count = plan.create.length + plan.update.length;
+  if (count === 0) {
     return;
   }
 
-  await update(dbRef("players"), payload);
+  await writeWithLog({ action: "import", count }, (logId) => {
+    const payload: Record<string, unknown> = {};
+
+    for (const row of plan.create) {
+      payload[`players/${row.id}`] = {
+        logId,
+        name: row.name,
+        role: row.role,
+        linePosition: row.linePosition,
+        isMonthly: row.isMonthly,
+        joinDate: row.joinDate,
+        active: true,
+        createdAt: serverTimestamp(),
+        ...(row.legacyId !== undefined ? { legacyId: row.legacyId } : {}),
+        ratings: row.ratings,
+        baseline: row.baseline,
+      };
+    }
+
+    for (const row of plan.update) {
+      const path = `players/${row.id}`;
+      payload[`${path}/logId`] = logId;
+      payload[`${path}/name`] = row.name;
+      payload[`${path}/role`] = row.role;
+      payload[`${path}/linePosition`] = row.linePosition;
+      payload[`${path}/isMonthly`] = row.isMonthly;
+      payload[`${path}/joinDate`] = row.joinDate;
+      if (row.legacyId !== undefined) {
+        payload[`${path}/legacyId`] = row.legacyId;
+      }
+      payload[`${path}/ratings`] = row.ratings;
+      payload[`${path}/baseline`] = row.baseline;
+    }
+
+    return payload;
+  });
 }

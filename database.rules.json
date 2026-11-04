@@ -15,9 +15,44 @@
           ".read": "auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase().replace('.', ',') === $emailKey"
         }
       },
+      "owners": {
+        ".write": false,
+        "$emailKey": {
+          ".read": "auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase().replace('.', ',') === $emailKey"
+        }
+      },
+      "log": {
+        ".read": "auth != null && auth.token.email_verified === true && root.child('futerca/owners').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true",
+        "$logId": {
+          ".write": "auth != null && auth.token.email_verified === true && root.child('futerca/admins').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true && !data.exists() && newData.exists()",
+          ".validate": "newData.hasChildren(['by', 'uid', 'at', 'action']) && newData.child('by').val() === auth.token.email && newData.child('uid').val() === auth.uid && newData.child('at').val() === now && newData.child('action').isString()"
+        }
+      },
+      "players": {
+        ".read": true,
+        ".write": "auth != null && auth.token.email_verified === true && root.child('futerca/admins').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true",
+        "$playerId": {
+          ".validate": "newData.child('logId').isString() && !root.child('futerca/log').child(newData.child('logId').val()).exists() && newData.parent().parent().child('log').child(newData.child('logId').val()).child('uid').val() === auth.uid"
+        }
+      },
+      "sessions": {
+        ".read": true,
+        ".write": "auth != null && auth.token.email_verified === true && root.child('futerca/admins').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true",
+        "$sessionId": {
+          "matches": {
+            "$matchId": {
+              "events": {
+                "$eventId": {
+                  ".validate": "data.exists() || (newData.child('logId').isString() && !root.child('futerca/log').child(newData.child('logId').val()).exists() && newData.parent().parent().parent().parent().parent().parent().child('log').child(newData.child('logId').val()).child('uid').val() === auth.uid)"
+                }
+              }
+            }
+          }
+        }
+      },
       "$section": {
-        ".read": "$section !== 'admins'",
-        ".write": "$section !== 'admins' && auth != null && auth.token.email_verified === true && root.child('futerca/admins').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true"
+        ".read": "$section !== 'admins' && $section !== 'owners' && $section !== 'log'",
+        ".write": "$section !== 'admins' && $section !== 'owners' && $section !== 'log' && auth != null && auth.token.email_verified === true && root.child('futerca/admins').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true"
       }
     }
   }

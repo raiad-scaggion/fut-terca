@@ -33,6 +33,8 @@ Everything lives under the root `futerca/`. The old app's path `fut-terca/live` 
 ```
 futerca/
   admins/{emailKey}: true            # email with "." replaced by ","
+  owners/{emailKey}: true            # who can read the change log
+  log/{pushId}: { by, name, uid, at, action, playerId?, sessionId?, matchId?, eventType?, changes?, count? }
   players/{playerId}                 # "p" + Sheet id for imported players, push() keys for new ones
     name, role: "line" | "keeper", isMonthly, joinDate, active, createdAt   # role = usual position
     legacyId?                        # the Sheet's numeric id, for re-imports
@@ -62,7 +64,9 @@ The central rule: **stats are derived, never accumulated.** A player's season to
 Database rules:
 - `.read`: public for every section of `futerca/` except `admins`, so nobody can list the admins' e-mails. A signed-in person can read only their own entry there.
 - `.write`: only when `auth.token.email_verified == true` and `futerca/admins/{emailKey}` exists.
-- `admins/` is writable only from the Firebase console.
+- `admins/` and `owners/` are writable only from the Firebase console.
+- `log/` is append-only: an admin can add an entry signed with their own e-mail and uid at the server's time, and nobody can edit or delete one. Only owners can read it.
+- Player writes and new match events must carry a `logId` that points to a log entry created in the same write, so a change can't skip the log. Deletes can't be forced this way, so deleting a player or undoing an event is logged by the app but not enforced by the rules.
 - Admin e-mails never go in this public repo. They are added in the Firebase console.
 
 The Firebase web config is public by design and is committed. Rules are the only protection, so they ship in the repo as `database.rules.json`, and a change to them is a change to the app.

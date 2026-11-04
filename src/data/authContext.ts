@@ -4,6 +4,7 @@ import { createContext, useContext } from "react";
 export type AuthState = {
   user: User | null;
   isAdmin: boolean;
+  isOwner: boolean;
   loading: boolean;
   signIn: () => Promise<void>;
   signOut: () => Promise<void>;

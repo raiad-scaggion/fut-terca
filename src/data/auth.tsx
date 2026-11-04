@@ -24,6 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [adminOf, setAdminOf] = useState<string | null>(null);
+  const [ownerOf, setOwnerOf] = useState<string | null>(null);
 
   useEffect(
     () =>
@@ -47,9 +48,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
   }, [email]);
 
+  // Only the owner can read the change log, and the rules check this flag again on every read.
+  useEffect(() => {
+    if (!email) {
+      return undefined;
+    }
+    return onValue(
+      dbRef(`owners/${emailKey(email)}`),
+      (snapshot) => setOwnerOf(snapshot.val() === true ? email : null),
+      () => setOwnerOf(null),
+    );
+  }, [email]);
+
   const value: AuthState = {
     user,
     isAdmin: email !== null && adminOf === email,
+    isOwner: email !== null && ownerOf === email,
     loading: !authReady,
     signIn: signInWithGoogle,
     signOut: () => signOut(auth),

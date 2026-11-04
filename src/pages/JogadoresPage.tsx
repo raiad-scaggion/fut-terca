@@ -233,7 +233,7 @@ export function JogadoresPage() {
         isMonthly: editingDraft.isMonthly,
         joinDate: editingDraft.joinDate,
         ...(editingDraft.id ? { active: editingDraft.active } : {}),
-      });
+      }, players.find((p) => p.id === editingDraft.id));
 
       const wasDeactivated = Boolean(editingDraft.id && !editingDraft.active);
       setEditingDraft(null);

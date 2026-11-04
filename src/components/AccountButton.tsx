@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../data/authContext";
 import { checkWriteAccess } from "../data/writeCheck";
 
@@ -12,7 +13,7 @@ const WRITE_CHECK_TEXT: Record<WriteCheck, string> = {
 };
 
 export function AccountButton() {
-  const { user, isAdmin, loading, signIn, signOut } = useAuth();
+  const { user, isAdmin, isOwner, loading, signIn, signOut } = useAuth();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
   const [writeCheck, setWriteCheck] = useState<WriteCheck>("idle");
@@ -70,6 +71,11 @@ export function AccountButton() {
             Testar permissão de gravação
           </button>
           {writeCheck !== "idle" && <span className={`account__check account__check--${writeCheck}`}>{WRITE_CHECK_TEXT[writeCheck]}</span>}
+          {isOwner && (
+            <Link to="/historico" className="button button--ghost button--link" onClick={() => setOpen(false)}>
+              Histórico de alterações
+            </Link>
+          )}
           <button type="button" className="button button--ghost" onClick={() => signOut()}>
             Sair
           </button>

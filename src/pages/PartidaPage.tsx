@@ -335,7 +335,7 @@ function MatchScreen({ session, match, byId, isAdmin }: MatchScreenProps) {
                   <span className="match-log__team"> ({teamName(event.teamId)})</span>
                 </span>
                 {canEdit && (
-                  <button type="button" className="match-log__undo" onClick={() => attempt(() => removeEvent(session.id, match.id, event.id))}>
+                  <button type="button" className="match-log__undo" onClick={() => attempt(() => removeEvent(session.id, match.id, event))}>
                     Desfazer
                   </button>
                 )}

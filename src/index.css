@@ -1618,3 +1618,48 @@ button.fut-card {
 .whats-new__list strong {
   color: var(--text);
 }
+
+/* Histórico */
+.history {
+  margin-top: 20px;
+}
+
+.history__day {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.history__day::first-letter {
+  text-transform: uppercase;
+}
+
+.history__list {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.history__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.history__text {
+  font-size: 0.9375rem;
+  overflow-wrap: anywhere;
+}
+
+.history__meta {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.history__email {
+  overflow-wrap: anywhere;
+}
