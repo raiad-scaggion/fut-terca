@@ -1,10 +1,8 @@
 import { useMemo, useState, type ChangeEvent } from "react";
 import { Link } from "react-router-dom";
-import { LegacyNightImport } from "../components/LegacyNightImport";
 import { EmptyState, Page } from "../components/Page";
 import { useAuth } from "../data/authContext";
 import { applyImport, usePlayers } from "../data/players";
-import { useSessions } from "../data/sessions";
 import {
   parsePlayersCsv,
   planImport,
@@ -38,7 +36,6 @@ function PlanGroup({
 export function ImportarJogadoresPage() {
   const { isAdmin, loading: authLoading } = useAuth();
   const { players, loading: playersLoading } = usePlayers();
-  const { sessions, loading: sessionsLoading } = useSessions();
 
   const [fileName, setFileName] = useState("");
   const [parsedSheet, setParsedSheet] = useState<ParsedCsvSheet | null>(null);
@@ -130,13 +127,6 @@ export function ImportarJogadoresPage() {
           ← Jogadores
         </Link>
       </div>
-
-      {!playersLoading && !sessionsLoading && (
-        <div className="import-section">
-          <h2 className="import-section__title">Noite do app antigo</h2>
-          <LegacyNightImport players={players} sessions={sessions} />
-        </div>
-      )}
 
       <div className="import-card">
         <label className="file-picker">
