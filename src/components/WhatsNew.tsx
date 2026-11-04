@@ -1,15 +1,17 @@
 import { useState } from "react";
 
-const SEEN_KEY = "whats-new-seen-2.0";
+// Each release gets a new version, so everyone sees its sheet once.
+const VERSION = "2.1";
+const SEEN_KEY = `whats-new-seen-${VERSION}`;
 
 const NEWS = [
-  { title: "Cartas estilo FIFA", text: "com foto, bandeira e escudo do seu time." },
-  { title: "Cartas especiais do mês", text: "Craque, Artilheiro, Garçom e Paredão ganham uma carta única no mês seguinte." },
-  { title: "Ranking do mês", text: "além da temporada, agora com G+A e defesas." },
-  { title: "Jogos e médias", text: "veja quantos jogos fez e sua média de gols, assistências e defesas." },
-  { title: "Copa completa", text: "classificação após cada jogo, mata-mata e Gol de ouro na final." },
-  { title: "Partida ao vivo", text: "o placar fica igual em todos os celulares, e dá para navegar com o jogo rolando." },
-  { title: "Imagens para o WhatsApp", text: "os times da semana e o resumo da noite, com um toque." },
+  { title: "Tabela no Ranking", text: "todos os números numa tabela só, uma para a linha e outra para os goleiros. Toque no título da coluna para ordenar." },
+  { title: "Médias por noite", text: "gols, assistências e títulos por noite, contando a partir de 03/11." },
+  { title: "Gol contra", text: "conta para o outro time e não tira gol de ninguém." },
+  { title: "Frango", text: "agora fica registrado quando o goleiro deixa passar um gol fácil." },
+  { title: "Qualquer um no gol", text: "dá para escalar um jogador de linha no gol, ou um goleiro na linha." },
+  { title: "A noite de 03/11", text: "já conta nos gols, assistências, títulos e no ranking de novembro." },
+  { title: "Botão i", text: "toque para entender as colunas, o OVR, as cartas especiais e o desempate da Copa." },
 ];
 
 // A browser that blocks storage would show this on every visit, so it counts as already seen.
@@ -46,7 +48,7 @@ export function WhatsNew() {
       <div className="sheet whats-new" role="dialog" aria-modal="true" aria-labelledby="whats-new-title" onClick={(event) => event.stopPropagation()}>
         <div className="sheet__handle" aria-hidden="true" />
         <h2 id="whats-new-title" className="whats-new__title">
-          Futerça 2.0
+          Futerça {VERSION}
         </h2>
         <p className="whats-new__subtitle">Novidades do app</p>
         <ul className="whats-new__list">

@@ -78,6 +78,10 @@ Bottom tab bar, one page each:
 4. **Copa**: round robin, then standings, semis (1st vs 4th, 2nd vs 3rd), 3rd place match and final. Standings update when each match ends. Teams level on points are separated by confronto direto, then victories, goal difference and goals scored. Champion banner and an end-of-day export.
 5. **Partida**: the live match. It has no tab of its own: it opens from Início, the Copa or the live bar.
 
+Help sits behind a tap-to-open "i" (`components/InfoTip.tsx`), since phones never show a `title`. There is one on Jogadores (OVR, card colors and special cards), next to Início's special cards, on the Copa standings (points and tiebreak), above the Ranking table (column legend) and on Partida for whoever marks the match (own goal and howler).
+
+On entry, a "Novidades do app" sheet lists what changed in the release. It shows once per version: `VERSION` in `components/WhatsNew.tsx` sets the localStorage key, so each release bumps it and rewrites `NEWS`.
+
 A fixed bar above the tab bar shows the live score and clock on every page but Início, which already leads with them, while a match runs. Tapping it opens Partida.
 
 ## 6. Live match
