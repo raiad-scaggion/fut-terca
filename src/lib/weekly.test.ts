@@ -10,6 +10,7 @@ import {
   isReadyToConfirm,
   nextOpenTeam,
   normalizeWeekly,
+  playingAs,
   removeFromTeams,
   setTeamColor,
   togglePlayer,
@@ -50,20 +51,47 @@ describe("normalizeWeekly", () => {
 
 describe("togglePlayer", () => {
   it("adds and removes a player", () => {
-    const added = togglePlayer(empty, LINE[0]);
+    const added = togglePlayer(empty, "p0", "line");
     expect(added.selectedIds).toEqual(["p0"]);
-    expect(togglePlayer(added, LINE[0]).selectedIds).toEqual([]);
+    expect(togglePlayer(added, "p0", "line").selectedIds).toEqual([]);
   });
 
   it("stops at 16 outfield players and 2 keepers", () => {
-    expect(togglePlayer(selected(16), LINE[16]).selectedIds).toHaveLength(16);
-    const twoKeepers = togglePlayer(togglePlayer(empty, keeper("k1")), keeper("k2"));
-    expect(togglePlayer(twoKeepers, keeper("k3")).keeperIds).toEqual(["k1", "k2"]);
+    expect(togglePlayer(selected(16), "p16", "line").selectedIds).toHaveLength(16);
+    const twoKeepers = togglePlayer(togglePlayer(empty, "k1", "keeper"), "k2", "keeper");
+    expect(togglePlayer(twoKeepers, "k3", "keeper").keeperIds).toEqual(["k1", "k2"]);
   });
 
   it("takes a removed player off their team", () => {
     const weekly = addToTeam(selected(4), 0, "p0");
-    expect(togglePlayer(weekly, LINE[0]).teams[0].playerIds).toEqual([]);
+    expect(togglePlayer(weekly, "p0", "line").teams[0].playerIds).toEqual([]);
+  });
+
+  it("puts a line player in goal and a keeper outfield", () => {
+    const weekly = togglePlayer(togglePlayer(empty, "p0", "keeper"), "k1", "line");
+    expect(weekly.keeperIds).toEqual(["p0"]);
+    expect(weekly.selectedIds).toEqual(["k1"]);
+  });
+
+  it("moves a player between slots and off their team", () => {
+    const weekly = addToTeam(selected(4), 0, "p0");
+    const moved = togglePlayer(weekly, "p0", "keeper");
+    expect(moved.keeperIds).toEqual(["p0"]);
+    expect(moved.selectedIds).not.toContain("p0");
+    expect(moved.teams[0].playerIds).toEqual([]);
+  });
+
+  it("keeps a player where they are when the other slot is full", () => {
+    const weekly = { ...selected(1), keeperIds: ["k1", "k2"] };
+    expect(togglePlayer(weekly, "p0", "keeper")).toBe(weekly);
+  });
+});
+
+describe("playingAs", () => {
+  it("rates a keeper playing outfield as a line player", () => {
+    const xester = keeper("k1");
+    expect(playingAs(xester, "line").role).toBe("line");
+    expect(playingAs(xester, "keeper")).toBe(xester);
   });
 });
 
@@ -82,6 +110,13 @@ describe("fillWithMonthly", () => {
     expect(weekly.selectedIds[0]).toBe("guest");
     expect(weekly.selectedIds).not.toContain("left");
     expect(weekly.keeperIds).toEqual(["k1", "k2"]);
+  });
+
+  it("leaves a mensalista where they were picked tonight", () => {
+    const players = [keeper("k1", { isMonthly: true }), keeper("k2", { isMonthly: true }), line("p0", { isMonthly: true })];
+    const weekly = fillWithMonthly({ ...empty, selectedIds: ["k1"], keeperIds: ["p0"] }, players);
+    expect(weekly.selectedIds).toEqual(["k1"]);
+    expect(weekly.keeperIds).toEqual(["p0", "k2"]);
   });
 });
 

@@ -52,29 +52,45 @@ function withoutPlayer(teams: WeeklyTeam[], playerId: string): WeeklyTeam[] {
   return teams.map((team) => ({ ...team, playerIds: team.playerIds.filter((id) => id !== playerId) }));
 }
 
-export function togglePlayer(weekly: Weekly, player: Player): Weekly {
-  if (player.role === "keeper") {
-    if (weekly.keeperIds.includes(player.id)) {
-      return { ...weekly, keeperIds: weekly.keeperIds.filter((id) => id !== player.id) };
-    }
-    return weekly.keeperIds.length < WEEKLY_KEEPERS ? { ...weekly, keeperIds: [...weekly.keeperIds, player.id] } : weekly;
-  }
+export type Slot = "keeper" | "line";
 
-  if (weekly.selectedIds.includes(player.id)) {
-    return {
-      ...weekly,
-      selectedIds: weekly.selectedIds.filter((id) => id !== player.id),
-      teams: withoutPlayer(weekly.teams, player.id),
-    };
-  }
-  return weekly.selectedIds.length < WEEKLY_LINE_PLAYERS ? { ...weekly, selectedIds: [...weekly.selectedIds, player.id] } : weekly;
+// A player's role is where they usually play. The slot is where they play tonight: a line player can
+// keep goal and a keeper can play outfield, and the night's OVR follows the slot.
+export function playingAs(player: Player, slot: Slot): Player {
+  return player.role === slot ? player : { ...player, role: slot };
 }
 
-// Fills the free spots with mensalistas and keeps anyone already picked.
+export function slotOf(weekly: Weekly, playerId: string): Slot | null {
+  if (weekly.keeperIds.includes(playerId)) {
+    return "keeper";
+  }
+  return weekly.selectedIds.includes(playerId) ? "line" : null;
+}
+
+// Picking someone for one slot takes them out of the other, so nobody is in goal and outfield at once.
+export function togglePlayer(weekly: Weekly, playerId: string, slot: Slot): Weekly {
+  const current = slotOf(weekly, playerId);
+  const freed: Weekly = {
+    ...weekly,
+    keeperIds: weekly.keeperIds.filter((id) => id !== playerId),
+    selectedIds: weekly.selectedIds.filter((id) => id !== playerId),
+    teams: current === "line" ? withoutPlayer(weekly.teams, playerId) : weekly.teams,
+  };
+  if (current === slot) {
+    return freed;
+  }
+  if (slot === "keeper") {
+    return weekly.keeperIds.length < WEEKLY_KEEPERS ? { ...freed, keeperIds: [...freed.keeperIds, playerId] } : weekly;
+  }
+  return weekly.selectedIds.length < WEEKLY_LINE_PLAYERS ? { ...freed, selectedIds: [...freed.selectedIds, playerId] } : weekly;
+}
+
+// Fills the free spots with mensalistas and keeps anyone already picked, in whatever slot they are.
 export function fillWithMonthly(weekly: Weekly, players: Player[]): Weekly {
-  const monthly = players.filter((player) => player.active && player.isMonthly);
+  const picked = new Set([...weekly.selectedIds, ...weekly.keeperIds]);
+  const monthly = players.filter((player) => player.active && player.isMonthly && !picked.has(player.id));
   const fill = (current: string[], candidates: Player[], limit: number) =>
-    [...current, ...candidates.map((player) => player.id).filter((id) => !current.includes(id))].slice(0, limit);
+    [...current, ...candidates.map((player) => player.id)].slice(0, limit);
 
   return {
     ...weekly,
@@ -88,7 +104,7 @@ export function clearWeekly(weekly: Weekly): Weekly {
 }
 
 export function drawTeams(weekly: Weekly, players: Player[], history: PairHistory, random: () => number = Math.random): Weekly {
-  const selected = players.filter((player) => weekly.selectedIds.includes(player.id));
+  const selected = players.filter((player) => weekly.selectedIds.includes(player.id)).map((player) => playingAs(player, "line"));
   if (selected.length !== WEEKLY_LINE_PLAYERS) {
     return weekly;
   }

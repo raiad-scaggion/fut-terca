@@ -34,7 +34,7 @@ Everything lives under the root `futerca/`. The old app's path `fut-terca/live` 
 futerca/
   admins/{emailKey}: true            # email with "." replaced by ","
   players/{playerId}                 # "p" + Sheet id for imported players, push() keys for new ones
-    name, role: "line" | "keeper", isMonthly, joinDate, active, createdAt
+    name, role: "line" | "keeper", isMonthly, joinDate, active, createdAt   # role = usual position
     legacyId?                        # the Sheet's numeric id, for re-imports
     linePosition: "ataque" | "meio" | "defesa"
     ratings: { speed, finishing, defense, passing }   # 1-10, used by the draw
@@ -42,7 +42,7 @@ futerca/
   sessions/{sessionId}               # one Tuesday night
     date, createdAt, status: "draft" | "live" | "finished"
     teams/{teamId}: { name, color, playerIds[] }
-    keeperIds[]
+    keeperIds[]                      # who keeps goal tonight, whatever their role
     matches/{matchId}
       number, stage: "group" | "semi" | "third" | "final", label?
       homeId, awayId
@@ -74,7 +74,7 @@ Bottom tab bar, one page each:
 0. **Início**: the landing screen. The top changes with the moment: countdown to Tuesday, cup in progress or live score. Below it, last month's special cards (or the season's leaders when there are none) and the last champion.
 1. **Ranking**: three rankings to pick from (Títulos, Gols, Assistências). Each one shows player cards in order, with OVR, position and that number on the card. Players at zero stay out, ties share a position, and a switch shows or hides the keepers.
 2. **Jogadores**: player list and cards. Admins can add or edit players and ratings.
-3. **Sorteio**: pick the week's 16 outfield players and 2 keepers. Balanced draw or manual teams ("picking sides"). A color picker on each team. Export teams image. Confirm creates the session.
+3. **Sorteio**: pick the week's 16 outfield players and 2 keepers. Anyone can play out of their usual role for the night: "+ Outro jogador no gol" and "+ Goleiro na linha" open a list of the other role, and the chip gets a "no gol" or "na linha" tag. The draw rates them with the weights of the slot they play. Balanced draw or manual teams ("picking sides"). A color picker on each team. Export teams image. Confirm creates the session.
 4. **Copa**: round robin, then standings, semis (1st vs 4th, 2nd vs 3rd), 3rd place match and final. Standings update when each match ends. Teams level on points are separated by confronto direto, then victories, goal difference and goals scored. Champion banner and an end-of-day export.
 5. **Partida**: the live match. It has no tab of its own: it opens from Início, the Copa or the live bar.
 
@@ -233,7 +233,7 @@ Each phase ends with its acceptance test. Don't start a phase until the previous
 Before the first real Tuesday on this app:
 
 1. Add the other admins at `futerca/admins`, so the night doesn't depend on one phone.
-2. If the Sheet changed after the import of 2026-10-28, export the CSV again and import it. From this night on, stats live here and the Sheet stops being updated.
+2. If the Sheet changed after the import of 2026-10-28, export the CSV again and import it. Leave out the night of 2026-11-03: it's already in the app, and it would count twice. From this night on, stats live here and the Sheet stops being updated.
 3. Tap "Limpar" in Sorteio to clear test picks.
 4. Share the link and the install steps from the README with the group.
 
