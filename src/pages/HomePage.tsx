@@ -10,6 +10,8 @@ import { usePhotos } from "../data/photos";
 import { usePlayers } from "../data/players";
 import { useSessions } from "../data/sessions";
 import { AWARD_LABELS, getCurrentAwards, getPlayerAward } from "../lib/awards";
+import { InfoTip } from "../components/InfoTip";
+import { SpecialCardsInfo } from "../components/SpecialCardsInfo";
 import { formatClock, getRemainingMs } from "../lib/clock";
 import { getMatchScore, matchLabel } from "../lib/cup";
 import { getHomeState, getLastChampion, listAwardWinners, type HomeState } from "../lib/home";
@@ -146,7 +148,12 @@ export function HomePage() {
 
       {winners.length > 0 ? (
         <section className="home__section">
-          <h2 className="draw-section__title">Cartas de {awardMonth.split(" ")[0]}</h2>
+          <h2 className="draw-section__title">
+            Cartas de {awardMonth.split(" ")[0]}{" "}
+            <InfoTip label="Como funcionam as cartas especiais">
+              <SpecialCardsInfo />
+            </InfoTip>
+          </h2>
           <div className="players-grid">
             {winners.flatMap((winner) => {
               const player = byId.get(winner.playerId);

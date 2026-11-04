@@ -76,6 +76,7 @@ When you add or change a script, update this block in the same commit.
 
 Newest first. Format: date, decision, one-line reason.
 
+- 2026-11-04: Explanations live in a tap-to-open "i" instead of text under each screen. Phones have no hover, and the notes below the table pushed it down and went unread.
 - 2026-11-04: Goals, assists and titles are averaged per night, on the player sheet and in the Ranking table. Saves and goals conceded stay per game in goal. A night has many short games, so per-game numbers looked tiny and said little.
 - 2026-11-04: The Ranking table is split into Linha and Goleiros, built in `lib/table.ts`. Each match is credited to the slot the player had in it, so someone who keeps goal for a night shows in both tables. Keepers have different numbers (conceded, clean sheets, howlers) that make no sense for outfield players.
 - 2026-11-04: An own goal is an `ownGoal` event on the player's own side that scores for the other side, and a stat of its own that never takes a goal away. A howler (`howler`, "Frango") is marked on the keeper next to the goal and has no score effect. The group asked to track both, and a goal scored by mistake shouldn't erase real goals.

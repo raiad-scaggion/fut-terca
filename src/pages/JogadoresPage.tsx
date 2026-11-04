@@ -9,6 +9,8 @@ import { removePhoto, usePhotos } from "../data/photos";
 import { savePlayer, usePlayers } from "../data/players";
 import { useSessions } from "../data/sessions";
 import { getCurrentAwards, getPlayerAward } from "../lib/awards";
+import { InfoTip } from "../components/InfoTip";
+import { SpecialCardsInfo } from "../components/SpecialCardsInfo";
 import { CLUBS } from "../lib/clubs";
 import { COUNTRIES, DEFAULT_COUNTRY } from "../lib/countries";
 import {
@@ -248,7 +250,21 @@ export function JogadoresPage() {
   };
 
   return (
-    <Page title="Jogadores" subtitle="Cartas e notas de cada um">
+    <Page
+      title="Jogadores"
+      subtitle="Cartas e notas de cada um"
+      info={
+        <InfoTip label="O que é o OVR e as cores das cartas">
+          <p>
+            <strong>OVR</strong> é a nota geral da carta, até 99. Ela junta velocidade, finalização, defesa e passe, com
+            pesos que mudam com a posição: no ataque conta mais a finalização, no meio o passe, e na defesa e no gol a
+            defesa.
+          </p>
+          <p>A cor da carta vem do OVR: ouro a partir de 75, prata de 51 a 74 e bronze até 50.</p>
+          <SpecialCardsInfo />
+        </InfoTip>
+      }
+    >
       {isAdmin && (
         <div className="players-admin-bar">
           <button

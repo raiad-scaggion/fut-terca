@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { InfoTip } from "../components/InfoTip";
 import { EmptyState, Page } from "../components/Page";
 import { useAuth } from "../data/authContext";
 import { useNow } from "../data/clock";
@@ -304,6 +305,22 @@ function MatchScreen({ session, match, byId, isAdmin }: MatchScreenProps) {
         <TeamColumn team={home} keeperId={match.keepers?.home} byId={byId} events={match.events} canEdit={canEdit} onMark={mark} />
         <TeamColumn team={away} keeperId={match.keepers?.away} byId={byId} events={match.events} canEdit={canEdit} onMark={mark} />
       </div>
+
+      {canEdit && (
+        <p className="match-help">
+          Gol contra e frango{" "}
+          <InfoTip label="Como marcar gol contra e frango">
+            <p>
+              <strong>Gol contra:</strong> toque em "Gol contra" embaixo do time de quem fez e escolha o jogador. O gol
+              vai para o outro time e não tira gol de ninguém.
+            </p>
+            <p>
+              <strong>Frango:</strong> gol fácil que o goleiro devia ter defendido. Marque o gol (ou o gol contra) e
+              depois o frango. O frango não muda o placar.
+            </p>
+          </InfoTip>
+        </p>
+      )}
 
       {error && <p className="form-error">{error}</p>}
 

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { InfoTip } from "../components/InfoTip";
 import { ExportImage } from "../components/ExportImage";
 import { EmptyState, Page } from "../components/Page";
 import { StartMatchSheet } from "../components/StartMatchSheet";
@@ -73,7 +74,18 @@ function Standings({ session }: { session: Session }) {
       <thead>
         <tr>
           <th scope="col" className="standings__team">
-            Classificação
+            Classificação{" "}
+            <InfoTip label="Como funciona a classificação e o desempate">
+              <p>Vitória vale 3 pontos e empate vale 1.</p>
+              <p>
+                Empate em pontos: primeiro o confronto direto entre os times empatados, depois o número de vitórias, o
+                saldo de gols e os gols marcados.
+              </p>
+              <p>
+                No mata-mata não tem pênalti. Semifinal ou 3º lugar empatado fica com quem terminou na frente nos
+                grupos. A final não acaba empatada: segue no gol de ouro.
+              </p>
+            </InfoTip>
           </th>
           <th scope="col" title="Pontos">
             P

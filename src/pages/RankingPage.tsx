@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { EmptyState, Page } from "../components/Page";
+import { InfoTip } from "../components/InfoTip";
 import { RankingCard } from "../components/RankingCard";
 import { StatsLegend, StatsTable, type StatsColumn } from "../components/StatsTable";
 import { usePhotos } from "../data/photos";
@@ -174,6 +175,20 @@ export function RankingPage() {
               Goleiros
             </button>
           </div>
+          <p className="table-help">
+            Legenda{" "}
+            <InfoTip label="O que significa cada coluna">
+              <StatsLegend columns={tableSlot === "line" ? LINE_COLUMNS : KEEPER_COLUMNS} />
+              <p>
+                {scope === "month"
+                  ? "Tudo conta só as partidas jogadas no app."
+                  : tableSlot === "line"
+                    ? "T, G e A somam o histórico da planilha. O resto conta só as partidas jogadas no app, desde 03/11."
+                    : "D e T somam o histórico da planilha. O resto conta só as partidas jogadas no app, desde 03/11."}
+              </p>
+              <p>Toque no título de uma coluna para ordenar.</p>
+            </InfoTip>
+          </p>
           {error ? (
             <EmptyState>{error}</EmptyState>
           ) : playersLoading || sessionsLoading ? (
@@ -185,15 +200,6 @@ export function RankingPage() {
           ) : (
             <StatsTable key="keeper" label="Tabela dos goleiros" rows={table.keeper} columns={KEEPER_COLUMNS} defaultSort="games" />
           )}
-          <p className="stats-note">
-            {scope === "month"
-              ? "Tudo conta só as partidas jogadas no app."
-              : tableSlot === "line"
-                ? "T, G e A somam o histórico da planilha. O resto conta só as partidas jogadas no app, desde 03/11."
-                : "D e T somam o histórico da planilha. O resto conta só as partidas jogadas no app, desde 03/11."}{" "}
-            Toque no título de uma coluna para ordenar.
-          </p>
-          <StatsLegend columns={tableSlot === "line" ? LINE_COLUMNS : KEEPER_COLUMNS} />
         </>
       ) : (
         <>
