@@ -76,6 +76,8 @@ When you add or change a script, update this block in the same commit.
 
 Newest first. Format: date, decision, one-line reason.
 
+- 2026-11-04: Goals, assists and titles are averaged per night, on the player sheet and in the Ranking table. Saves and goals conceded stay per game in goal. A night has many short games, so per-game numbers looked tiny and said little.
+- 2026-11-04: The Ranking table is split into Linha and Goleiros, built in `lib/table.ts`. Each match is credited to the slot the player had in it, so someone who keeps goal for a night shows in both tables. Keepers have different numbers (conceded, clean sheets, howlers) that make no sense for outfield players.
 - 2026-11-04: An own goal is an `ownGoal` event on the player's own side that scores for the other side, and a stat of its own that never takes a goal away. A howler (`howler`, "Frango") is marked on the keeper next to the goal and has no score effect. The group asked to track both, and a goal scored by mistake shouldn't erase real goals.
 - 2026-11-04: A player's `role` is where they usually play, and Sorteio picks where they play tonight. Any line player can be picked for goal and any keeper for outfield, tagged "no gol" or "na linha", and rated with that night's weights. Medina kept goal on 2026-11-03 and the app had no way to pick him.
 - 2026-11-04: The night of 2026-11-03 was played on the old app and imported as session `legacy-2026-11-03`, with Davi (`p70`) and Otavio (`p71`) created for it. The old app recorded no keepers, so Xester defends Time 4 (the champion) and Medina the other side, with no saves. The one-off importer was removed after use and lives in commit 4304ecf.

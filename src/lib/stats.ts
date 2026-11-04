@@ -1,12 +1,13 @@
 import { displayOvr, type Player, type PlayerBaseline } from "./players";
 import type { MatchEventType, Session } from "./session";
 
-// Games, own goals and howlers only exist in the app: the Sheet's baseline never had them.
-export type PlayerStats = PlayerBaseline & { games: number; ownGoals: number; howlers: number };
+// Games, nights, own goals and howlers only exist in the app: the Sheet's baseline never had them.
+// A night counts when the player took part in at least one finished match of that session.
+export type PlayerStats = PlayerBaseline & { games: number; nights: number; ownGoals: number; howlers: number };
 export type RankingKey = keyof PlayerBaseline | "contributions";
 
 // An own goal is its own stat and never takes a goal away from the player.
-const EVENT_STAT: Record<MatchEventType, Exclude<keyof PlayerStats, "games">> = {
+const EVENT_STAT: Record<MatchEventType, Exclude<keyof PlayerStats, "games" | "nights">> = {
   goal: "goals",
   assist: "assists",
   save: "saves",
@@ -42,11 +43,12 @@ export function championKeeperId(session: Session): string | undefined {
 // fixes every table.
 export function computeStats(players: Player[], sessions: Session[]): Map<string, PlayerStats> {
   const stats = new Map<string, PlayerStats>(
-    players.map((player) => [player.id, { ...player.baseline, games: 0, ownGoals: 0, howlers: 0 }]),
+    players.map((player) => [player.id, { ...player.baseline, games: 0, nights: 0, ownGoals: 0, howlers: 0 }]),
   );
 
   for (const session of sessions) {
     const teamById = new Map(session.teams.map((team) => [team.id, team]));
+    const playedTonight = new Set<string>();
 
     for (const match of session.matches) {
       if (match.status !== "finished") {
@@ -67,6 +69,7 @@ export function computeStats(players: Player[], sessions: Session[]): Map<string
         played.add(match.keepers.away);
       }
       for (const playerId of played) {
+        playedTonight.add(playerId);
         const playerStats = stats.get(playerId);
         if (playerStats) {
           playerStats.games += 1;
@@ -79,6 +82,13 @@ export function computeStats(players: Player[], sessions: Session[]): Map<string
         if (playerStats && stat) {
           playerStats[stat] += 1;
         }
+      }
+    }
+
+    for (const playerId of playedTonight) {
+      const playerStats = stats.get(playerId);
+      if (playerStats) {
+        playerStats.nights += 1;
       }
     }
 

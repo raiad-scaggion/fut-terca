@@ -902,6 +902,106 @@ body {
   margin-bottom: 16px;
 }
 
+/* Ranking table */
+.stats-table {
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.stats-table table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats-table th,
+.stats-table td {
+  padding: 0 8px;
+  text-align: center;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+
+.stats-table td {
+  height: 44px;
+}
+
+.stats-table td.is-active {
+  color: var(--brand);
+  font-weight: 700;
+}
+
+.stats-table .stats-table__name {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  max-width: 132px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  font-weight: 600;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+.stats-table__pos {
+  display: inline-block;
+  min-width: 20px;
+  margin-right: 4px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.stats-table__sort {
+  min-width: 36px;
+  min-height: 44px;
+  padding: 0 4px;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 700;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.stats-table__sort.is-active {
+  color: var(--brand);
+}
+
+.stats-note {
+  margin: 12px 0 8px;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.stats-legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 12px;
+  margin: 0;
+  font-size: 0.8125rem;
+}
+
+.stats-legend__item {
+  display: flex;
+  gap: 6px;
+}
+
+.stats-legend dt {
+  min-width: 32px;
+  color: var(--brand);
+  font-weight: 700;
+}
+
+.stats-legend dd {
+  margin: 0;
+  color: var(--muted);
+}
+
 /* Delete player */
 .button--danger {
   color: var(--text);

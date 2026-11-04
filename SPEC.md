@@ -266,14 +266,18 @@ Direction: "Noite de estádio", premium version. The approved reference is `C:\d
 
 - A game is a finished match. Outfield players count the finished matches of their team. A keeper counts the matches they defended.
 - The Sheet has no games, so games and averages use only matches played in the app. Season totals still include the baseline.
+- A night counts when the player took part in at least one finished match of that session. Goals, assists and titles are averaged per night, since a player has many short games in a night and a per-game number would always look tiny. A keeper's saves and goals conceded are averaged per game in goal.
 - Keepers can score and assist, so the match screen keeps giving them the same buttons as everyone, plus the save.
 - Own goals and howlers ("frangos") only exist in the app, like games. An own goal never takes a goal away from the player.
 
 ### 13.3 Ranking
 
 - Temporada or Mês, with a month picker when Mês is on.
-- Tabs: Gols, Assistências, G+A, Defesas, Títulos.
+- Tabs: Gols, Assistências, G+A, Defesas, Títulos and Tabela.
 - The month view counts only that month, with no baseline.
+- Tabela shows every number in one table, with a Linha or Goleiros switch. The name column stays fixed while the numbers scroll sideways, and tapping a header sorts by that column (highest first, "-" last). A note under it says which columns include the Sheet, and a legend spells out each abbreviation.
+  - Linha: usual outfield players plus anyone who played outfield in the app. T, G, A, G+A (with the Sheet), J (outfield games), GC, G/N, A/N, T/N.
+  - Goleiros: usual keepers plus anyone who kept goal in the app, so a player can be in both. J (games in goal), D (with the Sheet for usual keepers), D/J, GS (the other side's score), GS/J, SG (games without conceding), FR, GC (own goals while in goal), T (titles won in goal, plus the Sheet's titles for usual keepers), T/N (per night in goal).
 
 ### 13.4 Monthly awards
 

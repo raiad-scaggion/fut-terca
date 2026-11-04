@@ -41,7 +41,7 @@ function session(matches: Match[], extra: Partial<Session> = {}): Session {
 describe("computeStats", () => {
   it("returns the baseline when there are no sessions", () => {
     const stats = computeStats([player("ana", { goals: 3, assists: 2, titles: 1 })], []);
-    expect(stats.get("ana")).toEqual({ goals: 3, assists: 2, saves: 0, titles: 1, games: 0, ownGoals: 0, howlers: 0 });
+    expect(stats.get("ana")).toEqual({ goals: 3, assists: 2, saves: 0, titles: 1, games: 0, nights: 0, ownGoals: 0, howlers: 0 });
   });
 
   it("adds goals, assists and saves from finished matches to the baseline", () => {
@@ -49,7 +49,7 @@ describe("computeStats", () => {
     const finished = match("finished", [event("goal", "ana"), event("assist", "ana"), event("save", "gui")]);
 
     const stats = computeStats(players, [session([finished])]);
-    expect(stats.get("ana")).toEqual({ goals: 4, assists: 1, saves: 0, titles: 0, games: 1, ownGoals: 0, howlers: 0 });
+    expect(stats.get("ana")).toEqual({ goals: 4, assists: 1, saves: 0, titles: 0, games: 1, nights: 1, ownGoals: 0, howlers: 0 });
     expect(stats.get("gui")?.saves).toBe(2);
   });
 
@@ -97,6 +97,16 @@ describe("computeStats", () => {
     expect(stats.get("caio")?.games).toBe(1);
     expect(stats.get("gui")?.games).toBe(2);
     expect(stats.get("leo")?.games).toBe(1);
+    expect(stats.get("ana")?.nights).toBe(1);
+    expect(stats.get("leo")?.nights).toBe(1);
+  });
+
+  it("counts a night once per session the player took part in", () => {
+    const players = [player("ana"), player("caio")];
+    const twoGames = session([match("finished", []), { ...match("finished", []), id: "m2" }]);
+    const stats = computeStats(players, [twoGames, { ...twoGames, id: "s2" }]);
+    expect(stats.get("ana")?.nights).toBe(2);
+    expect(stats.get("caio")?.nights).toBe(0);
   });
 
   it("ignores matches that haven't finished", () => {

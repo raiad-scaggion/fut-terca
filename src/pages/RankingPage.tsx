@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { EmptyState, Page } from "../components/Page";
 import { RankingCard } from "../components/RankingCard";
+import { StatsLegend, StatsTable, type StatsColumn } from "../components/StatsTable";
 import { usePhotos } from "../data/photos";
 import { usePlayers } from "../data/players";
 import { useSessions } from "../data/sessions";
@@ -15,6 +16,7 @@ import {
   zeroBaselines,
   type RankingKey,
 } from "../lib/stats";
+import { buildKeeperTable, buildLineTable, type KeeperRow, type LineRow } from "../lib/table";
 
 type RankingTab = {
   key: RankingKey;
@@ -31,6 +33,31 @@ const TABS: RankingTab[] = [
   { key: "titles", tab: "Títulos", singular: "título", plural: "títulos" },
 ];
 
+const LINE_COLUMNS: StatsColumn<LineRow>[] = [
+  { key: "titles", label: "T", name: "Títulos", value: (row) => row.titles },
+  { key: "goals", label: "G", name: "Gols", value: (row) => row.goals },
+  { key: "assists", label: "A", name: "Assistências", value: (row) => row.assists },
+  { key: "contributions", label: "G+A", name: "Gols + assistências", value: (row) => row.contributions },
+  { key: "games", label: "J", name: "Jogos na linha", value: (row) => row.games },
+  { key: "ownGoals", label: "GC", name: "Gols contra", value: (row) => row.ownGoals },
+  { key: "goalsPerNight", label: "G/N", name: "Gols por noite", value: (row) => row.goalsPerNight, average: true },
+  { key: "assistsPerNight", label: "A/N", name: "Assistências por noite", value: (row) => row.assistsPerNight, average: true },
+  { key: "titlesPerNight", label: "T/N", name: "Títulos por noite", value: (row) => row.titlesPerNight, average: true },
+];
+
+const KEEPER_COLUMNS: StatsColumn<KeeperRow>[] = [
+  { key: "games", label: "J", name: "Jogos no gol", value: (row) => row.games },
+  { key: "saves", label: "D", name: "Defesas", value: (row) => row.saves },
+  { key: "savesPerGame", label: "D/J", name: "Defesas por jogo", value: (row) => row.savesPerGame, average: true },
+  { key: "conceded", label: "GS", name: "Gols sofridos", value: (row) => row.conceded },
+  { key: "concededPerGame", label: "GS/J", name: "Gols sofridos por jogo", value: (row) => row.concededPerGame, average: true },
+  { key: "cleanSheets", label: "SG", name: "Jogos sem sofrer gol", value: (row) => row.cleanSheets },
+  { key: "howlers", label: "FR", name: "Frangos", value: (row) => row.howlers },
+  { key: "ownGoals", label: "GC", name: "Gols contra", value: (row) => row.ownGoals },
+  { key: "titles", label: "T", name: "Títulos no gol", value: (row) => row.titles },
+  { key: "titlesPerNight", label: "T/N", name: "Títulos por noite no gol", value: (row) => row.titlesPerNight, average: true },
+];
+
 export function RankingPage() {
   const { players, loading: playersLoading, error: playersError } = usePlayers();
   const { sessions, loading: sessionsLoading, error: sessionsError } = useSessions();
@@ -40,6 +67,8 @@ export function RankingPage() {
   const [scope, setScope] = useState<"season" | "month">("season");
   const [month, setMonth] = useState(monthOf(today));
   const [showKeepers, setShowKeepers] = useState(true);
+  const [view, setView] = useState<"cards" | "table">("cards");
+  const [tableSlot, setTableSlot] = useState<"line" | "keeper">("line");
 
   const months = useMemo(() => listMonths(sessions, today), [sessions, today]);
   const activeMonthLabel = monthLabel(month);
@@ -52,6 +81,11 @@ export function RankingPage() {
         : computeStats(players, sessions);
     return buildRanking(listed, stats, tab.key);
   }, [players, sessions, tab, showKeepers, scope, month]);
+  const table = useMemo(() => {
+    const [listed, played] =
+      scope === "month" ? [zeroBaselines(players), sessionsInMonth(sessions, month)] : [players, sessions];
+    return { line: buildLineTable(listed, played), keeper: buildKeeperTable(listed, played) };
+  }, [players, sessions, scope, month]);
   const awards = useMemo(() => getCurrentAwards(players, sessions, today), [players, sessions, today]);
   const awardMonth = monthLabel(awards.month).slice(0, 3);
   const error = playersError ?? sessionsError;
@@ -101,15 +135,68 @@ export function RankingPage() {
             key={item.key}
             type="button"
             role="tab"
-            aria-selected={item.key === tab.key}
-            className={`filter-chip${item.key === tab.key ? " is-active" : ""}`}
-            onClick={() => setTab(item)}
+            aria-selected={view === "cards" && item.key === tab.key}
+            className={`filter-chip${view === "cards" && item.key === tab.key ? " is-active" : ""}`}
+            onClick={() => {
+              setTab(item);
+              setView("cards");
+            }}
           >
             {item.tab}
           </button>
         ))}
+        <button
+          type="button"
+          role="tab"
+          aria-selected={view === "table"}
+          className={`filter-chip${view === "table" ? " is-active" : ""}`}
+          onClick={() => setView("table")}
+        >
+          Tabela
+        </button>
       </div>
 
+      {view === "table" ? (
+        <>
+          <div className="segmented ranking-keepers" role="group" aria-label="Tabela da linha ou do gol">
+            <button
+              type="button"
+              className={`segmented__btn${tableSlot === "line" ? " is-active" : ""}`}
+              onClick={() => setTableSlot("line")}
+            >
+              Linha
+            </button>
+            <button
+              type="button"
+              className={`segmented__btn${tableSlot === "keeper" ? " is-active" : ""}`}
+              onClick={() => setTableSlot("keeper")}
+            >
+              Goleiros
+            </button>
+          </div>
+          {error ? (
+            <EmptyState>{error}</EmptyState>
+          ) : playersLoading || sessionsLoading ? (
+            <EmptyState>Carregando tabela...</EmptyState>
+          ) : (tableSlot === "line" ? table.line : table.keeper).length === 0 ? (
+            <EmptyState>Ninguém jogou {scope === "month" ? `em ${activeMonthLabel}` : "ainda"}.</EmptyState>
+          ) : tableSlot === "line" ? (
+            <StatsTable key="line" label="Tabela da linha" rows={table.line} columns={LINE_COLUMNS} defaultSort="titles" />
+          ) : (
+            <StatsTable key="keeper" label="Tabela dos goleiros" rows={table.keeper} columns={KEEPER_COLUMNS} defaultSort="games" />
+          )}
+          <p className="stats-note">
+            {scope === "month"
+              ? "Tudo conta só as partidas jogadas no app."
+              : tableSlot === "line"
+                ? "T, G e A somam o histórico da planilha. O resto conta só as partidas jogadas no app, desde 03/11."
+                : "D e T somam o histórico da planilha. O resto conta só as partidas jogadas no app, desde 03/11."}{" "}
+            Toque no título de uma coluna para ordenar.
+          </p>
+          <StatsLegend columns={tableSlot === "line" ? LINE_COLUMNS : KEEPER_COLUMNS} />
+        </>
+      ) : (
+        <>
       <label className="switch-row ranking-keepers">
         <span className="switch-row__label">Mostrar goleiros</span>
         <input
@@ -146,6 +233,8 @@ export function RankingPage() {
             />
           ))}
         </div>
+      )}
+        </>
       )}
     </Page>
   );

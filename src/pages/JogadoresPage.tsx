@@ -682,17 +682,17 @@ export function JogadoresPage() {
                         <span className="baseline-stat__val">
                           {selectedAppStats.games === 0
                             ? "-"
-                            : formatAverage(perGame(selectedAppStats.goals, selectedAppStats.games))}
+                            : formatAverage(perGame(selectedAppStats.goals, selectedAppStats.nights))}
                         </span>
-                        <span className="baseline-stat__label">Gols/jogo</span>
+                        <span className="baseline-stat__label">Gols/noite</span>
                       </div>
                       <div className="baseline-stat">
                         <span className="baseline-stat__val">
                           {selectedAppStats.games === 0
                             ? "-"
-                            : formatAverage(perGame(selectedAppStats.assists, selectedAppStats.games))}
+                            : formatAverage(perGame(selectedAppStats.assists, selectedAppStats.nights))}
                         </span>
-                        <span className="baseline-stat__label">Assist./jogo</span>
+                        <span className="baseline-stat__label">Assist./noite</span>
                       </div>
                       <div className="baseline-stat">
                         <span className="baseline-stat__val">
