@@ -13,7 +13,13 @@ import { getMatchScore, getMatchWinnerId, isNextRoundLocked, isTied, matchLabel,
 import type { Player } from "../lib/players";
 import type { Match, MatchEvent, MatchEventType, Session, Team } from "../lib/session";
 
-const EVENT_LABELS: Record<MatchEventType, string> = { goal: "Gol", assist: "Assistência", save: "Defesa" };
+const EVENT_LABELS: Record<MatchEventType, string> = {
+  goal: "Gol",
+  assist: "Assistência",
+  save: "Defesa",
+  ownGoal: "Gol contra",
+  howler: "Frango",
+};
 const WRITE_ERROR = "Não deu para salvar. Confira sua conexão e tente de novo.";
 
 type Mark = (type: MatchEventType, playerId: string, teamId: string) => void;
@@ -29,7 +35,7 @@ type PlayerRowProps = {
 
 function PlayerRow({ player, team, keeper, events, canEdit, onMark }: PlayerRowProps) {
   const count = (type: MatchEventType) => events.filter((event) => event.playerId === player.id && event.type === type).length;
-  const [goals, assists, saves] = [count("goal"), count("assist"), count("save")];
+  const [goals, assists, saves, ownGoals, howlers] = [count("goal"), count("assist"), count("save"), count("ownGoal"), count("howler")];
 
   return (
     <li className={`match-player${keeper ? " is-keeper" : ""}`}>
@@ -39,6 +45,8 @@ function PlayerRow({ player, team, keeper, events, canEdit, onMark }: PlayerRowP
           {goals > 0 && <span aria-label={`${goals} gols`}>{goals} G</span>}
           {assists > 0 && <span aria-label={`${assists} assistências`}>{assists} A</span>}
           {saves > 0 && <span aria-label={`${saves} defesas`}>{saves} D</span>}
+          {ownGoals > 0 && <span aria-label={`${ownGoals} gols contra`}>{ownGoals} GC</span>}
+          {howlers > 0 && <span aria-label={`${howlers} frangos`}>{howlers} FR</span>}
         </span>
       </div>
       {canEdit && (
@@ -50,9 +58,20 @@ function PlayerRow({ player, team, keeper, events, canEdit, onMark }: PlayerRowP
             + Assist.
           </button>
           {keeper && (
-            <button type="button" className="mark-btn mark-btn--save" aria-label={`Defesa de ${player.name}`} onClick={() => onMark("save", player.id, team.id)}>
-              + Defesa
-            </button>
+            <>
+              <button type="button" className="mark-btn mark-btn--save" aria-label={`Defesa de ${player.name}`} onClick={() => onMark("save", player.id, team.id)}>
+                + Defesa
+              </button>
+              <button
+                type="button"
+                className="mark-btn mark-btn--howler"
+                aria-label={`Frango de ${player.name}`}
+                title="Frango: gol fácil de defender. Marque junto com o gol, ele não muda o placar."
+                onClick={() => onMark("howler", player.id, team.id)}
+              >
+                + Frango
+              </button>
+            </>
           )}
         </div>
       )}
@@ -69,7 +88,36 @@ type TeamColumnProps = {
   onMark: Mark;
 };
 
+type OwnGoalSheetProps = { team: Team; players: Player[]; onPick: (player: Player) => void; onClose: () => void };
+
+// An own goal is marked on the player who scored it, and the goal goes to the other side.
+function OwnGoalSheet({ team, players, onPick, onClose }: OwnGoalSheetProps) {
+  const title = `Gol contra do ${team.name}`;
+  return (
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div className="sheet" role="dialog" aria-modal="true" aria-label={title} onClick={(event) => event.stopPropagation()}>
+        <div className="sheet__handle" aria-hidden="true" />
+        <div className="sheet__header">
+          <h2 className="sheet__title">{title}</h2>
+          <button type="button" className="button button--ghost" onClick={onClose}>
+            Fechar
+          </button>
+        </div>
+        <p className="draw-hint">Quem fez? O gol conta para o outro time.</p>
+        <div className="own-goal-list">
+          {players.map((player) => (
+            <button key={player.id} type="button" className="mark-btn" onClick={() => onPick(player)}>
+              {player.name}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TeamColumn({ team, keeperId, byId, events, canEdit, onMark }: TeamColumnProps) {
+  const [pickingOwnGoal, setPickingOwnGoal] = useState(false);
   const keeper = keeperId ? byId.get(keeperId) : undefined;
   const players = team.playerIds.flatMap((id) => byId.get(id) ?? []);
 
@@ -82,6 +130,22 @@ function TeamColumn({ team, keeperId, byId, events, canEdit, onMark }: TeamColum
         ))}
         {keeper && <PlayerRow player={keeper} team={team} keeper events={events} canEdit={canEdit} onMark={onMark} />}
       </ul>
+      {canEdit && (
+        <button type="button" className="mark-btn mark-btn--own-goal" onClick={() => setPickingOwnGoal(true)}>
+          Gol contra
+        </button>
+      )}
+      {pickingOwnGoal && (
+        <OwnGoalSheet
+          team={team}
+          players={keeper ? [...players, keeper] : players}
+          onPick={(player) => {
+            setPickingOwnGoal(false);
+            onMark("ownGoal", player.id, team.id);
+          }}
+          onClose={() => setPickingOwnGoal(false)}
+        />
+      )}
     </section>
   );
 }

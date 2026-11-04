@@ -41,7 +41,7 @@ function session(matches: Match[], extra: Partial<Session> = {}): Session {
 describe("computeStats", () => {
   it("returns the baseline when there are no sessions", () => {
     const stats = computeStats([player("ana", { goals: 3, assists: 2, titles: 1 })], []);
-    expect(stats.get("ana")).toEqual({ goals: 3, assists: 2, saves: 0, titles: 1, games: 0 });
+    expect(stats.get("ana")).toEqual({ goals: 3, assists: 2, saves: 0, titles: 1, games: 0, ownGoals: 0, howlers: 0 });
   });
 
   it("adds goals, assists and saves from finished matches to the baseline", () => {
@@ -49,8 +49,17 @@ describe("computeStats", () => {
     const finished = match("finished", [event("goal", "ana"), event("assist", "ana"), event("save", "gui")]);
 
     const stats = computeStats(players, [session([finished])]);
-    expect(stats.get("ana")).toEqual({ goals: 4, assists: 1, saves: 0, titles: 0, games: 1 });
+    expect(stats.get("ana")).toEqual({ goals: 4, assists: 1, saves: 0, titles: 0, games: 1, ownGoals: 0, howlers: 0 });
     expect(stats.get("gui")?.saves).toBe(2);
+  });
+
+  it("counts own goals and howlers apart, without taking goals away", () => {
+    const players = [player("ana", { goals: 3 }), player("gui")];
+    const finished = match("finished", [event("goal", "ana"), event("ownGoal", "ana"), event("ownGoal", "gui"), event("howler", "gui")]);
+
+    const stats = computeStats(players, [session([finished])]);
+    expect(stats.get("ana")).toMatchObject({ goals: 4, ownGoals: 1, howlers: 0 });
+    expect(stats.get("gui")).toMatchObject({ goals: 0, ownGoals: 1, howlers: 1, saves: 0 });
   });
 
   it("counts games of a player and of a keeper, and only counts a keeper when they defended", () => {

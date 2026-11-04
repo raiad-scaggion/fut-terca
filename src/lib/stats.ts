@@ -1,13 +1,17 @@
 import { displayOvr, type Player, type PlayerBaseline } from "./players";
 import type { MatchEventType, Session } from "./session";
 
-export type PlayerStats = PlayerBaseline & { games: number };
+// Games, own goals and howlers only exist in the app: the Sheet's baseline never had them.
+export type PlayerStats = PlayerBaseline & { games: number; ownGoals: number; howlers: number };
 export type RankingKey = keyof PlayerBaseline | "contributions";
 
-const EVENT_STAT: Record<MatchEventType, keyof PlayerBaseline> = {
+// An own goal is its own stat and never takes a goal away from the player.
+const EVENT_STAT: Record<MatchEventType, Exclude<keyof PlayerStats, "games">> = {
   goal: "goals",
   assist: "assists",
   save: "saves",
+  ownGoal: "ownGoals",
+  howler: "howlers",
 };
 
 const MONTH_NAMES = [
@@ -38,7 +42,7 @@ export function championKeeperId(session: Session): string | undefined {
 // fixes every table.
 export function computeStats(players: Player[], sessions: Session[]): Map<string, PlayerStats> {
   const stats = new Map<string, PlayerStats>(
-    players.map((player) => [player.id, { ...player.baseline, games: 0 }]),
+    players.map((player) => [player.id, { ...player.baseline, games: 0, ownGoals: 0, howlers: 0 }]),
   );
 
   for (const session of sessions) {

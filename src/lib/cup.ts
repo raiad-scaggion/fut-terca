@@ -36,11 +36,11 @@ export function needsGoldenGoal(match: Match): boolean {
 }
 
 export function getMatchScore(match: Match): { home: number; away: number } {
-  const goals = match.events.filter((event) => event.type === "goal");
-  return {
-    home: goals.filter((event) => event.teamId === match.homeId).length,
-    away: goals.filter((event) => event.teamId === match.awayId).length,
-  };
+  const scoredBy = (teamId: string, otherId: string) =>
+    match.events.filter(
+      (event) => (event.type === "goal" && event.teamId === teamId) || (event.type === "ownGoal" && event.teamId === otherId),
+    ).length;
+  return { home: scoredBy(match.homeId, match.awayId), away: scoredBy(match.awayId, match.homeId) };
 }
 
 // There are no penalties. A tied semi or 3rd place match goes to whoever finished higher in the group.

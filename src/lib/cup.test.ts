@@ -90,6 +90,19 @@ describe("getMatchScore and getMatchWinnerId", () => {
     expect(getMatchWinnerId(read(newCup()), withAssist)).toBe("a");
   });
 
+  it("credits an own goal to the other side", () => {
+    const withOwnGoal = match(["a"]);
+    withOwnGoal.events.push({ id: "og", type: "ownGoal", playerId: "y", teamId: "a", at: 0 });
+    withOwnGoal.events.push({ id: "fr", type: "howler", playerId: "k", teamId: "a", at: 0 });
+    expect(getMatchScore(withOwnGoal)).toEqual({ home: 1, away: 1 });
+  });
+
+  it("decides a final with an own goal", () => {
+    const final = match([], "final");
+    final.events.push({ id: "og", type: "ownGoal", playerId: "y", teamId: "b", at: 0 });
+    expect(getMatchWinnerId(read(newCup()), final)).toBe("a");
+  });
+
   it("has no winner in a tied group match or final", () => {
     expect(getMatchWinnerId(read(newCup()), match(["a", "b"]))).toBeNull();
     expect(getMatchWinnerId(read(newCup()), match(["a", "b"], "final"))).toBeNull();

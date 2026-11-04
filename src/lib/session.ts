@@ -1,6 +1,8 @@
 import type { MatchTimer } from "./clock";
 
-export type MatchEventType = "goal" | "assist" | "save";
+// An event's teamId is always the player's own side. An own goal ("ownGoal") scores for the other side,
+// and a howler ("frango") is a keeper's blunder marked next to the goal it let in, with no effect on the score.
+export type MatchEventType = "goal" | "assist" | "save" | "ownGoal" | "howler";
 export type MatchStage = "group" | "semi" | "third" | "final";
 export type MatchStatus = "pending" | "live" | "finished";
 export type SessionStatus = "draft" | "live" | "finished";

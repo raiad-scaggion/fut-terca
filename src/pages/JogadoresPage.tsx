@@ -702,6 +702,20 @@ export function JogadoresPage() {
                         </span>
                         <span className="baseline-stat__label">Defesas/jogo</span>
                       </div>
+                      <div className="baseline-stat">
+                        <span className="baseline-stat__val">
+                          {selectedAppStats.ownGoals}
+                        </span>
+                        <span className="baseline-stat__label">Gols contra</span>
+                      </div>
+                      {(selectedPlayer.role === "keeper" || selectedAppStats.howlers > 0) && (
+                        <div className="baseline-stat">
+                          <span className="baseline-stat__val">
+                            {selectedAppStats.howlers}
+                          </span>
+                          <span className="baseline-stat__label">Frangos</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 

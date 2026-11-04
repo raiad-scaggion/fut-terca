@@ -422,8 +422,19 @@
   border-color: var(--text);
 }
 
-.mark-btn--save {
-  grid-column: 1 / -1;
+.mark-btn--howler {
+  color: var(--danger);
+}
+
+.mark-btn--own-goal {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.own-goal-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .match-log {

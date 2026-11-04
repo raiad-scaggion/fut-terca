@@ -49,7 +49,7 @@ futerca/
       keepers: { home: playerId, away: playerId }
       status: "pending" | "live" | "finished"
       timer: { durationSec, running, startedAt, elapsedMs }
-      events/{eventId}: { type: "goal" | "assist" | "save", playerId, teamId, at }
+      events/{eventId}: { type: "goal" | "assist" | "save" | "ownGoal" | "howler", playerId, teamId, at }   # teamId = the player's own side
     championId?
   live: { sessionId, matchId }       # what every phone shows right now
   weekly: { selectedIds[], keeperIds[], mode: "auto" | "manual", teams[]: { color, playerIds[] } }   # the draw in progress
@@ -84,7 +84,9 @@ A fixed bar above the tab bar shows the live score and clock on every page but I
 
 - Starting a match asks which keeper defends each side. It preselects the previous match's choice.
 - Timer with a chosen length. A started match opens with the clock stopped, and an admin starts it on the whistle. It uses Firebase's server clock offset, so every phone shows the same time. When time runs out, the phone whistles and vibrates and the clock keeps counting in red.
-- Each side lists its 4 players and its keeper with "+ Gol" and "+ Assist.". The keeper also has "+ Defesa".
+- Each side lists its 4 players and its keeper with "+ Gol" and "+ Assist.". The keeper also has "+ Defesa" and "+ Frango".
+- "Gol contra" under each side opens that side's players and keeper. The own goal counts for the other side and is the player's own stat, apart from their goals.
+- "Frango" marks a goal the keeper should have saved. It's marked next to the goal or own goal and doesn't change the score.
 - The event log is shown with undo.
 - There are no penalties. A tied semi or 3rd place match goes to the team that finished higher in the group stage.
 - The final can't end tied. If it's level when time runs out, it goes on with "Gol de ouro": the first goal wins, and an admin then ends the match.
@@ -265,6 +267,7 @@ Direction: "Noite de estádio", premium version. The approved reference is `C:\d
 - A game is a finished match. Outfield players count the finished matches of their team. A keeper counts the matches they defended.
 - The Sheet has no games, so games and averages use only matches played in the app. Season totals still include the baseline.
 - Keepers can score and assist, so the match screen keeps giving them the same buttons as everyone, plus the save.
+- Own goals and howlers ("frangos") only exist in the app, like games. An own goal never takes a goal away from the player.
 
 ### 13.3 Ranking
 
