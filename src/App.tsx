@@ -32,6 +32,12 @@ const CopaPage = lazy(() => loadPage(() => import("./pages/CopaPage")).then((mod
 const ImportarJogadoresPage = lazy(() =>
   loadPage(() => import("./pages/ImportarJogadoresPage")).then((module) => ({ default: module.ImportarJogadoresPage })),
 );
+const GlossarioPage = lazy(() =>
+  loadPage(() => import("./pages/GlossarioPage")).then((module) => ({ default: module.GlossarioPage })),
+);
+const RebalanceamentoPage = lazy(() =>
+  loadPage(() => import("./pages/RebalanceamentoPage")).then((module) => ({ default: module.RebalanceamentoPage })),
+);
 const HistoricoPage = lazy(() =>
   loadPage(() => import("./pages/HistoricoPage")).then((module) => ({ default: module.HistoricoPage })),
 );
@@ -63,6 +69,8 @@ export default function App() {
             <Route path="/sorteio" element={<SorteioPage />} />
             <Route path="/copa" element={<CopaPage />} />
             <Route path="/historico" element={<HistoricoPage />} />
+            <Route path="/rebalanceamento" element={<RebalanceamentoPage />} />
+            <Route path="/glossario" element={<GlossarioPage />} />
             <Route path="/partida" element={<PartidaPage />} />
             <Route path="/partida/:sessionId/:matchId" element={<PartidaPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />

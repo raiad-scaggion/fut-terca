@@ -8,7 +8,10 @@ import { useNow } from "../data/clock";
 import { useLive } from "../data/live";
 import { usePhotos } from "../data/photos";
 import { usePlayers } from "../data/players";
+import { useMyRebalance, useRebalanceRules, useRound } from "../data/rebalance";
 import { useSessions } from "../data/sessions";
+import { adminProgress } from "../lib/rebalance";
+import type { Player } from "../lib/players";
 import { AWARD_LABELS, getCurrentAwards, getPlayerAward } from "../lib/awards";
 import { InfoTip } from "../components/InfoTip";
 import { SpecialCardsInfo } from "../components/SpecialCardsInfo";
@@ -49,6 +52,31 @@ function LiveScore({ session, match }: { session: Session; match: Match }) {
       </span>
       <span className={`home-score__clock${remaining < 0 ? " is-over" : ""}`}>{formatClock(remaining)}</span>
     </div>
+  );
+}
+
+// Admins see the open round on Início until they send their votes.
+function RebalanceBanner({ players }: { players: Player[] }) {
+  const { user, isAdmin } = useAuth();
+  const rules = useRebalanceRules();
+  const ready = isAdmin && rules === "ready";
+  const round = useRound(ready);
+  const mine = useMyRebalance(ready ? user?.email ?? null : null);
+
+  if (!ready || round.loading || round.error || round.value.status === "closed" || mine.sent.loading || mine.sent.value || !mine.ownPlayer.value) {
+    return null;
+  }
+  const { remaining } = adminProgress(players, mine.ownPlayer.value, mine.votes.value);
+
+  return (
+    <Link to="/rebalanceamento" className="home-banner">
+      <strong>Rebalanceamento aberto</strong>
+      <span>
+        {remaining === 0
+          ? "Você já avaliou todo mundo. Falta enviar."
+          : `Faltam ${remaining} ${remaining === 1 ? "jogador" : "jogadores"} para você avaliar.`}
+      </span>
+    </Link>
   );
 }
 
@@ -145,6 +173,7 @@ export function HomePage() {
   return (
     <div className="home">
       <Hero state={getHomeState(sessions, live, today)} />
+      <RebalanceBanner players={players} />
 
       {winners.length > 0 ? (
         <section className="home__section">
@@ -195,6 +224,9 @@ export function HomePage() {
 
       <Link to="/ranking" className="button button--ghost button--link home__ranking">
         Ver o ranking completo
+      </Link>
+      <Link to="/glossario" className="home__glossary">
+        O que quer dizer cada sigla? Veja o Glossário.
       </Link>
 
       {champion && (

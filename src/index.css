@@ -1515,7 +1515,7 @@ button.fut-card {
 }
 
 .fut-card__stat {
-  font-size: 64px;
+  font-size: 48px;
   font-weight: 700;
   font-feature-settings: "tnum";
 }
@@ -1662,4 +1662,343 @@ button.fut-card {
 
 .history__email {
   overflow-wrap: anywhere;
+}
+
+.stat-input {
+  width: 72px;
+  height: 44px;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+  font-feature-settings: "tnum";
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.stat-input::-webkit-outer-spin-button,
+.stat-input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+.stat-input:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+}
+
+.rating-stepper.is-invalid .stat-input {
+  border-color: var(--danger);
+}
+
+.legend-action {
+  margin-top: 12px;
+}
+
+.legend-action > .button {
+  width: 100%;
+}
+
+/* Início: rebalanceamento e glossário */
+.home-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  color: var(--text);
+  text-decoration: none;
+  background: color-mix(in srgb, var(--brand) 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--brand) 45%, transparent);
+  border-radius: var(--radius);
+}
+
+.home-banner strong {
+  color: var(--brand);
+}
+
+.home-banner span {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.home__glossary {
+  display: block;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.page__subtitle a,
+.info-tip a {
+  color: var(--brand);
+}
+
+/* Rebalanceamento */
+.rebalance-progress {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+.rebalance-progress__count {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.rebalance-send {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.rebalance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.rebalance-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: 56px;
+  padding: 10px 12px;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.rebalance-tile.is-done {
+  border-color: color-mix(in srgb, var(--success) 50%, transparent);
+}
+
+.rebalance-tile__name {
+  max-width: 100%;
+  overflow: hidden;
+  font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.rebalance-tile__meta {
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.rebalance-tile.is-done .rebalance-tile__meta {
+  color: var(--success);
+}
+
+.rebalance-sheet__hint {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.rebalance-owner {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.rebalance-owner__status {
+  margin: 0;
+  color: var(--muted);
+}
+
+.rebalance-admins {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rebalance-admin {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.rebalance-admin__who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rebalance-admin__email {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+
+.rebalance-admin__count {
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.rebalance-admin__count.is-sent {
+  color: var(--success);
+}
+
+.rebalance-admin__link {
+  grid-column: 1 / -1;
+  min-height: 40px;
+  padding: 0 8px;
+  color: var(--text);
+  font: inherit;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.rebalance-result {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rebalance-result__list {
+  margin: 0;
+  padding: 0;
+  font-size: 0.875rem;
+  list-style: none;
+}
+
+.rebalance-result__list li {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+
+.rebalance-result__list li.is-empty {
+  color: var(--muted);
+}
+
+.rebalance-result__votes {
+  color: var(--muted);
+}
+
+.rebalance-result__text {
+  width: 100%;
+  padding: 8px;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8125rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  resize: vertical;
+}
+
+/* Glossário */
+.glossary {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.glossary__section > p {
+  margin: 4px 0 8px;
+  color: var(--muted);
+}
+
+.glossary__list {
+  margin: 8px 0 0;
+}
+
+.glossary__item {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.glossary__item dt {
+  font-weight: 700;
+}
+
+.glossary__item dd {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+.glossary__list--compact .glossary__item {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.glossary__list--compact .glossary__item dd {
+  margin: 0;
+}
+
+.glossary__code {
+  color: var(--brand);
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.glossary__code--gold {
+  color: #f5c842;
+}
+
+.glossary__code--silver {
+  color: #c9d1de;
+}
+
+.glossary__code--bronze {
+  color: #cd8a4f;
+}
+
+.glossary__table-wrap {
+  margin-top: 12px;
+  overflow-x: auto;
+}
+
+.glossary__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.glossary__table caption {
+  margin-bottom: 4px;
+  color: var(--muted);
+  text-align: left;
+}
+
+.glossary__table th,
+.glossary__table td {
+  padding: 6px 4px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.glossary__table th[scope="row"] {
+  color: var(--brand);
+  text-align: left;
 }

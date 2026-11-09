@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { EmptyState, Page } from "../components/Page";
 import { InfoTip } from "../components/InfoTip";
 import { RankingCard } from "../components/RankingCard";
-import { StatsLegend, StatsTable, type StatsColumn } from "../components/StatsTable";
+import { KEEPER_COLUMNS, LINE_COLUMNS } from "../components/rankingColumns";
+import { StatsLegend, StatsTable } from "../components/StatsTable";
 import { usePhotos } from "../data/photos";
 import { usePlayers } from "../data/players";
 import { useSessions } from "../data/sessions";
@@ -17,7 +19,7 @@ import {
   zeroBaselines,
   type RankingKey,
 } from "../lib/stats";
-import { buildKeeperTable, buildLineTable, type KeeperRow, type LineRow } from "../lib/table";
+import { buildKeeperTable, buildLineTable } from "../lib/table";
 
 type RankingTab = {
   key: RankingKey;
@@ -32,31 +34,6 @@ const TABS: RankingTab[] = [
   { key: "contributions", tab: "G+A", singular: "participação", plural: "participações" },
   { key: "saves", tab: "Defesas", singular: "defesa", plural: "defesas" },
   { key: "titles", tab: "Títulos", singular: "título", plural: "títulos" },
-];
-
-const LINE_COLUMNS: StatsColumn<LineRow>[] = [
-  { key: "titles", label: "T", name: "Títulos", value: (row) => row.titles },
-  { key: "goals", label: "G", name: "Gols", value: (row) => row.goals },
-  { key: "assists", label: "A", name: "Assistências", value: (row) => row.assists },
-  { key: "contributions", label: "G+A", name: "Gols + assistências", value: (row) => row.contributions },
-  { key: "games", label: "J", name: "Jogos na linha", value: (row) => row.games },
-  { key: "ownGoals", label: "GC", name: "Gols contra", value: (row) => row.ownGoals },
-  { key: "goalsPerNight", label: "G/N", name: "Gols por noite", value: (row) => row.goalsPerNight, average: true },
-  { key: "assistsPerNight", label: "A/N", name: "Assistências por noite", value: (row) => row.assistsPerNight, average: true },
-  { key: "titlesPerNight", label: "T/N", name: "Títulos por noite", value: (row) => row.titlesPerNight, average: true },
-];
-
-const KEEPER_COLUMNS: StatsColumn<KeeperRow>[] = [
-  { key: "games", label: "J", name: "Jogos no gol", value: (row) => row.games },
-  { key: "saves", label: "D", name: "Defesas", value: (row) => row.saves },
-  { key: "savesPerGame", label: "D/J", name: "Defesas por jogo", value: (row) => row.savesPerGame, average: true },
-  { key: "conceded", label: "GS", name: "Gols sofridos", value: (row) => row.conceded },
-  { key: "concededPerGame", label: "GS/J", name: "Gols sofridos por jogo", value: (row) => row.concededPerGame, average: true },
-  { key: "cleanSheets", label: "SG", name: "Jogos sem sofrer gol", value: (row) => row.cleanSheets },
-  { key: "howlers", label: "FR", name: "Frangos", value: (row) => row.howlers },
-  { key: "ownGoals", label: "GC", name: "Gols contra", value: (row) => row.ownGoals },
-  { key: "titles", label: "T", name: "Títulos no gol", value: (row) => row.titles },
-  { key: "titlesPerNight", label: "T/N", name: "Títulos por noite no gol", value: (row) => row.titlesPerNight, average: true },
 ];
 
 export function RankingPage() {
@@ -187,6 +164,9 @@ export function RankingPage() {
                     : "D e T somam o histórico da planilha. O resto conta só as partidas jogadas no app, desde 03/11."}
               </p>
               <p>Toque no título de uma coluna para ordenar.</p>
+              <p>
+                Todas as siglas estão no <Link to="/glossario">Glossário</Link>.
+              </p>
             </InfoTip>
           </p>
           {error ? (

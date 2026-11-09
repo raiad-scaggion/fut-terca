@@ -88,7 +88,7 @@ export function togglePlayer(weekly: Weekly, playerId: string, slot: Slot): Week
 // Fills the free spots with mensalistas and keeps anyone already picked, in whatever slot they are.
 export function fillWithMonthly(weekly: Weekly, players: Player[]): Weekly {
   const picked = new Set([...weekly.selectedIds, ...weekly.keeperIds]);
-  const monthly = players.filter((player) => player.active && player.isMonthly && !picked.has(player.id));
+  const monthly = players.filter((player) => player.active && !player.legend && player.isMonthly && !picked.has(player.id));
   const fill = (current: string[], candidates: Player[], limit: number) =>
     [...current, ...candidates.map((player) => player.id)].slice(0, limit);
 

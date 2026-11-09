@@ -45,8 +45,10 @@ export function buildPairHistory(sessions: Session[]): PairHistory {
   return history;
 }
 
+// Stats are 0 to 100 since 2.2. Dividing by 10 keeps the totals on the old 1 to 10 scale,
+// so the balance, position and repeat weights below still mean what they did.
 export function teamTotal(team: Player[]): number {
-  return team.reduce((sum, player) => sum + levelScore(player), 0);
+  return team.reduce((sum, player) => sum + levelScore(player) / 10, 0);
 }
 
 function positionImbalance(team: Player[]): number {

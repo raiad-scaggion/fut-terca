@@ -33,13 +33,16 @@ Everything lives under the root `futerca/`. The old app's path `fut-terca/live` 
 ```
 futerca/
   admins/{emailKey}: true            # email with "." replaced by ","
-  owners/{emailKey}: true            # who can read the change log
+  owners/{emailKey}: true            # who can read the change log and run the rebalanceamento
+  adminPlayers/{emailKey}: playerId  # which player each admin is, so they don't rate themselves
   log/{pushId}: { by, name, uid, at, action, playerId?, sessionId?, matchId?, eventType?, changes?, count? }
   players/{playerId}                 # "p" + Sheet id for imported players, push() keys for new ones
     name, role: "line" | "keeper", isMonthly, joinDate, active, createdAt   # role = usual position
     legacyId?                        # the Sheet's numeric id, for re-imports
     linePosition: "ataque" | "meio" | "defesa"
-    ratings: { speed, finishing, defense, passing }   # 1-10, used by the draw
+    stats: { line: { vel, fin, pas, dri, def, fis }, keeper: { pac, pas, sal, mne, pos, ref } }   # 0-100
+    ratings?: { speed, finishing, defense, passing }  # before 2.2, 1-10; read only when stats is missing
+    legend?: true                    # out of the lists, the monthly fill and the rebalanceamento
     baseline: { goals, assists, saves, titles }       # totals imported from the Sheet
   sessions/{sessionId}               # one Tuesday night
     date, createdAt, status: "draft" | "live" | "finished"
@@ -55,6 +58,10 @@ futerca/
     championId?
   live: { sessionId, matchId }       # what every phone shows right now
   weekly: { selectedIds[], keeperIds[], mode: "auto" | "manual", teams[]: { color, playerIds[] } }   # the draw in progress
+  rebalance/
+    round: { status: "open" | "closed", openedAt, publishedAt? }
+    votes/{emailKey}/{playerId}: { <six stats of the player's role>, at }
+    sent/{emailKey}: timestamp       # the admin tapped "Enviar avaliações"
 ```
 
 The central rule: **stats are derived, never accumulated.** A player's season total is `baseline` plus the events of every finished match. Titles are `baseline.titles` plus the sessions where the player's team is the champion. The keeper who defended the champion in the final gets the title too. Editing a finished match only means adding or removing events, and every table updates itself. Don't write per-player counters anywhere.
@@ -67,6 +74,9 @@ Database rules:
 - `admins/` and `owners/` are writable only from the Firebase console.
 - `log/` is append-only: an admin can add an entry signed with their own e-mail and uid at the server's time, and nobody can edit or delete one. Only owners can read it.
 - Player writes and new match events must carry a `logId` that points to a log entry created in the same write, so a change can't skip the log. Deletes can't be forced this way, so deleting a player or undoing an event is logged by the app but not enforced by the rules.
+- `admins/` is readable only by owners. The app reads a person's own entry to know whether they are an admin.
+- `adminPlayers/`: owners read and write the whole map. An admin reads only their own entry.
+- `rebalance/votes/{emailKey}` and `rebalance/sent/{emailKey}`: readable only by that admin and the owners. An admin writes votes only while the round isn't closed, never for their own player, with integers from 0 to 100. `rebalance/round` is readable by admins and writable by owners. Under the old rules all of this would be public, so the app probes `rebalance/probe` and keeps voting closed until the probe is denied.
 - Admin e-mails never go in this public repo. They are added in the Firebase console.
 
 The Firebase web config is public by design and is committed. Rules are the only protection, so they ship in the repo as `database.rules.json`, and a change to them is a change to the app.
@@ -299,3 +309,29 @@ The awards of a month come from the matches of that month and show on the cards 
 | Paredão | most saves | blue, brick wall |
 
 Ties all win. Nobody wins with zero. A player who wins more than one shows the highest card, in the order above. A special card never changes the overall.
+
+## 14. Version 2.2: stats, Legends and Rebalanceamento
+
+Design: `docs/superpowers/specs/2026-11-09-rebalanceamento-design.md`.
+
+### 14.1 Stats
+
+- Six stats on a 0 to 100 scale. Outfield: VEL, FIN, PAS, DRI, DEF, FIS. Keepers: PAC, PAS, SAL, MNE, POS, REF. Labels and hints live in `LINE_STATS` and `KEEPER_STATS` in `src/lib/players.ts`.
+- Old ratings convert × 10. Drible and Físico start at 50. Keeper stats start at 99 until someone sets them.
+- OVR is the weighted average of the role's six stats, capped at 99. Weights per position are `LINE_WEIGHTS` and `KEEPER_WEIGHTS`, shown in the Glossário.
+
+### 14.2 Legends
+
+- An admin can make a player a Legend from Jogadores. Legends get their own card, leave the default lists, are never added by "Completar com mensalistas" and are left out of the rebalanceamento. Their numbers stay in the Ranking. In Sorteio they show only when searched by name.
+
+### 14.3 Rebalanceamento (`/rebalanceamento`)
+
+- Admins only. Each admin rates every active, non-Legend player except their own (`adminPlayers`). The sheet starts from the current stats and shows the OVR the admin's numbers would give.
+- Nobody sees anyone else's votes or any average. The admin sees a counter and which players are still missing, then taps "Enviar avaliações".
+- The owner panel lists each admin with their progress and linked player, and links a player to an e-mail. "Calcular médias" averages each stat over the votes received (rounded), shows the vote count per player, and exports the result as WhatsApp text and as an image.
+- Publicar writes every averaged player's stats, the log entry and the closed round in one write. Players with no votes keep their stats. "Abrir rebalanceamento" clears votes and `sent` and opens a new round.
+- The home screen shows a banner to an admin who hasn't sent yet while a round is open.
+
+### 14.4 Glossário (`/glossario`)
+
+- Every abbreviation in the app: stats, positions, OVR weights, card colors, special cards, Legend, Rebalanceamento and the Ranking table columns. Linked from the account menu, the home screen and the "i" tips.

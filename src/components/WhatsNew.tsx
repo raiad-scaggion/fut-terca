@@ -1,17 +1,15 @@
 import { useState } from "react";
 
 // Each release gets a new version, so everyone sees its sheet once.
-const VERSION = "2.1";
+const VERSION = "2.2";
 const SEEN_KEY = `whats-new-seen-${VERSION}`;
 
 const NEWS = [
-  { title: "Tabela no Ranking", text: "todos os números numa tabela só, uma para a linha e outra para os goleiros. Toque no título da coluna para ordenar." },
-  { title: "Médias por noite", text: "gols, assistências e títulos por noite, contando a partir de 03/11." },
-  { title: "Gol contra", text: "conta para o outro time e não tira gol de ninguém." },
-  { title: "Frango", text: "agora fica registrado quando o goleiro deixa passar um gol fácil." },
-  { title: "Qualquer um no gol", text: "dá para escalar um jogador de linha no gol, ou um goleiro na linha." },
-  { title: "A noite de 03/11", text: "já conta nos gols, assistências, títulos e no ranking de novembro." },
-  { title: "Botão i", text: "toque para entender as colunas, o OVR, as cartas especiais e o desempate da Copa." },
+  { title: "Notas de 0 a 100", text: "as cartas agora têm seis notas: VEL, FIN, PAS, DRI, DEF e FIS. DRI e FIS são novas e começam em 50." },
+  { title: "Notas de goleiro", text: "goleiro ganhou seis notas próprias: PAC, PAS, SAL, MNE, POS e REF." },
+  { title: "Legends", text: "quem virou Legend sai das listas e do rebalanceamento, mas continua no ranking." },
+  { title: "Rebalanceamento", text: "os admins dão notas para todo mundo, sem ver as notas dos outros. A média é publicada depois do ok do grupo." },
+  { title: "Glossário", text: "o que quer dizer cada sigla do app, num lugar só. Fica no fim do Início e no menu da conta." },
 ];
 
 // A browser that blocks storage would show this on every visit, so it counts as already seen.

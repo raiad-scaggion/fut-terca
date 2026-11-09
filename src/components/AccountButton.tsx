@@ -71,6 +71,14 @@ export function AccountButton() {
             Testar permissão de gravação
           </button>
           {writeCheck !== "idle" && <span className={`account__check account__check--${writeCheck}`}>{WRITE_CHECK_TEXT[writeCheck]}</span>}
+          {isAdmin && (
+            <Link to="/rebalanceamento" className="button button--ghost button--link" onClick={() => setOpen(false)}>
+              Rebalanceamento
+            </Link>
+          )}
+          <Link to="/glossario" className="button button--ghost button--link" onClick={() => setOpen(false)}>
+            Glossário
+          </Link>
           {isOwner && (
             <Link to="/historico" className="button button--ghost button--link" onClick={() => setOpen(false)}>
               Histórico de alterações

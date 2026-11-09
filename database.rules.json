@@ -13,7 +13,8 @@
         ".write": false,
         "$emailKey": {
           ".read": "auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase().replace('.', ',') === $emailKey"
-        }
+        },
+        ".read": "auth != null && auth.token.email_verified === true && root.child('futerca/owners').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true"
       },
       "owners": {
         ".write": false,
@@ -50,9 +51,50 @@
           }
         }
       },
+      "adminPlayers": {
+        ".read": "auth != null && auth.token.email_verified === true && root.child('futerca/owners').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true",
+        ".write": "auth != null && auth.token.email_verified === true && root.child('futerca/owners').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true",
+        "$emailKey": {
+          ".read": "auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase().replace('.', ',') === $emailKey",
+          ".validate": "newData.isString() && root.child('futerca/players').child(newData.val()).exists()"
+        }
+      },
+      "rebalance": {
+        "round": {
+          ".read": "auth != null && auth.token.email_verified === true && root.child('futerca/admins').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true",
+          ".write": "auth != null && auth.token.email_verified === true && root.child('futerca/owners').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true",
+          ".validate": "newData.hasChildren(['status', 'openedAt']) && (newData.child('status').val() === 'open' || newData.child('status').val() === 'closed') && newData.child('openedAt').isNumber()"
+        },
+        "votes": {
+          ".read": "auth != null && auth.token.email_verified === true && root.child('futerca/owners').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true",
+          ".write": "auth != null && auth.token.email_verified === true && root.child('futerca/owners').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true",
+          "$emailKey": {
+            ".read": "auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase().replace('.', ',') === $emailKey && root.child('futerca/admins').child($emailKey).val() === true",
+            "$playerId": {
+              ".write": "auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase().replace('.', ',') === $emailKey && root.child('futerca/admins').child($emailKey).val() === true && root.child('futerca/rebalance/round/status').val() !== 'closed' && root.child('futerca/adminPlayers').child($emailKey).val() !== $playerId",
+              ".validate": "newData.hasChild('at') && newData.child('at').val() === now && root.child('futerca/players').child($playerId).exists()",
+              "at": {
+                ".validate": "newData.isNumber()"
+              },
+              "$stat": {
+                ".validate": "($stat === 'vel' || $stat === 'fin' || $stat === 'pas' || $stat === 'dri' || $stat === 'def' || $stat === 'fis' || $stat === 'pac' || $stat === 'sal' || $stat === 'mne' || $stat === 'pos' || $stat === 'ref') && newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 100"
+              }
+            }
+          }
+        },
+        "sent": {
+          ".read": "auth != null && auth.token.email_verified === true && root.child('futerca/owners').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true",
+          ".write": "auth != null && auth.token.email_verified === true && root.child('futerca/owners').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true",
+          "$emailKey": {
+            ".read": "auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase().replace('.', ',') === $emailKey",
+            ".write": "auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase().replace('.', ',') === $emailKey && root.child('futerca/admins').child($emailKey).val() === true && root.child('futerca/rebalance/round/status').val() !== 'closed'",
+            ".validate": "newData.val() === now"
+          }
+        }
+      },
       "$section": {
-        ".read": "$section !== 'admins' && $section !== 'owners' && $section !== 'log'",
-        ".write": "$section !== 'admins' && $section !== 'owners' && $section !== 'log' && auth != null && auth.token.email_verified === true && root.child('futerca/admins').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true"
+        ".read": "$section !== 'admins' && $section !== 'owners' && $section !== 'log' && $section !== 'adminPlayers' && $section !== 'rebalance'",
+        ".write": "$section !== 'admins' && $section !== 'owners' && $section !== 'log' && $section !== 'adminPlayers' && $section !== 'rebalance' && auth != null && auth.token.email_verified === true && root.child('futerca/admins').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true"
       }
     }
   }

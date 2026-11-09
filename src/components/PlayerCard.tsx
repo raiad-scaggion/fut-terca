@@ -1,11 +1,11 @@
 import { AWARD_LABELS, type AwardKey } from "../lib/awards";
 import { crestUrl, getClub } from "../lib/clubs";
 import { flagUrl } from "../lib/countries";
-import { cardTier, displayOvr, displayStat, positionCode, type Player } from "../lib/players";
+import { cardTier, displayOvr, positionCode, roleStats, type Player } from "../lib/players";
 import { CARD_PATH, CARD_THEMES } from "./cardTheme";
 
 type PlayerCardProps = {
-  player: Pick<Player, "name" | "role" | "linePosition" | "ratings" | "active" | "nationality" | "club">;
+  player: Pick<Player, "name" | "role" | "linePosition" | "stats" | "active" | "nationality" | "club"> & { legend?: boolean };
   award?: AwardKey | null;
   awardMonth?: string;
   photo?: string;
@@ -16,10 +16,10 @@ type PlayerCardProps = {
 function Stat({ value, label, x, y, ink }: { value: number; label: string; x: number; y: number; ink: string }) {
   return (
     <>
-      <text x={x} y={y} className="fut-card__stat" fill={ink}>
+      <text x={x + 84} y={y} textAnchor="end" className="fut-card__stat" fill={ink}>
         {value}
       </text>
-      <text x={x + 66} y={y} className="fut-card__stat fut-card__stat--label" fill={ink}>
+      <text x={x + 98} y={y} className="fut-card__stat fut-card__stat--label" fill={ink}>
         {label}
       </text>
     </>
@@ -27,7 +27,8 @@ function Stat({ value, label, x, y, ink }: { value: number; label: string; x: nu
 }
 
 export function PlayerCard({ player, award, awardMonth, photo, onClick, size = "grid" }: PlayerCardProps) {
-  const key = award ?? cardTier(player);
+  const key = award ?? (player.legend ? "legend" : cardTier(player));
+  const stats = roleStats(player);
   const theme = CARD_THEMES[key];
   const tone = theme.dark ? "dark" : "light";
   const rule = `${theme.ink}66`;
@@ -83,17 +84,21 @@ export function PlayerCard({ player, award, awardMonth, photo, onClick, size = "
         {(player.name || "Novo jogador").toUpperCase()}
       </text>
       <rect x="96" y="580" width="378" height="1.6" fill={rule} />
-      <Stat value={displayStat(player.ratings.speed)} label="VEL" x={106} y={652} ink={theme.ink} />
-      <Stat value={displayStat(player.ratings.finishing)} label="FIN" x={106} y={722} ink={theme.ink} />
-      <rect x="284" y="606" width="1.6" height="132" fill={rule} />
-      <Stat value={displayStat(player.ratings.passing)} label="PAS" x={330} y={652} ink={theme.ink} />
-      <Stat value={displayStat(player.ratings.defense)} label="DEF" x={330} y={722} ink={theme.ink} />
-      {stamp ? (
-        <text x="285" y="796" textAnchor="middle" className="fut-card__stamp" fill={theme.ink}>
+      {stats.map((stat, index) => (
+        <Stat key={stat.key} value={stat.value} label={stat.short} x={index < 3 ? 78 : 312} y={638 + (index % 3) * 56} ink={theme.ink} />
+      ))}
+      <rect x="284" y="598" width="1.6" height="160" fill={rule} />
+      {player.legend && !award && (
+        <text x="285" y="808" textAnchor="middle" className="fut-card__stamp" fill={theme.ink}>
+          LEGEND
+        </text>
+      )}
+      {player.legend && !award ? null : stamp ? (
+        <text x="285" y="808" textAnchor="middle" className="fut-card__stamp" fill={theme.ink}>
           {stamp}
         </text>
       ) : (
-        <rect x="255" y="780" width="60" height="1.6" fill={rule} />
+        <rect x="255" y="786" width="60" height="1.6" fill={rule} />
       )}
     </svg>
   );

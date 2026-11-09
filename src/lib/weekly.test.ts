@@ -112,6 +112,13 @@ describe("fillWithMonthly", () => {
     expect(weekly.keeperIds).toEqual(["k1", "k2"]);
   });
 
+  it("never adds a Legend, even one marked as mensalista", () => {
+    const players = [line("legend", { isMonthly: true, legend: true }), line("p0", { isMonthly: true }), keeper("k9", { isMonthly: true, legend: true })];
+    const weekly = fillWithMonthly(empty, players);
+    expect(weekly.selectedIds).toEqual(["p0"]);
+    expect(weekly.keeperIds).toEqual([]);
+  });
+
   it("leaves a mensalista where they were picked tonight", () => {
     const players = [keeper("k1", { isMonthly: true }), keeper("k2", { isMonthly: true }), line("p0", { isMonthly: true })];
     const weekly = fillWithMonthly({ ...empty, selectedIds: ["k1"], keeperIds: ["p0"] }, players);

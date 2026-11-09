@@ -5,9 +5,11 @@ import {
   type LinePosition,
   type Player,
   type PlayerBaseline,
-  type PlayerRatings,
   type PlayerRole,
 } from "./players";
+
+// The old sheet's 1 to 10 ratings. The app turns them into 0 to 100 stats only when it creates a player.
+export type CsvRatings = { speed: number; finishing: number; defense: number; passing: number };
 
 export const REQUIRED_CSV_COLUMNS = [
   "id",
@@ -33,7 +35,7 @@ export type ImportedPlayer = {
   linePosition: LinePosition;
   isMonthly: boolean;
   joinDate: string;
-  ratings: PlayerRatings;
+  ratings: CsvRatings;
   baseline: PlayerBaseline;
 };
 
@@ -329,10 +331,6 @@ function hasDifferences(row: ImportedPlayer, existing: Player): boolean {
     row.isMonthly !== existing.isMonthly ||
     row.joinDate !== existing.joinDate ||
     row.legacyId !== existing.legacyId ||
-    row.ratings.speed !== existing.ratings.speed ||
-    row.ratings.finishing !== existing.ratings.finishing ||
-    row.ratings.defense !== existing.ratings.defense ||
-    row.ratings.passing !== existing.ratings.passing ||
     row.baseline.goals !== existing.baseline.goals ||
     row.baseline.assists !== existing.baseline.assists ||
     row.baseline.saves !== existing.baseline.saves ||

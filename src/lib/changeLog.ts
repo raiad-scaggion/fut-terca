@@ -1,12 +1,16 @@
 import { matchLabel } from "./cup";
 import { dayLabel, sessionDate } from "./nightSummary";
-import type { Player } from "./players";
+import { KEEPER_STATS, LINE_STATS, type Player } from "./players";
 import type { MatchEventType, Session } from "./session";
 
 export type LogAction =
   | "player.create"
   | "player.edit"
   | "player.delete"
+  | "player.legend"
+  | "player.unlegend"
+  | "rebalance.publish"
+  | "rebalance.open"
   | "photo.save"
   | "photo.remove"
   | "import"
@@ -44,7 +48,7 @@ export type LogEntry = LogInput & {
 
 export type PlayerFields = Pick<
   Player,
-  "name" | "role" | "linePosition" | "nationality" | "club" | "isMonthly" | "joinDate" | "ratings"
+  "name" | "role" | "linePosition" | "nationality" | "club" | "isMonthly" | "joinDate" | "stats"
 > & { active?: boolean };
 
 const FIELD_LABELS: Record<string, string> = {
@@ -56,10 +60,14 @@ const FIELD_LABELS: Record<string, string> = {
   isMonthly: "Mensalista",
   joinDate: "Entrada",
   active: "Ativo",
+  // Before 2.2 the ratings were 1 to 10 under these keys. Old entries still read with them.
   speed: "VEL",
   finishing: "FIN",
   passing: "PAS",
   defense: "DEF",
+  ...Object.fromEntries(LINE_STATS.map(({ key, short }) => [key, short])),
+  // Keeper keys get a prefix because PAS exists in both sets.
+  ...Object.fromEntries(KEEPER_STATS.map(({ key, short }) => [`gk_${key}`, `${short} (gol)`])),
 };
 
 const EVENT_NAMES: Record<MatchEventType, string> = {
@@ -70,10 +78,11 @@ const EVENT_NAMES: Record<MatchEventType, string> = {
   howler: "frango",
 };
 
-// Ratings are flattened because database keys can't hold the "." of "ratings.speed".
+// Stats are flattened because database keys can't hold the "." of "stats.line.vel".
 function flatten(fields: PlayerFields): Record<string, Value> {
-  const { ratings, ...rest } = fields;
-  const flat: Record<string, Value> = { ...rest, ...ratings };
+  const { stats, ...rest } = fields;
+  const keeper = Object.fromEntries(Object.entries(stats.keeper).map(([key, value]) => [`gk_${key}`, value]));
+  const flat: Record<string, Value> = { ...rest, ...stats.line, ...keeper };
   if (rest.active === undefined) {
     delete flat.active;
   }
@@ -138,6 +147,14 @@ export function describeEntry(entry: LogEntry, { byId, sessions }: Context): str
       return `Editou ${player}: ${describeChanges(entry.changes) || "sem mudanças"}`;
     case "player.delete":
       return `Excluiu ${player}`;
+    case "player.legend":
+      return `Tornou ${player} Legend`;
+    case "player.unlegend":
+      return `Trouxe ${player} de volta ao elenco`;
+    case "rebalance.publish":
+      return `Publicou o rebalanceamento (${entry.count ?? 0} jogadores)`;
+    case "rebalance.open":
+      return "Abriu um novo rebalanceamento";
     case "photo.save":
       return `Trocou a foto de ${player}`;
     case "photo.remove":

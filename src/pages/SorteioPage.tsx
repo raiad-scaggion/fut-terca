@@ -70,14 +70,26 @@ function PickChip({ player, slot, selected, disabled, onClick }: PickChipProps) 
   );
 }
 
+// Legends come after the regular players, in their own group at the end.
+function legendsLast(list: Player[]): Player[] {
+  return [...list.filter((player) => !player.legend), ...list.filter((player) => player.legend)];
+}
+
 type SlotSheetProps = { slot: Slot; players: Player[]; weekly: Weekly; onPick: (player: Player) => void; onClose: () => void };
 
 // Lists the players of the other role, so anyone can keep goal tonight and any keeper can play outfield.
 function SlotSheet({ slot, players, weekly, onPick, onClose }: SlotSheetProps) {
   const [search, setSearch] = useState("");
   const query = normalizeName(search);
-  const candidates = players.filter(
-    (player) => player.active && player.role !== slot && slotOf(weekly, player.id) !== slot && normalizeName(player.name).includes(query),
+  const candidates = legendsLast(
+    players.filter(
+      (player) =>
+        player.active &&
+        player.role !== slot &&
+        slotOf(weekly, player.id) !== slot &&
+        (!player.legend || query !== "") &&
+        normalizeName(player.name).includes(query),
+    ),
   );
   const title = slot === "keeper" ? "Quem vai pro gol?" : "Qual goleiro joga na linha?";
 
@@ -199,8 +211,16 @@ export function SorteioPage() {
   const history = useMemo(() => buildPairHistory(sessions), [sessions]);
   const available = useMemo(() => {
     const query = normalizeName(search);
-    return players.filter((player) => player.active && normalizeName(player.name).includes(query));
-  }, [players, search]);
+    // Legends show up when someone searches for them or after they are picked.
+    return legendsLast(
+      players.filter(
+        (player) =>
+          player.active &&
+          (!player.legend || query !== "" || slotOf(weekly, player.id) !== null) &&
+          normalizeName(player.name).includes(query),
+      ),
+    );
+  }, [players, search, weekly]);
 
   const edit = async (change: (current: Weekly) => Weekly) => {
     setError("");

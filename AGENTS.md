@@ -78,6 +78,11 @@ When you add or change a script, update this block in the same commit.
 
 Newest first. Format: date, decision, one-line reason.
 
+- 2026-11-09: Stats moved to 0-100 with Drible and Físico, and keepers got their own six stats. The group asked for finer ratings, and a keeper's ratings meant little on outfield scales.
+- 2026-11-09: The rebalanceamento keeps each admin's votes readable only by that admin and the owner, and only the owner calculates and publishes, after the group approves on WhatsApp. That's how the group asked for it, so nobody is swayed by others' votes.
+- 2026-11-09: The admin to player link lives in `futerca/adminPlayers`, set by the owner in the app or imported once. E-mails stay out of the public repo.
+- 2026-11-09: The voting page stays closed until the new rules are live, checked by reading a path the new rules deny. Under the old rules the votes would be public.
+
 - 2026-11-04: Every admin change writes an entry to `futerca/log` in the same write, readable only by the owner. Someone changed ratings and nobody could tell who, since the database keeps no history. The rules were checked in the Firebase emulator before shipping.
 - 2026-11-04: Explanations live in a tap-to-open "i" instead of text under each screen. Phones have no hover, and the notes below the table pushed it down and went unread.
 - 2026-11-04: Goals, assists and titles are averaged per night, on the player sheet and in the Ranking table. Saves and goals conceded stay per game in goal. A night has many short games, so per-game numbers looked tiny and said little.

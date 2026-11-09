@@ -3,16 +3,18 @@ import { useEffect, useState } from "react";
 import { diffPlayer, type PlayerFields } from "../lib/changeLog";
 import type { ImportPlan } from "../lib/importCsv";
 import {
-  clampRating,
+  defaultKeeperStats,
+  lineStatsFromRatings,
   normalizeClub,
   normalizeJoinDate,
   normalizeLinePosition,
   normalizeNationality,
   normalizePlayer,
   normalizeRole,
+  normalizeStats,
   type LinePosition,
   type Player,
-  type PlayerRatings,
+  type PlayerStats,
   type PlayerRole,
 } from "../lib/players";
 import { dbRef } from "./firebase";
@@ -31,7 +33,7 @@ export type PlayerInput = {
   linePosition: LinePosition;
   nationality: string;
   club: string;
-  ratings: PlayerRatings;
+  stats: PlayerStats;
   isMonthly: boolean;
   joinDate: string;
   active?: boolean;
@@ -91,12 +93,7 @@ export async function savePlayer(input: PlayerInput, previous?: Player): Promise
   const club = normalizeClub(input.club);
   const isMonthly = Boolean(input.isMonthly);
   const joinDate = normalizeJoinDate(input.joinDate);
-  const ratings: PlayerRatings = {
-    speed: clampRating(input.ratings.speed, 5),
-    finishing: clampRating(input.ratings.finishing, 5),
-    defense: clampRating(input.ratings.defense, 5),
-    passing: clampRating(input.ratings.passing, 5),
-  };
+  const stats = normalizeStats({ stats: input.stats });
 
   if (!input.id) {
     const id = push(dbRef("players")).key ?? "";
@@ -112,7 +109,7 @@ export async function savePlayer(input: PlayerInput, previous?: Player): Promise
         joinDate,
         active: true,
         createdAt: serverTimestamp(),
-        ratings,
+        stats,
         baseline: {
           goals: 0,
           assists: 0,
@@ -132,7 +129,7 @@ export async function savePlayer(input: PlayerInput, previous?: Player): Promise
     club,
     isMonthly,
     joinDate,
-    ratings,
+    stats,
   };
 
   if (typeof input.active === "boolean") {
@@ -145,6 +142,14 @@ export async function savePlayer(input: PlayerInput, previous?: Player): Promise
     Object.fromEntries(Object.entries({ ...updates, logId }).map(([key, value]) => [`players/${id}/${key}`, value])),
   );
   return id;
+}
+
+// A Legend leaves the regular lists but can still be picked in the Sorteio.
+export async function setLegend(player: Pick<Player, "id" | "name">, legend: boolean): Promise<void> {
+  await writeWithLog(
+    { action: legend ? "player.legend" : "player.unlegend", playerId: player.id, playerName: player.name },
+    (logId) => ({ [`players/${player.id}/legend`]: legend, [`players/${player.id}/logId`]: logId }),
+  );
 }
 
 export async function deletePlayer(player: Pick<Player, "id" | "name">): Promise<void> {
@@ -174,7 +179,7 @@ export async function applyImport(plan: ImportPlan): Promise<void> {
         active: true,
         createdAt: serverTimestamp(),
         ...(row.legacyId !== undefined ? { legacyId: row.legacyId } : {}),
-        ratings: row.ratings,
+        stats: { line: lineStatsFromRatings(row.ratings), keeper: defaultKeeperStats() },
         baseline: row.baseline,
       };
     }
@@ -190,7 +195,6 @@ export async function applyImport(plan: ImportPlan): Promise<void> {
       if (row.legacyId !== undefined) {
         payload[`${path}/legacyId`] = row.legacyId;
       }
-      payload[`${path}/ratings`] = row.ratings;
       payload[`${path}/baseline`] = row.baseline;
     }
 

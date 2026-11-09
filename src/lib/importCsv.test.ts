@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseCsv, parsePlayersCsv, planImport } from "./importCsv";
-import { cardTier, displayOvr, normalizePlayer, type Player } from "./players";
+import { normalizePlayer, type Player } from "./players";
 
 const HEADER =
   "id,name,goals,assists,championships,speed,finishing,defense,passing,linePosition,role,isMonthly,joinDate";
@@ -114,8 +114,7 @@ describe("parsePlayersCsv", () => {
 
     const neto = parsed.rows.find((p) => p.name === "Neto")!;
     expect(neto.id).toBe("p69");
-    expect(displayOvr(neto)).toBe(72);
-    expect(cardTier(neto)).toBe("silver");
+    expect(neto.ratings).toEqual({ speed: 7, finishing: 6, defense: 8, passing: 8 });
   });
 });
 

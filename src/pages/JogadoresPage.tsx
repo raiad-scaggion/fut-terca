@@ -6,33 +6,41 @@ import { PhotoEditor } from "../components/PhotoEditor";
 import { PlayerCard } from "../components/PlayerCard";
 import { useAuth } from "../data/authContext";
 import { removePhoto, usePhotos } from "../data/photos";
-import { savePlayer, usePlayers } from "../data/players";
+import { savePlayer, setLegend, usePlayers } from "../data/players";
 import { useSessions } from "../data/sessions";
 import { getCurrentAwards, getPlayerAward } from "../lib/awards";
 import { InfoTip } from "../components/InfoTip";
 import { SpecialCardsInfo } from "../components/SpecialCardsInfo";
+import { StatInputs } from "../components/StatInputs";
 import { CLUBS } from "../lib/clubs";
 import { COUNTRIES, DEFAULT_COUNTRY } from "../lib/countries";
 import {
   cardTier,
-  clampRating,
   displayOvr,
+  isStatText,
+  KEEPER_STATS,
+  LINE_STATS,
+  newPlayerStats,
   normalizeName,
   positionCode,
+  statsFromText,
+  statText,
   type LinePosition,
   type Player,
-  type PlayerRatings,
   type PlayerRole,
+  type PlayerStats,
+  type StatText,
 } from "../lib/players";
 import { isPlayerInSessions } from "../lib/session";
 import { computeStats, formatAverage, monthLabel, perGame, zeroBaselines } from "../lib/stats";
 
-type FilterKey = "all" | "monthly" | "keepers" | "inactive";
+type FilterKey = "all" | "monthly" | "keepers" | "legends" | "inactive";
 
 const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "all", label: "Todos" },
   { key: "monthly", label: "Mensalistas" },
   { key: "keepers", label: "Goleiros" },
+  { key: "legends", label: "Legends" },
   { key: "inactive", label: "Inativos" },
 ];
 
@@ -40,13 +48,6 @@ const POSITIONS: { value: LinePosition; label: string }[] = [
   { value: "defesa", label: "Defesa" },
   { value: "meio", label: "Meio" },
   { value: "ataque", label: "Ataque" },
-];
-
-const RATING_FIELDS: { key: keyof PlayerRatings; label: string; short: string }[] = [
-  { key: "speed", label: "Velocidade", short: "VEL" },
-  { key: "finishing", label: "Finalização", short: "FIN" },
-  { key: "defense", label: "Defesa", short: "DEF" },
-  { key: "passing", label: "Passe", short: "PAS" },
 ];
 
 const TIER_LABELS: Record<"gold" | "silver" | "bronze", string> = {
@@ -62,11 +63,25 @@ type FormDraft = {
   linePosition: LinePosition;
   nationality: string;
   club: string;
-  ratings: PlayerRatings;
+  // Both sets are kept, so switching role in the form never loses the other set.
+  stats: PlayerStats;
+  lineText: StatText;
+  keeperText: StatText;
   isMonthly: boolean;
   joinDate: string;
   active: boolean;
 };
+
+function statsDraft(stats: PlayerStats) {
+  return { stats, lineText: statText(stats.line), keeperText: statText(stats.keeper) };
+}
+
+function draftStats(draft: FormDraft): PlayerStats {
+  return {
+    line: statsFromText(LINE_STATS, draft.lineText, draft.stats.line),
+    keeper: statsFromText(KEEPER_STATS, draft.keeperText, draft.stats.keeper),
+  };
+}
 
 function createEmptyDraft(): FormDraft {
   return {
@@ -75,7 +90,7 @@ function createEmptyDraft(): FormDraft {
     linePosition: "meio",
     nationality: DEFAULT_COUNTRY,
     club: "",
-    ratings: { speed: 5, finishing: 5, defense: 5, passing: 5 },
+    ...statsDraft(newPlayerStats()),
     isMonthly: false,
     joinDate: "",
     active: true,
@@ -90,7 +105,7 @@ function createDraftFromPlayer(player: Player): FormDraft {
     linePosition: player.linePosition,
     nationality: player.nationality,
     club: player.club,
-    ratings: { ...player.ratings },
+    ...statsDraft(player.stats),
     isMonthly: player.isMonthly,
     joinDate: player.joinDate,
     active: player.active,
@@ -108,6 +123,8 @@ export function JogadoresPage() {
   const [editingDraft, setEditingDraft] = useState<FormDraft | null>(null);
   const [formError, setFormError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [legendStep, setLegendStep] = useState<"idle" | "confirm" | "saving">("idle");
+  const [legendError, setLegendError] = useState("");
 
   const selectedPlayer = useMemo(
     () => (selectedId ? players.find((p) => p.id === selectedId) ?? null : null),
@@ -154,7 +171,11 @@ export function JogadoresPage() {
   const filteredPlayers = useMemo(() => {
     const query = normalizeName(search);
     return players.filter((player) => {
-      if (filter === "inactive") {
+      if (filter === "legends") {
+        if (!player.legend) return false;
+      } else if (player.legend) {
+        return false;
+      } else if (filter === "inactive") {
         if (player.active) return false;
       } else {
         if (!player.active) return false;
@@ -187,18 +208,26 @@ export function JogadoresPage() {
     setEditingDraft(createDraftFromPlayer(player));
   };
 
-  const stepRating = (key: keyof PlayerRatings, delta: number) => {
-    setEditingDraft((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        ratings: {
-          ...prev.ratings,
-          [key]: clampRating(prev.ratings[key] + delta, 5),
-        },
-      };
-    });
+  const setStatText = (set: "lineText" | "keeperText", key: string, value: string) => {
+    setEditingDraft((prev) => (prev ? { ...prev, [set]: { ...prev[set], [key]: value } } : prev));
   };
+
+  const changeLegend = async (player: Player) => {
+    setLegendStep("saving");
+    setLegendError("");
+    try {
+      await setLegend(player, !player.legend);
+      setLegendStep("idle");
+    } catch {
+      setLegendError("Não deu para salvar. Tente de novo.");
+      setLegendStep("confirm");
+    }
+  };
+
+  useEffect(() => {
+    setLegendStep("idle");
+    setLegendError("");
+  }, [selectedId]);
 
   const handleSave = async (event: FormEvent) => {
     event.preventDefault();
@@ -219,6 +248,12 @@ export function JogadoresPage() {
       return;
     }
 
+    const statSet = editingDraft.role === "keeper" ? editingDraft.keeperText : editingDraft.lineText;
+    if (!Object.values(statSet).every((value) => isStatText(value))) {
+      setFormError("Cada nota precisa ser um número inteiro de 0 a 100.");
+      return;
+    }
+
     setSaving(true);
     setFormError("");
     try {
@@ -229,7 +264,7 @@ export function JogadoresPage() {
         linePosition: editingDraft.linePosition,
         nationality: editingDraft.nationality,
         club: editingDraft.club,
-        ratings: editingDraft.ratings,
+        stats: draftStats(editingDraft),
         isMonthly: editingDraft.isMonthly,
         joinDate: editingDraft.joinDate,
         ...(editingDraft.id ? { active: editingDraft.active } : {}),
@@ -249,6 +284,8 @@ export function JogadoresPage() {
     }
   };
 
+  const previewOvr = editingDraft ? displayOvr({ ...editingDraft, stats: draftStats(editingDraft) }) : 0;
+
   return (
     <Page
       title="Jogadores"
@@ -256,9 +293,12 @@ export function JogadoresPage() {
       info={
         <InfoTip label="O que é o OVR e as cores das cartas">
           <p>
-            <strong>OVR</strong> é a nota geral da carta, até 99. Ela junta velocidade, finalização, defesa e passe, com
-            pesos que mudam com a posição: no ataque conta mais a finalização, no meio o passe, e na defesa e no gol a
-            defesa.
+            <strong>OVR</strong> é a nota geral da carta, até 99. Ela junta as seis notas do jogador, de 0 a 100, com pesos
+            que mudam com a posição: no ataque pesa mais a finalização, no meio o passe e o drible, na defesa a defesa. O
+            goleiro tem notas próprias.
+          </p>
+          <p>
+            O que cada sigla quer dizer está no <Link to="/glossario">Glossário</Link>.
           </p>
           <p>A cor da carta vem do OVR: ouro a partir de 75, prata de 51 a 74 e bronze até 50.</p>
           <SpecialCardsInfo />
@@ -374,12 +414,12 @@ export function JogadoresPage() {
                 </div>
 
                 <div
-                  className={`ovr-preview ovr-preview--${cardTier(editingDraft)}`}
+                  className={`ovr-preview ovr-preview--${cardTier(previewOvr)}`}
                   aria-live="polite"
                 >
                   <div className="ovr-preview__score">
                     <span className="ovr-preview__value">
-                      {displayOvr(editingDraft)}
+                      {previewOvr}
                     </span>
                     <span className="ovr-preview__pos">
                       {positionCode(editingDraft)}
@@ -387,7 +427,7 @@ export function JogadoresPage() {
                   </div>
                   <div className="ovr-preview__meta">
                     <strong>{editingDraft.name.trim() || "Novo jogador"}</strong>
-                    <span>Carta {TIER_LABELS[cardTier(editingDraft)]}</span>
+                    <span>Carta {TIER_LABELS[cardTier(previewOvr)]}</span>
                   </div>
                 </div>
 
@@ -503,41 +543,22 @@ export function JogadoresPage() {
                 )}
 
                 <div className="form-field">
-                  <span className="form-field__label">Notas (1 a 10)</span>
-                  <div className="rating-steppers">
-                    {RATING_FIELDS.map(({ key, label, short }) => {
-                      const val = editingDraft.ratings[key];
-                      return (
-                        <div key={key} className="rating-stepper">
-                          <div className="rating-stepper__info">
-                            <span className="rating-stepper__short">{short}</span>
-                            <span className="rating-stepper__label">{label}</span>
-                          </div>
-                          <div className="rating-stepper__controls">
-                            <button
-                              type="button"
-                              className="stepper-btn"
-                              aria-label={`Diminuir ${label}`}
-                              disabled={val <= 1}
-                              onClick={() => stepRating(key, -1)}
-                            >
-                              −
-                            </button>
-                            <span className="rating-stepper__value">{val}</span>
-                            <button
-                              type="button"
-                              className="stepper-btn"
-                              aria-label={`Aumentar ${label}`}
-                              disabled={val >= 10}
-                              onClick={() => stepRating(key, 1)}
-                            >
-                              +
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <span className="form-field__label">
+                    {editingDraft.role === "keeper" ? "Notas de goleiro (0 a 100)" : "Notas (0 a 100)"}
+                  </span>
+                  {editingDraft.role === "keeper" ? (
+                    <StatInputs
+                      defs={KEEPER_STATS}
+                      values={editingDraft.keeperText}
+                      onChange={(key, value) => setStatText("keeperText", key, value)}
+                    />
+                  ) : (
+                    <StatInputs
+                      defs={LINE_STATS}
+                      values={editingDraft.lineText}
+                      onChange={(key, value) => setStatText("lineText", key, value)}
+                    />
+                  )}
                 </div>
 
                 <label className="switch-row">
@@ -745,6 +766,35 @@ export function JogadoresPage() {
                         >
                           Editar
                         </button>
+                      </div>
+                      <div className="legend-action">
+                        {legendStep === "idle" ? (
+                          <button type="button" className="button button--ghost" onClick={() => setLegendStep("confirm")}>
+                            {selectedPlayer.legend ? "Voltar ao elenco" : "Tornar Legend"}
+                          </button>
+                        ) : (
+                          <div className="delete-player" role="alertdialog" aria-label={selectedPlayer.legend ? "Voltar ao elenco" : "Tornar Legend"}>
+                            <strong>
+                              {selectedPlayer.legend
+                                ? `Trazer ${selectedPlayer.name} de volta ao elenco?`
+                                : `Tornar ${selectedPlayer.name} Legend?`}
+                            </strong>
+                            <p className="delete-player__text">
+                              {selectedPlayer.legend
+                                ? "Volta para as listas e para o rebalanceamento."
+                                : "Sai das listas e do rebalanceamento, mas os números continuam no ranking. Ainda dá para escalar no sorteio."}
+                            </p>
+                            {legendError && <p className="form-error">{legendError}</p>}
+                            <div className="delete-player__actions">
+                              <button type="button" className="button button--ghost" disabled={legendStep === "saving"} onClick={() => setLegendStep("idle")}>
+                                Cancelar
+                              </button>
+                              <button type="button" className="button button--primary" disabled={legendStep === "saving"} onClick={() => changeLegend(selectedPlayer)}>
+                                {legendStep === "saving" ? "Salvando..." : "Confirmar"}
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                       <div className="sheet__danger">
                         <DeletePlayer
