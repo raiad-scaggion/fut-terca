@@ -93,14 +93,6 @@ export type Player = {
   baseline: PlayerBaseline;
 };
 
-export const LINE_WEIGHTS: Record<LinePosition, LineStats> = {
-  ataque: { vel: 0.2, fin: 0.35, pas: 0.1, dri: 0.2, def: 0, fis: 0.15 },
-  meio: { vel: 0.15, fin: 0.15, pas: 0.3, dri: 0.25, def: 0.05, fis: 0.1 },
-  defesa: { vel: 0.15, fin: 0.05, pas: 0.1, dri: 0.05, def: 0.45, fis: 0.2 },
-};
-
-export const KEEPER_WEIGHTS: KeeperStats = { pac: 0.05, pas: 0.05, sal: 0.25, mne: 0.2, pos: 0.2, ref: 0.25 };
-
 const POSITION_CODES: Record<LinePosition, "ATA" | "MEI" | "DEF"> = {
   ataque: "ATA",
   meio: "MEI",
@@ -278,13 +270,12 @@ export function statsFromText<K extends string>(defs: StatDef<K>[], text: StatTe
 
 export type OvrInput = Pick<Player, "role" | "linePosition" | "stats">;
 
-// Weighted average of the role's six stats, on the same 0 to 100 scale.
+// Plain average of the role's six stats, all with the same weight, on the same 0 to 100 scale.
 export function levelScore(player: OvrInput): number {
   if (player.role === "keeper") {
-    return KEEPER_STATS.reduce((sum, { key }) => sum + clampStat(player.stats.keeper[key], 50) * KEEPER_WEIGHTS[key], 0);
+    return KEEPER_STATS.reduce((sum, { key }) => sum + clampStat(player.stats.keeper[key], 50), 0) / KEEPER_STATS.length;
   }
-  const weights = LINE_WEIGHTS[normalizeLinePosition(player.linePosition)];
-  return LINE_STATS.reduce((sum, { key }) => sum + clampStat(player.stats.line[key], 50) * weights[key], 0);
+  return LINE_STATS.reduce((sum, { key }) => sum + clampStat(player.stats.line[key], 50), 0) / LINE_STATS.length;
 }
 
 export function displayOvr(player: OvrInput): number {

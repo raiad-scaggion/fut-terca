@@ -78,6 +78,7 @@ When you add or change a script, update this block in the same commit.
 
 Newest first. Format: date, decision, one-line reason.
 
+- 2026-11-09: OVR is the plain average of the six stats, with no per-position weights. The group asked for it so admins rate each stat on its own, knowing every one counts the same.
 - 2026-11-09: Stats moved to 0-100 with Drible and Físico, and keepers got their own six stats. The group asked for finer ratings, and a keeper's ratings meant little on outfield scales.
 - 2026-11-09: The rebalanceamento keeps each admin's votes readable only by that admin and the owner, and only the owner calculates and publishes, after the group approves on WhatsApp. That's how the group asked for it, so nobody is swayed by others' votes.
 - 2026-11-09: The admin to player link lives in `futerca/adminPlayers`, set by the owner in the app or imported once. E-mails stay out of the public repo.

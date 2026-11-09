@@ -50,6 +50,89 @@ function Engraving({ theme }: { theme: AwardKey }) {
   );
 }
 
+// Deterministic noise, so every Legend card gets the same gold dust.
+function seeded(seed: number) {
+  let state = seed;
+  return () => {
+    state = (state * 16807) % 2147483647;
+    return (state - 1) / 2147483646;
+  };
+}
+
+function dust(seed: number, count: number, from: [number, number], to: [number, number], spread: number) {
+  const random = seeded(seed);
+  return Array.from({ length: count }, (_, index) => {
+    const t = random();
+    const off = random() * spread;
+    return (
+      <circle
+        key={index}
+        cx={from[0] + (to[0] - from[0]) * t + off * 0.34}
+        cy={from[1] + (to[1] - from[1]) * t + off * 0.94}
+        r={0.8 + random() * 2.6}
+        opacity={0.55 + random() * 0.45}
+      />
+    );
+  });
+}
+
+const KINTSUGI = [
+  "M-10 604L90 640L130 700L110 780L150 860L140 920",
+  "M90 640L180 620L260 650L330 610L420 640L500 600L590 622",
+  "M260 650L240 720L300 790L280 880L300 920",
+  "M330 610L360 700L440 730L520 700L590 744",
+  "M440 730L430 810L500 860L580 840",
+  "M130 700L200 744L240 720",
+  "M300 790L380 802L430 810",
+  "M-10 822L60 800L110 780",
+  "M180 620L170 560L120 520",
+  "M420 640L470 560L560 520",
+];
+
+// White marble with diagonal gold blades and gold veins, after the FUT Icon cards.
+function LegendArt() {
+  return (
+    <g id="fc-legend-art">
+      <g fill="none" stroke="#a9a397" strokeOpacity=".3" strokeWidth="1.2">
+        <path d="M-10 160C80 190 120 120 210 150S330 90 400 60" />
+        <path d="M20 40C60 90 40 130 100 170" />
+        <path d="M360 470C420 500 470 460 590 480" />
+      </g>
+      <path d="M-56 452L594 -8L646 66L-4 526Z" fill="url(#fc-legend-gold)" />
+      <path d="M-56 452L594 -8" stroke="#fff6d2" strokeWidth="3" />
+      <path d="M-4 526L646 66" stroke="#7a5512" strokeOpacity=".6" strokeWidth="2" />
+      <path d="M-70 400L580 -60" stroke="#fffaf0" strokeWidth="9" strokeOpacity=".85" />
+      <path d="M-70 384L580 -76" stroke="#d9b04e" strokeWidth="2" />
+      <path d="M110 456L610 276L630 328L130 508Z" fill="url(#fc-legend-gold)" />
+      <path d="M110 456L610 276" stroke="#fff6d2" strokeWidth="2.4" />
+      <g fill="#c99a33">
+        {dust(7, 140, [-4, 526], [646, 66], 46)}
+        {dust(11, 90, [130, 508], [630, 328], 38)}
+        {dust(13, 60, [380, 60], [580, 40], 120)}
+      </g>
+      <g fill="none" strokeLinejoin="round" strokeLinecap="round">
+        {KINTSUGI.map((d) => (
+          <path key={d} d={d} stroke="#c9952c" strokeWidth="3" strokeOpacity=".75" />
+        ))}
+        {KINTSUGI.map((d) => (
+          <path key={`${d}h`} d={d} stroke="#fff1b8" strokeWidth="1" strokeOpacity=".9" />
+        ))}
+      </g>
+      <g stroke="#d6ad4c" strokeWidth="2.4" strokeLinecap="round">
+        {[
+          [214, 96],
+          [262, 150],
+          [318, 108],
+          [196, 200],
+          [52, 236],
+        ].map(([x, y]) => (
+          <path key={`${x}-${y}`} d={`M${x - 7} ${y}H${x + 7}M${x} ${y - 7}V${y + 7}`} />
+        ))}
+      </g>
+    </g>
+  );
+}
+
 function Bust({ id, light, mid, deep }: { id: string; light: string; mid: string; deep: string }) {
   return (
     <g id={id} mask="url(#fc-bust-fade)">
@@ -164,6 +247,16 @@ export function CardArtDefs() {
         <Engraving theme="artilheiro" />
         <Engraving theme="garcom" />
         <Engraving theme="paredao" />
+
+        <linearGradient id="fc-legend-gold" x1="0" y1="0" x2="1" y2=".4">
+          <stop offset="0" stopColor="#9c7020" />
+          <stop offset=".18" stopColor="#f6d77c" />
+          <stop offset=".34" stopColor="#c4912e" />
+          <stop offset=".52" stopColor="#fff0b0" />
+          <stop offset=".7" stopColor="#d8a943" />
+          <stop offset="1" stopColor="#8a6219" />
+        </linearGradient>
+        <LegendArt />
       </defs>
     </svg>
   );

@@ -16,6 +16,7 @@ import { AWARD_LABELS, getCurrentAwards, getPlayerAward } from "../lib/awards";
 import { InfoTip } from "../components/InfoTip";
 import { SpecialCardsInfo } from "../components/SpecialCardsInfo";
 import { formatClock, getRemainingMs } from "../lib/clock";
+import { COUNTDOWN_PHRASES, countdownStage, kickoffMs, splitRemaining } from "../lib/countdown";
 import { getMatchScore, matchLabel } from "../lib/cup";
 import { getHomeState, getLastChampion, listAwardWinners, type HomeState } from "../lib/home";
 import { dayLabel, sessionDate } from "../lib/nightSummary";
@@ -80,11 +81,52 @@ function RebalanceBanner({ players }: { players: Player[] }) {
   );
 }
 
-function countdownTitle(days: number): string {
-  if (days === 0) {
-    return "Hoje tem fut";
-  }
-  return days === 1 ? "É amanhã" : `Faltam ${days} dias`;
+const pad = (value: number) => String(value).padStart(2, "0");
+
+function NextGame({ date, isAdmin }: { date: string; isAdmin: boolean }) {
+  const now = useNow(true, 1000);
+  const remaining = kickoffMs(date) - now;
+  const stage = countdownStage(remaining);
+  const { days, hours, minutes, seconds } = splitRemaining(remaining);
+  const units =
+    stage === "final"
+      ? [{ key: "s", value: String(seconds), label: "segundos" }]
+      : [
+          ...(days > 0 ? [{ key: "d", value: String(days), label: days === 1 ? "dia" : "dias" }] : []),
+          { key: "h", value: pad(hours), label: "horas" },
+          { key: "m", value: pad(minutes), label: "min" },
+          { key: "s", value: pad(seconds), label: "seg" },
+        ];
+  const spoken = units.map((unit) => `${unit.value} ${unit.label}`).join(", ");
+
+  return (
+    <section className={`home-hero home-hero--countdown is-${stage}`}>
+      <PitchLines />
+      <p className="home-hero__eyebrow">
+        {stage === "kickoff" ? "Terça" : "Próximo jogo: terça"}, {dayLabel(sessionDate(date))}, às 20h15
+      </p>
+      <h1 className="home-hero__title">{COUNTDOWN_PHRASES[stage]}</h1>
+      {stage !== "kickoff" && (
+        <div className="countdown" role="timer" aria-label={`Faltam ${spoken}`}>
+          {units.map((unit) => (
+            <span key={unit.key} className={`countdown__unit countdown__unit--${unit.key}`}>
+              <span key={unit.key === "s" ? seconds : undefined} className="countdown__value" aria-hidden="true">
+                {unit.value}
+              </span>
+              <span className="countdown__label" aria-hidden="true">
+                {unit.label}
+              </span>
+            </span>
+          ))}
+        </div>
+      )}
+      {isAdmin && (
+        <Link to="/sorteio" className="button button--primary button--link home-hero__action">
+          Montar os times
+        </Link>
+      )}
+    </section>
+  );
 }
 
 function Hero({ state }: { state: HomeState }) {
@@ -125,20 +167,7 @@ function Hero({ state }: { state: HomeState }) {
     );
   }
 
-  return (
-    <section className="home-hero">
-      <PitchLines />
-      <h1 className="home-hero__title">{countdownTitle(state.days)}</h1>
-      <p className="home-hero__text">
-        {state.days === 0 ? "Terça" : "Próximo jogo: terça"}, {dayLabel(sessionDate(state.date))}
-      </p>
-      {isAdmin && (
-        <Link to="/sorteio" className="button button--primary button--link home-hero__action">
-          Montar os times
-        </Link>
-      )}
-    </section>
-  );
+  return <NextGame date={state.date} isAdmin={isAdmin} />;
 }
 
 export function HomePage() {

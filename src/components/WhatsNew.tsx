@@ -1,10 +1,15 @@
 import { useState } from "react";
 
 // Each release gets a new version, so everyone sees its sheet once.
-const VERSION = "2.2";
+const VERSION = "2.3";
 const SEEN_KEY = `whats-new-seen-${VERSION}`;
 
+// 2.2 went live the day before 2.3, so its news stays on the list for whoever missed it.
 const NEWS = [
+  { title: "OVR sem peso", text: "o OVR agora é a média simples das seis notas. Todas valem o mesmo, em qualquer posição." },
+  { title: "Carta de Legend nova", text: "mármore branco com detalhes em ouro, no estilo das cartas de ícone do FIFA." },
+  { title: "Contagem regressiva", text: "o Início mostra quanto falta para o jogo de terça, às 20h15, até o último segundo." },
+  { title: "Siglas na votação", text: "o rebalanceamento tem a lista do que é cada nota logo no topo." },
   { title: "Notas de 0 a 100", text: "as cartas agora têm seis notas: VEL, FIN, PAS, DRI, DEF e FIS. DRI e FIS são novas e começam em 50." },
   { title: "Notas de goleiro", text: "goleiro ganhou seis notas próprias: PAC, PAS, SAL, MNE, POS e REF." },
   { title: "Legends", text: "quem virou Legend sai das listas e do rebalanceamento, mas continua no ranking." },

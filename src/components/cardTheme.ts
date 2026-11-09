@@ -20,7 +20,7 @@ export const CARD_THEMES: Record<CardTheme, ThemeArt> = {
   gold: { stops: ["#fff3c4", "#e9cd7c", "#f8e7a8", "#c9a24a", "#e8cc7c", "#a67f2e"], rim: ["#fff8dc", "#8f6a22"], glow: "#fff4c9", ink: "#2b1f07", dark: false },
   silver: { stops: ["#ffffff", "#ccd2d8", "#f1f3f5", "#a3abb3", "#d5dade", "#7f878f"], rim: ["#ffffff", "#6c747c"], glow: "#ffffff", ink: "#191d22", dark: false },
   bronze: { stops: ["#f3cfa8", "#c98f5c", "#e9b98a", "#96603a", "#c48a58", "#6e4326"], rim: ["#fbdcbc", "#5e381f"], glow: "#ffd9b3", ink: "#23130a", dark: false },
-  legend: { stops: ["#ffffff", "#ece6d6", "#fbf8f0", "#d6ccb2", "#f2ecdc", "#b8aa86"], rim: ["#fff4c9", "#9a7424"], glow: "#fff8e3", ink: "#3a2a08", dark: false },
+  legend: { stops: ["#ffffff", "#f0eee8", "#fbfaf6", "#e2ded4", "#f5f3ee", "#d3cec2"], rim: ["#fff2b8", "#a2751f"], glow: "#fff6d8", ink: "#2e2006", dark: false },
   craque: { stops: ["#2c2616", "#14110a", "#2a2412", "#0a0806", "#1b170d", "#050403"], rim: ["#fbeab0", "#7d5f1e"], glow: "#f3d98a", ink: "#f3d98a", dark: true },
   artilheiro: { stops: ["#d8392b", "#8f1019", "#c22a24", "#5b0812", "#94131b", "#2c040b"], rim: ["#ffb98a", "#5c0a10"], glow: "#ff9a4d", ink: "#fff0d8", dark: true },
   garcom: { stops: ["#16a583", "#0a5e54", "#129476", "#063c38", "#0b6459", "#032523"], rim: ["#9df3d4", "#04403a"], glow: "#7cf0c8", ink: "#e9fff6", dark: true },

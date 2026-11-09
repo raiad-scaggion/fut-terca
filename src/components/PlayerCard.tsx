@@ -31,7 +31,8 @@ export function PlayerCard({ player, award, awardMonth, photo, onClick, size = "
   const stats = roleStats(player);
   const theme = CARD_THEMES[key];
   const tone = theme.dark ? "dark" : "light";
-  const rule = `${theme.ink}66`;
+  const legendCard = key === "legend";
+  const rule = legendCard ? "#b8862c" : `${theme.ink}66`;
   const club = getClub(player.club);
   const stamp = award ? [AWARD_LABELS[award], awardMonth].filter(Boolean).join(" · ").toUpperCase() : "";
   const className = `fut-card fut-card--${size}${player.active === false ? " is-inactive" : ""}`;
@@ -42,6 +43,7 @@ export function PlayerCard({ player, award, awardMonth, photo, onClick, size = "
       <g clipPath="url(#fc-shape)">
         <rect width="570" height="910" fill={`url(#fc-lines-${tone})`} />
         {award && <use href={`#fc-engrave-${award}`} opacity=".2" />}
+        {legendCard && <use href="#fc-legend-art" />}
         <rect width="570" height="480" fill={`url(#fc-glow-${key})`} />
         <rect y="480" width="570" height="430" fill={`url(#fc-lower-${tone})`} />
         <rect width="570" height="910" fill={`url(#fc-sheen-${tone})`} />
@@ -53,8 +55,28 @@ export function PlayerCard({ player, award, awardMonth, photo, onClick, size = "
           <use href={`#fc-bust-on-${tone}`} />
         )}
       </g>
-      <path d={CARD_PATH} transform="translate(285 455) scale(.952 .958) translate(-285 -455)" fill="none" stroke={rule} strokeWidth="1.6" />
-      <path d={CARD_PATH} fill="none" stroke={`url(#fc-rim-${key})`} strokeWidth="4" />
+      <path
+        d={CARD_PATH}
+        transform="translate(285 455) scale(.952 .958) translate(-285 -455)"
+        fill="none"
+        stroke={rule}
+        strokeWidth={legendCard ? 2.6 : 1.6}
+      />
+      <path d={CARD_PATH} fill="none" stroke={`url(#fc-rim-${key})`} strokeWidth={legendCard ? 11 : 4} />
+      {legendCard && (
+        <>
+          <path d={CARD_PATH} fill="none" stroke="#fff6cc" strokeOpacity=".8" strokeWidth="1.4" />
+          <g fill="#c99a33">
+            {[262, 285, 308].map((x, index) => (
+              <path
+                key={x}
+                transform={`translate(${x} ${index === 1 ? 54 : 60}) scale(${index === 1 ? 1.15 : 0.9})`}
+                d="M0 -9L2.6 -2.8L9 -2.8L3.8 1.2L5.8 7.6L0 3.6L-5.8 7.6L-3.8 1.2L-9 -2.8L-2.6 -2.8Z"
+              />
+            ))}
+          </g>
+        </>
+      )}
 
       <text x="126" y="182" textAnchor="middle" className="fut-card__ovr" fill={theme.ink}>
         {displayOvr(player)}

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ExportImage } from "../components/ExportImage";
 import { EmptyState, Page } from "../components/Page";
+import { StatGlossary } from "../components/StatGlossary";
 import { StatInputs } from "../components/StatInputs";
 import { useAuth } from "../data/authContext";
 import { usePlayers } from "../data/players";
@@ -413,6 +414,7 @@ export function RebalanceamentoPage() {
   return (
     <Page title="Rebalanceamento">
       {info}
+      {ready && <StatGlossary />}
       {body()}
     </Page>
   );

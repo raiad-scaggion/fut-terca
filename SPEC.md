@@ -318,7 +318,7 @@ Design: `docs/superpowers/specs/2026-11-09-rebalanceamento-design.md`.
 
 - Six stats on a 0 to 100 scale. Outfield: VEL, FIN, PAS, DRI, DEF, FIS. Keepers: PAC, PAS, SAL, MNE, POS, REF. Labels and hints live in `LINE_STATS` and `KEEPER_STATS` in `src/lib/players.ts`.
 - Old ratings convert × 10. Drible and Físico start at 50. Keeper stats start at 99 until someone sets them.
-- OVR is the weighted average of the role's six stats, capped at 99. Weights per position are `LINE_WEIGHTS` and `KEEPER_WEIGHTS`, shown in the Glossário.
+- OVR is the plain average of the role's six stats, all with the same weight, capped at 99. Since 2.3 there are no per-position weights.
 
 ### 14.2 Legends
 
@@ -334,4 +334,4 @@ Design: `docs/superpowers/specs/2026-11-09-rebalanceamento-design.md`.
 
 ### 14.4 Glossário (`/glossario`)
 
-- Every abbreviation in the app: stats, positions, OVR weights, card colors, special cards, Legend, Rebalanceamento and the Ranking table columns. Linked from the account menu, the home screen and the "i" tips.
+- Every abbreviation in the app: stats, positions, OVR, card colors, special cards, Legend, Rebalanceamento and the Ranking table columns. Linked from the account menu, the home screen and the "i" tips.

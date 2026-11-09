@@ -103,35 +103,37 @@ describe("normalizePlayer", () => {
 });
 
 describe("OVR and card tiers", () => {
-  it("weighs a meio by passing and dribbling", () => {
-    // Neto's old 7/6/8/8: .15*70 + .15*60 + .30*80 + .25*50 + .05*80 + .10*50 = 65
+  it("averages the six stats with the same weight", () => {
+    // Neto's old 7/6/8/8: (70 + 60 + 80 + 50 + 80 + 50) / 6 = 65
     const neto = normalizePlayer("p69", { linePosition: "meio", ratings: { speed: 7, finishing: 6, defense: 8, passing: 8 } });
     expect(levelScore(neto)).toBeCloseTo(65, 5);
     expect(displayOvr(neto)).toBe(65);
     expect(cardTier(neto)).toBe("silver");
   });
 
-  it("weighs a defesa mostly by defense", () => {
-    // .15*60 + .05*70 + .10*80 + .05*50 + .45*80 + .20*50 = 69
-    expect(displayOvr(withLine("defesa", line(60, 70, 80, 50, 80, 50)))).toBe(69);
+  it("gives the same OVR for the same stats in any position", () => {
+    const stats = line(60, 70, 80, 50, 80, 50);
+    expect(displayOvr(withLine("defesa", stats))).toBe(65);
+    expect(displayOvr(withLine("ataque", stats))).toBe(65);
+    expect(displayOvr(withLine("meio", stats))).toBe(65);
   });
 
-  it("weighs an ataque by finishing and ignores defense", () => {
-    // .20*90 + .35*95 + .10*80 + .20*85 + 0*30 + .15*70 = 86.75
+  it("counts defense for an ataque too", () => {
+    // (90 + 95 + 80 + 85 + 30 + 70) / 6 = 75
     const xana = withLine("ataque", line(90, 95, 80, 85, 30, 70));
-    expect(displayOvr(xana)).toBe(87);
+    expect(displayOvr(xana)).toBe(75);
     expect(cardTier(xana)).toBe("gold");
-    expect(displayOvr(withLine("ataque", line(90, 95, 80, 85, 0, 70)))).toBe(87);
+    expect(displayOvr(withLine("ataque", line(90, 95, 80, 85, 0, 70)))).toBe(70);
   });
 
-  it("weighs a keeper by the keeper set only", () => {
-    // .05*60 + .05*50 + .25*90 + .20*80 + .20*85 + .25*95 = 84.75
+  it("averages a keeper by the keeper set only", () => {
+    // (60 + 50 + 90 + 80 + 85 + 95) / 6 = 76.67
     const keeper = {
       role: "keeper" as const,
       linePosition: "meio" as const,
       stats: { line: flat(10), keeper: { pac: 60, pas: 50, sal: 90, mne: 80, pos: 85, ref: 95 } },
     };
-    expect(displayOvr(keeper)).toBe(85);
+    expect(displayOvr(keeper)).toBe(77);
   });
 
   it("caps OVR at 99", () => {

@@ -190,6 +190,199 @@ body {
   margin-top: 16px;
 }
 
+/* Countdown to kickoff: each stage is a little louder than the one before. */
+.home-hero--countdown {
+  --count-color: var(--text, #f3f1ea);
+  transition: background 0.6s;
+}
+
+.home-hero--countdown::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(90% 80% at 50% 40%, rgb(255 40 40 / 0.45), transparent 70%);
+  opacity: 0;
+}
+
+.home-hero__eyebrow {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.home-hero--countdown .home-hero__title {
+  font-size: 2.75rem;
+  line-height: 1;
+}
+
+.home-hero--countdown.is-kickoff .home-hero__title {
+  font-size: 4.5rem;
+}
+
+.countdown {
+  display: flex;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.countdown__unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 52px;
+}
+
+.countdown__value {
+  display: block;
+  color: var(--count-color);
+  font-family: var(--font-display);
+  font-size: 3.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 0.9;
+  transition: color 0.6s;
+}
+
+.countdown__label {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.home-hero--countdown.is-warm {
+  --count-color: var(--brand);
+}
+
+.home-hero--countdown.is-hot {
+  --count-color: #f2b84b;
+}
+
+.home-hero--countdown.is-hot .countdown__unit--s .countdown__value {
+  animation: count-pulse 1s ease-out;
+}
+
+.home-hero--countdown.is-hotter {
+  --count-color: #f39340;
+  background: radial-gradient(120% 110% at 50% 0, #4d3a1f, #1a150f 58%, var(--bg));
+}
+
+.home-hero--countdown.is-hotter .countdown__unit--s .countdown__value,
+.home-hero--countdown.is-crazy .countdown__unit--s .countdown__value {
+  animation: count-pop 0.5s ease-out;
+}
+
+.home-hero--countdown.is-crazy {
+  --count-color: #f5643a;
+  background: radial-gradient(120% 110% at 50% 0, #5c2a17, #1c120e 58%, var(--bg));
+}
+
+.home-hero--countdown.is-crazy .home-hero__title {
+  animation: count-wobble 0.6s ease-in-out infinite;
+}
+
+.home-hero--countdown.is-insane,
+.home-hero--countdown.is-final {
+  --count-color: #ff4040;
+  background: radial-gradient(120% 110% at 50% 0, #6b1717, #1f0d0d 58%, var(--bg));
+}
+
+.home-hero--countdown.is-insane::before {
+  animation: count-flash 1s ease-in-out infinite;
+}
+
+.home-hero--countdown.is-insane .countdown {
+  animation: count-shake 0.35s linear infinite;
+}
+
+.home-hero--countdown.is-insane .countdown__unit--s .countdown__value {
+  animation: count-pop 0.4s ease-out;
+}
+
+.home-hero--countdown.is-insane .home-hero__title,
+.home-hero--countdown.is-final .home-hero__title {
+  text-transform: uppercase;
+  animation: count-wobble 0.35s ease-in-out infinite;
+}
+
+.home-hero--countdown.is-final::before {
+  animation: count-flash 0.5s ease-in-out infinite;
+}
+
+.home-hero--countdown.is-final .countdown {
+  animation: count-shake 0.18s linear infinite;
+}
+
+.home-hero--countdown.is-final .countdown__value {
+  font-size: 8rem;
+  animation: count-slam 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes count-pulse {
+  from {
+    opacity: 0.55;
+  }
+}
+
+@keyframes count-pop {
+  from {
+    transform: scale(1.25);
+  }
+}
+
+@keyframes count-slam {
+  from {
+    transform: scale(1.8);
+    opacity: 0.3;
+  }
+}
+
+@keyframes count-wobble {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(-1.5deg);
+  }
+  75% {
+    transform: rotate(1.5deg);
+  }
+}
+
+@keyframes count-shake {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-2px, 1px);
+  }
+  50% {
+    transform: translate(2px, -1px);
+  }
+  75% {
+    transform: translate(-1px, -2px);
+  }
+}
+
+@keyframes count-flash {
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-hero--countdown *,
+  .home-hero--countdown::before {
+    animation: none !important;
+  }
+}
+
 .home-score {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
@@ -1973,32 +2166,31 @@ button.fut-card {
   color: #cd8a4f;
 }
 
-.glossary__table-wrap {
-  margin-top: 12px;
-  overflow-x: auto;
+.stat-glossary {
+  margin: 0 0 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
 }
 
-.glossary__table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.glossary__table caption {
-  margin-bottom: 4px;
-  color: var(--muted);
-  text-align: left;
-}
-
-.glossary__table th,
-.glossary__table td {
-  padding: 6px 4px;
-  text-align: center;
-  border-bottom: 1px solid var(--border);
-}
-
-.glossary__table th[scope="row"] {
+.stat-glossary__summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
   color: var(--brand);
-  text-align: left;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.stat-glossary__body {
+  padding: 0 12px 12px;
+}
+
+.stat-glossary__title {
+  margin: 12px 0 0;
+  font-size: 0.875rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }

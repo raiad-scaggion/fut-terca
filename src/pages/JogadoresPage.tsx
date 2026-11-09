@@ -293,9 +293,8 @@ export function JogadoresPage() {
       info={
         <InfoTip label="O que é o OVR e as cores das cartas">
           <p>
-            <strong>OVR</strong> é a nota geral da carta, até 99. Ela junta as seis notas do jogador, de 0 a 100, com pesos
-            que mudam com a posição: no ataque pesa mais a finalização, no meio o passe e o drible, na defesa a defesa. O
-            goleiro tem notas próprias.
+            <strong>OVR</strong> é a nota geral da carta, até 99. É a média das seis notas do jogador, de 0 a 100, todas
+            com o mesmo peso. O goleiro tem notas próprias.
           </p>
           <p>
             O que cada sigla quer dizer está no <Link to="/glossario">Glossário</Link>.

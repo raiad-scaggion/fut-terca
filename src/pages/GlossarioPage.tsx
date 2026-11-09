@@ -1,31 +1,15 @@
 import { Page } from "../components/Page";
 import { KEEPER_COLUMNS, LINE_COLUMNS } from "../components/rankingColumns";
 import { SpecialCardsInfo } from "../components/SpecialCardsInfo";
-import { KEEPER_STATS, KEEPER_WEIGHTS, LINE_STATS, LINE_WEIGHTS, type LinePosition, type StatDef } from "../lib/players";
+import { StatList } from "../components/StatGlossary";
+import { KEEPER_STATS, LINE_STATS } from "../lib/players";
 
-const POSITIONS: { code: string; name: string; key?: LinePosition }[] = [
-  { code: "ATA", name: "Ataque", key: "ataque" },
-  { code: "MEI", name: "Meio", key: "meio" },
-  { code: "DEF", name: "Defesa", key: "defesa" },
+const POSITIONS: { code: string; name: string }[] = [
+  { code: "ATA", name: "Ataque" },
+  { code: "MEI", name: "Meio" },
+  { code: "DEF", name: "Defesa" },
   { code: "GOL", name: "Goleiro" },
 ];
-
-const percent = (weight: number) => `${Math.round(weight * 100)}%`;
-
-function StatList({ defs }: { defs: StatDef<string>[] }) {
-  return (
-    <dl className="glossary__list">
-      {defs.map(({ key, short, label, hint }) => (
-        <div key={key} className="glossary__item">
-          <dt>
-            <span className="glossary__code">{short}</span> {label}
-          </dt>
-          <dd>{hint}</dd>
-        </div>
-      ))}
-    </dl>
-  );
-}
 
 function ColumnList({ columns }: { columns: { key: string; label: string; name: string }[] }) {
   return (
@@ -70,57 +54,7 @@ export function GlossarioPage() {
 
         <section className="glossary__section">
           <h2 className="draw-section__title">OVR</h2>
-          <p>
-            É a nota geral da carta. Sai das seis notas, e cada uma pesa diferente conforme a posição. O máximo é 99.
-          </p>
-          <div className="glossary__table-wrap">
-            <table className="glossary__table">
-              <caption>Peso de cada nota na linha</caption>
-              <thead>
-                <tr>
-                  <th scope="col">Posição</th>
-                  {LINE_STATS.map(({ key, short }) => (
-                    <th key={key} scope="col">
-                      {short}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {POSITIONS.filter((position) => position.key).map(({ code, key }) => (
-                  <tr key={code}>
-                    <th scope="row">{code}</th>
-                    {LINE_STATS.map((stat) => (
-                      <td key={stat.key}>{percent(LINE_WEIGHTS[key!][stat.key])}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="glossary__table-wrap">
-            <table className="glossary__table">
-              <caption>Peso de cada nota no gol</caption>
-              <thead>
-                <tr>
-                  <th scope="col">Posição</th>
-                  {KEEPER_STATS.map(({ key, short }) => (
-                    <th key={key} scope="col">
-                      {short}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th scope="row">GOL</th>
-                  {KEEPER_STATS.map((stat) => (
-                    <td key={stat.key}>{percent(KEEPER_WEIGHTS[stat.key])}</td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <p>É a nota geral da carta: a média das seis notas, todas com o mesmo peso. O máximo é 99.</p>
         </section>
 
         <section className="glossary__section">
