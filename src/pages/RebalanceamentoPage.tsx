@@ -31,8 +31,11 @@ import {
   publishedCount,
   roleDefs,
   startingValues,
+  VOTER_STATES,
+  voterStatus,
   type Average,
   type Round,
+  type VoterState,
   type VotesByPlayer,
 } from "../lib/rebalance";
 
@@ -192,6 +195,77 @@ function Voting({ players, voteKey, ownPlayerId, votes, sent }: VotingProps) {
 
 function shownEmail(key: string): string {
   return key.split(",").join(".");
+}
+
+const VOTER_GROUPS: Record<VoterState, string> = {
+  sent: "Enviaram",
+  complete: "Terminaram, mas não enviaram",
+  partial: "Votando",
+  none: "Não começaram",
+  unlinked: "Sem jogador ligado, não podem votar",
+};
+
+const WHEN = new Intl.DateTimeFormat("pt-BR", {
+  timeZone: "America/Sao_Paulo",
+  day: "2-digit",
+  month: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+// Only the owner can read everyone's votes, so only the owner ever sees this.
+function VoterStatus({ players }: { players: Player[] }) {
+  const { admins, adminPlayers, votes, sent } = useOwnerRebalance(true);
+  if (admins.loading || adminPlayers.loading || votes.loading || sent.loading || admins.error || votes.error) {
+    return null;
+  }
+  const rows = voterStatus(admins.value, adminPlayers.value, players, votes.value, sent.value);
+  const sentCount = rows.filter((row) => row.state === "sent").length;
+
+  return (
+    <section className="voter-status" aria-labelledby="voter-status-title">
+      <div className="voter-status__head">
+        <h2 id="voter-status-title" className="voter-status__title">
+          Quem já votou
+        </h2>
+        <span className="voter-status__private">Só você vê</span>
+      </div>
+      <p className="voter-status__summary">
+        <strong>{sentCount}</strong> de {rows.length} admins enviaram.
+      </p>
+      {VOTER_STATES.map((state) => {
+          const group = rows.filter((row) => row.state === state);
+          if (group.length === 0) {
+            return null;
+          }
+          return (
+            <div key={state} className={`voter-status__group is-${state}`}>
+              <h3 className="voter-status__label">
+                {VOTER_GROUPS[state]} <span>({group.length})</span>
+              </h3>
+              <ul className="voter-status__list">
+                {group.map((row) => (
+                  <li key={row.key} className="voter-row">
+                    <span className="voter-row__name">{row.name ?? shownEmail(row.key)}</span>
+                    {state !== "unlinked" && (
+                      <span className="voter-row__count">
+                        {row.done}/{row.total}
+                      </span>
+                    )}
+                    {state !== "unlinked" && (
+                      <span className="voter-row__bar" aria-hidden="true">
+                        <span style={{ width: `${row.total ? (row.done / row.total) * 100 : 0}%` }} />
+                      </span>
+                    )}
+                    {row.lastVoteAt && <span className="voter-row__when">Último voto: {WHEN.format(row.lastVoteAt)}</span>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+    </section>
+  );
 }
 
 type OwnerPanelProps = { players: Player[]; round: Round };
@@ -414,6 +488,7 @@ export function RebalanceamentoPage() {
   return (
     <Page title="Rebalanceamento">
       {info}
+      {ready && isOwner && !playersLoading && <VoterStatus players={players} />}
       {ready && <StatGlossary />}
       {body()}
     </Page>

@@ -90,6 +90,50 @@ export function adminProgress(players: Player[], ownPlayerId: string | null, vot
   return { done, total: list.length, remaining: list.length - done };
 }
 
+export type VoterState = "sent" | "complete" | "partial" | "none" | "unlinked";
+
+export const VOTER_STATES: VoterState[] = ["sent", "complete", "partial", "none", "unlinked"];
+
+export type VoterRow = {
+  key: string;
+  name: string | null;
+  state: VoterState;
+  done: number;
+  total: number;
+  lastVoteAt: number | null;
+};
+
+// Where each admin stands, for the owner only. An admin without a linked player can't vote yet.
+export function voterStatus(
+  admins: string[],
+  adminPlayers: Record<string, string>,
+  players: Player[],
+  votes: VotesByAdmin,
+  sent: Record<string, number>,
+): VoterRow[] {
+  const byId = new Map(players.map((player) => [player.id, player]));
+  const rows = admins.map((key): VoterRow => {
+    const ownId = adminPlayers[key] ?? null;
+    const own = votes[key] ?? {};
+    const { done, total } = adminProgress(players, ownId, own);
+    const times = Object.values(own).map((vote) => vote.at).filter((at) => at > 0);
+    const state: VoterState = sent[key]
+      ? "sent"
+      : !ownId
+        ? "unlinked"
+        : total > 0 && done === total
+          ? "complete"
+          : done > 0
+            ? "partial"
+            : "none";
+    return { key, name: (ownId && byId.get(ownId)?.name) || null, state, done, total, lastVoteAt: times.length ? Math.max(...times) : null };
+  });
+  const label = (row: VoterRow) => row.name ?? row.key;
+  return rows.sort(
+    (a, b) => VOTER_STATES.indexOf(a.state) - VOTER_STATES.indexOf(b.state) || b.done - a.done || label(a).localeCompare(label(b)),
+  );
+}
+
 // What the admin sees in the sheet: their saved vote, or the player's current numbers.
 export function startingValues(player: Player, vote: Vote | undefined): Record<string, number> {
   return isCompleteVote(player, vote)

@@ -11,6 +11,7 @@ import {
   publishedCount,
   publishPaths,
   startingValues,
+  voterStatus,
   type Vote,
 } from "./rebalance";
 
@@ -124,5 +125,31 @@ describe("computeAverages", () => {
       "Kadu (GOL) 91: PAC 91 · PAS 91 · SAL 91 · MNE 91 · POS 91 · REF 91",
     ]);
     expect(exportText(computeAverages([mose], {}, {}))).toContain("(sem votos, ficam as notas atuais)");
+  });
+});
+
+describe("voterStatus", () => {
+  const adminPlayers = { "a@x,com": "p63", "b@x,com": "p37", "c@x,com": "k1", "d@x,com": "p63" };
+  const votes = {
+    "a@x,com": { p37: lineVote(70, 70, 70, 70, 70, 70), k1: { ...keeperVote(70), at: 50 } },
+    "b@x,com": { p63: { ...lineVote(70, 70, 70, 70, 70, 70), at: 30 }, k1: { values: { ref: 70 }, at: 40 } },
+  };
+
+  it("sorts admins from sent to not started, with unlinked last", () => {
+    const rows = voterStatus(["e@x,com", "c@x,com", "b@x,com", "a@x,com", "d@x,com"], adminPlayers, players, votes, { "d@x,com": 9 });
+    expect(rows.map((row) => [row.key, row.state, row.done, row.total])).toEqual([
+      ["d@x,com", "sent", 0, 2],
+      ["a@x,com", "complete", 2, 2],
+      ["b@x,com", "partial", 1, 2],
+      ["c@x,com", "none", 0, 2],
+      ["e@x,com", "unlinked", 0, 3],
+    ]);
+  });
+
+  it("names the admin by their player and keeps the last vote time, counting incomplete ones", () => {
+    const rows = voterStatus(["a@x,com", "b@x,com", "e@x,com"], adminPlayers, players, votes, {});
+    expect(rows.find((row) => row.key === "a@x,com")).toMatchObject({ name: "Xana", lastVoteAt: 50 });
+    expect(rows.find((row) => row.key === "b@x,com")).toMatchObject({ name: "Mose", lastVoteAt: 40 });
+    expect(rows.find((row) => row.key === "e@x,com")).toMatchObject({ name: null, lastVoteAt: null });
   });
 });

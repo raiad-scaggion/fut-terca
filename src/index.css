@@ -2018,6 +2018,128 @@ button.fut-card {
   color: var(--muted);
 }
 
+.voter-status {
+  margin: 0 0 16px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--brand);
+  border-radius: 8px;
+}
+
+.voter-status__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.voter-status__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.voter-status__private {
+  padding: 2px 8px;
+  color: var(--brand);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid var(--brand);
+  border-radius: 999px;
+}
+
+.voter-status__summary {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.voter-status__summary strong {
+  color: var(--text);
+}
+
+.voter-status__group {
+  margin-top: 14px;
+}
+
+.voter-status__label {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.voter-status__label span {
+  font-weight: 500;
+}
+
+.voter-status__group.is-sent .voter-status__label {
+  color: var(--success);
+}
+
+.voter-status__group.is-complete .voter-status__label,
+.voter-status__group.is-partial .voter-status__label {
+  color: var(--brand);
+}
+
+.voter-status__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.voter-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 12px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.voter-row:last-child {
+  border-bottom: 0;
+}
+
+.voter-row__name {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.voter-row__count {
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.voter-row__bar {
+  grid-column: 1 / -1;
+  height: 4px;
+  overflow: hidden;
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.voter-row__bar span {
+  display: block;
+  height: 100%;
+  background: var(--brand);
+}
+
+.voter-status__group.is-sent .voter-row__bar span {
+  background: var(--success);
+}
+
+.voter-row__when {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
 .rebalance-admins {
   margin: 0;
   padding: 0;
