@@ -108,6 +108,7 @@ A fixed bar above the tab bar shows the live score and clock on every page but I
 - The event log is shown with undo.
 - There are no penalties. A tied semi or 3rd place match goes to the team that finished higher in the group stage.
 - The final can't end tied. If it's level when time runs out, it goes on with "Gol de ouro": the first goal wins, and an admin then ends the match.
+- Copa has a night picker, so anyone can open a past night and an admin can fix its matches later (an assist someone forgot to mark, say). The chosen night stays in the URL as `?noite=<sessionId>`.
 - An admin can fix a finished match in place: its events change while it stays finished, and "Concluir correção" re-syncs the cup. Pending knockout matches follow the new result. Rounds already started keep their matchups, and the screen says so. A fixed final changes the champion.
 - The screen stays awake (Wake Lock) while open.
 

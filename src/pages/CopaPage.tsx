@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { InfoTip } from "../components/InfoTip";
 import { ExportImage } from "../components/ExportImage";
 import { EmptyState, Page } from "../components/Page";
@@ -134,12 +134,20 @@ export function CopaPage() {
   const { sessions, loading } = useSessions();
   const live = useLive();
   const [starting, setStarting] = useState<Match | null>(null);
+  const [params, setParams] = useSearchParams();
 
   const byId = useMemo(() => new Map(players.map((player) => [player.id, player])), [players]);
-  const session = useMemo(() => {
+  const nights = useMemo(
+    () => [...sessions].sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt ?? 0) - (a.createdAt ?? 0)),
+    [sessions],
+  );
+  const current = useMemo(() => {
     const latest = [...sessions].sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))[0];
     return sessions.find((item) => item.id === live.sessionId) ?? latest ?? null;
   }, [sessions, live.sessionId]);
+  // A past night opens from the picker, so an admin can fix a match someone forgot to mark.
+  const session = sessions.find((item) => item.id === params.get("noite")) ?? current;
+  const past = Boolean(session && current && session.id !== current.id);
 
   if (loading || live.loading) {
     return (
@@ -166,7 +174,36 @@ export function CopaPage() {
   const row = (match: Match) => <MatchRow key={match.id} session={session} match={match} canStart={canStart} onStart={setStarting} />;
 
   return (
-    <Page title="Copa" subtitle={champion ? "A copa acabou" : "Fase de grupos, mata-mata e o campeão da noite"}>
+    <Page
+      title="Copa"
+      subtitle={past ? `Noite de ${dayLabel(sessionDate(session.date))}` : champion ? "A copa acabou" : "Fase de grupos, mata-mata e o campeão da noite"}
+    >
+      {nights.length > 1 && (
+        <label className="form-field cup-night">
+          <span className="form-field__label">Noite</span>
+          <select
+            className="text-input"
+            value={session.id}
+            onChange={(event) => setParams(event.target.value === current?.id ? {} : { noite: event.target.value }, { replace: true })}
+          >
+            {nights.map((night) => (
+              <option key={night.id} value={night.id}>
+                {dayLabel(sessionDate(night.date))}
+                {night.id === current?.id ? " (atual)" : ""}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+
+      {isAdmin && past && (
+        <p className="draw-hint cup-night__hint">
+          Esqueceram de marcar algum lance? Abra a partida e toque em Corrigir partida. Se ninguém lembra em qual jogo saiu uma
+          assistência ou defesa, pode marcar em qualquer partida do time do jogador nessa noite, que o total dele fica certo. Gol
+          precisa ir na partida certa, porque muda o placar.
+        </p>
+      )}
+
       {champion && (
         <section className="champion">
           <span className="champion__label">Campeão da noite</span>

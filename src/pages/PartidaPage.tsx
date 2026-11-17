@@ -393,7 +393,7 @@ function MatchScreen({ session, match, byId, isAdmin }: MatchScreenProps) {
                 Concluir correção
               </button>
             ))}
-          <Link to="/copa" className="button button--ghost button--link match__wide">
+          <Link to={`/copa?noite=${session.id}`} className="button button--ghost button--link match__wide">
             Voltar para a Copa
           </Link>
         </div>

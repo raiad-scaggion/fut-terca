@@ -1386,6 +1386,14 @@ body {
   width: 100%;
 }
 
+.cup-night {
+  margin-bottom: 12px;
+}
+
+.cup-night__hint {
+  margin: 0 0 16px;
+}
+
 .draw-hint,
 .draw-keepers {
   margin: 0;
