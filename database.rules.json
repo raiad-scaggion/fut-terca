@@ -44,11 +44,18 @@
             "$matchId": {
               "events": {
                 "$eventId": {
-                  ".validate": "data.exists() || (newData.child('logId').isString() && !root.child('futerca/log').child(newData.child('logId').val()).exists() && newData.parent().parent().parent().parent().parent().parent().child('log').child(newData.child('logId').val()).child('uid').val() === auth.uid)"
+                  ".validate": "(data.exists() && newData.child('type').val() === data.child('type').val() && newData.child('playerId').val() === data.child('playerId').val() && newData.child('teamId').val() === data.child('teamId').val()) || (newData.child('logId').isString() && !root.child('futerca/log').child(newData.child('logId').val()).exists() && newData.parent().parent().parent().parent().parent().parent().child('log').child(newData.child('logId').val()).child('uid').val() === auth.uid)"
                 }
               }
             }
           }
+        }
+      },
+      "live": {
+        ".read": true,
+        ".write": "auth != null && auth.token.email_verified === true && root.child('futerca/admins').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true",
+        "sessionId": {
+          ".validate": "!data.exists() || data.val() === newData.val() || root.child('futerca/sessions').child(data.val()).child('status').val() !== 'live'"
         }
       },
       "adminPlayers": {

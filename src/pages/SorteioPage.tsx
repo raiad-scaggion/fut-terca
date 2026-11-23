@@ -294,7 +294,9 @@ export function SorteioPage() {
     setError("");
     setConfirming(true);
     try {
-      await confirmSession(weekly);
+      if (!(await confirmSession(weekly))) {
+        setError("Outro admin já confirmou os times. A noite dele já está valendo.");
+      }
     } catch {
       setError(WRITE_ERROR);
     } finally {

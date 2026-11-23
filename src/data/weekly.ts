@@ -32,13 +32,23 @@ function today(): string {
   return new Date().toLocaleDateString("sv-SE");
 }
 
-// One multi-path write, so a session and the pointer to it can't exist without each other.
-export async function confirmSession(weekly: Weekly): Promise<void> {
+// One multi-path write, so a session and the pointer to it can't exist without each other. The rules
+// refuse it while `live/sessionId` names a night still live, so two admins confirming at once make one night.
+// Returns false when that happened.
+export async function confirmSession(weekly: Weekly): Promise<boolean> {
   const sessionId = push(dbRef("sessions")).key ?? "";
-  await writeWithLog({ action: "session.create", sessionId }, () => ({
-    [`sessions/${sessionId}`]: buildSession(weekly, today(), serverTimestamp()),
-    "live/sessionId": sessionId,
-  }));
+  try {
+    await writeWithLog({ action: "session.create", sessionId }, () => ({
+      [`sessions/${sessionId}`]: buildSession(weekly, today(), serverTimestamp()),
+      "live/sessionId": sessionId,
+    }));
+    return true;
+  } catch (error) {
+    if (String(error).includes("PERMISSION_DENIED")) {
+      return false;
+    }
+    throw error;
+  }
 }
 
 export async function cancelSession(sessionId: string): Promise<void> {
