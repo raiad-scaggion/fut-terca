@@ -1,36 +1,18 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { DeletePlayer } from "../components/DeletePlayer";
 import { EmptyState, Page } from "../components/Page";
 import { PhotoEditor } from "../components/PhotoEditor";
 import { PlayerCard } from "../components/PlayerCard";
+import { PlayerForm } from "../components/PlayerForm";
 import { useAuth } from "../data/authContext";
 import { removePhoto, usePhotos } from "../data/photos";
-import { savePlayer, setLegend, usePlayers } from "../data/players";
+import { setLegend, usePlayers } from "../data/players";
 import { useSessions } from "../data/sessions";
 import { getCurrentAwards, getPlayerAward } from "../lib/awards";
 import { InfoTip } from "../components/InfoTip";
 import { SpecialCardsInfo } from "../components/SpecialCardsInfo";
-import { StatInputs } from "../components/StatInputs";
-import { CLUBS } from "../lib/clubs";
-import { COUNTRIES, DEFAULT_COUNTRY } from "../lib/countries";
-import {
-  cardTier,
-  displayOvr,
-  isStatText,
-  KEEPER_STATS,
-  LINE_STATS,
-  newPlayerStats,
-  normalizeName,
-  positionCode,
-  statsFromText,
-  statText,
-  type LinePosition,
-  type Player,
-  type PlayerRole,
-  type PlayerStats,
-  type StatText,
-} from "../lib/players";
+import { normalizeName, type Player } from "../lib/players";
 import { isPlayerInSessions } from "../lib/session";
 import { computeStats, formatAverage, monthLabel, perGame, zeroBaselines } from "../lib/stats";
 
@@ -44,74 +26,6 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "inactive", label: "Inativos" },
 ];
 
-const POSITIONS: { value: LinePosition; label: string }[] = [
-  { value: "defesa", label: "Defesa" },
-  { value: "meio", label: "Meio" },
-  { value: "ataque", label: "Ataque" },
-];
-
-const TIER_LABELS: Record<"gold" | "silver" | "bronze", string> = {
-  gold: "Ouro",
-  silver: "Prata",
-  bronze: "Bronze",
-};
-
-type FormDraft = {
-  id?: string;
-  name: string;
-  role: PlayerRole;
-  linePosition: LinePosition;
-  nationality: string;
-  club: string;
-  // Both sets are kept, so switching role in the form never loses the other set.
-  stats: PlayerStats;
-  lineText: StatText;
-  keeperText: StatText;
-  isMonthly: boolean;
-  joinDate: string;
-  active: boolean;
-};
-
-function statsDraft(stats: PlayerStats) {
-  return { stats, lineText: statText(stats.line), keeperText: statText(stats.keeper) };
-}
-
-function draftStats(draft: FormDraft): PlayerStats {
-  return {
-    line: statsFromText(LINE_STATS, draft.lineText, draft.stats.line),
-    keeper: statsFromText(KEEPER_STATS, draft.keeperText, draft.stats.keeper),
-  };
-}
-
-function createEmptyDraft(): FormDraft {
-  return {
-    name: "",
-    role: "line",
-    linePosition: "meio",
-    nationality: DEFAULT_COUNTRY,
-    club: "",
-    ...statsDraft(newPlayerStats()),
-    isMonthly: false,
-    joinDate: "",
-    active: true,
-  };
-}
-
-function createDraftFromPlayer(player: Player): FormDraft {
-  return {
-    id: player.id,
-    name: player.name,
-    role: player.role,
-    linePosition: player.linePosition,
-    nationality: player.nationality,
-    club: player.club,
-    ...statsDraft(player.stats),
-    isMonthly: player.isMonthly,
-    joinDate: player.joinDate,
-    active: player.active,
-  };
-}
-
 export function JogadoresPage() {
   const { isAdmin } = useAuth();
   const { players, loading, error } = usePlayers();
@@ -120,9 +34,8 @@ export function JogadoresPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [editingDraft, setEditingDraft] = useState<FormDraft | null>(null);
-  const [formError, setFormError] = useState("");
-  const [saving, setSaving] = useState(false);
+  // Set while the form is open. A null player creates a new one.
+  const [editing, setEditing] = useState<{ player: Player | null } | null>(null);
   const [legendStep, setLegendStep] = useState<"idle" | "confirm" | "saving">("idle");
   const [legendError, setLegendError] = useState("");
 
@@ -151,22 +64,21 @@ export function JogadoresPage() {
   const [editingPhoto, setEditingPhoto] = useState(false);
   const [removingPhoto, setRemovingPhoto] = useState(false);
 
-  const sheetOpen = selectedPlayer !== null || editingDraft !== null;
+  // The form handles its own Escape, so this one only closes the detail sheet.
+  const detailOpen = selectedPlayer !== null && editing === null;
 
   useEffect(() => {
-    if (!sheetOpen) {
+    if (!detailOpen) {
       return undefined;
     }
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !saving) {
+      if (event.key === "Escape") {
         setSelectedId(null);
-        setEditingDraft(null);
-        setFormError("");
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [sheetOpen, saving]);
+  }, [detailOpen]);
 
   const filteredPlayers = useMemo(() => {
     const query = normalizeName(search);
@@ -190,26 +102,18 @@ export function JogadoresPage() {
     });
   }, [players, filter, search]);
 
-  const closeSheet = () => {
-    if (saving) return;
+  const closeSheet = useCallback(() => {
     setSelectedId(null);
-    setEditingDraft(null);
-    setFormError("");
-  };
+    setEditing(null);
+  }, []);
 
-  const openNewPlayer = () => {
-    setSelectedId(null);
-    setFormError("");
-    setEditingDraft(createEmptyDraft());
-  };
-
-  const openEditPlayer = (player: Player) => {
-    setFormError("");
-    setEditingDraft(createDraftFromPlayer(player));
-  };
-
-  const setStatText = (set: "lineText" | "keeperText", key: string, value: string) => {
-    setEditingDraft((prev) => (prev ? { ...prev, [set]: { ...prev[set], [key]: value } } : prev));
+  const handleSaved = (savedId: string | null, deactivated: boolean) => {
+    setEditing(null);
+    if (deactivated) {
+      setSelectedId(null);
+    } else if (savedId) {
+      setSelectedId(savedId);
+    }
   };
 
   const changeLegend = async (player: Player) => {
@@ -228,63 +132,6 @@ export function JogadoresPage() {
     setLegendStep("idle");
     setLegendError("");
   }, [selectedId]);
-
-  const handleSave = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!editingDraft || saving) return;
-
-    const trimmedName = editingDraft.name.trim();
-    if (!trimmedName) {
-      setFormError("Informe o nome do jogador.");
-      return;
-    }
-
-    const normalizedTarget = normalizeName(trimmedName);
-    const duplicate = players.find(
-      (p) => p.id !== editingDraft.id && normalizeName(p.name) === normalizedTarget,
-    );
-    if (duplicate) {
-      setFormError("Já existe um jogador com esse nome.");
-      return;
-    }
-
-    const statSet = editingDraft.role === "keeper" ? editingDraft.keeperText : editingDraft.lineText;
-    if (!Object.values(statSet).every((value) => isStatText(value))) {
-      setFormError("Cada nota precisa ser um número inteiro de 0 a 100.");
-      return;
-    }
-
-    setSaving(true);
-    setFormError("");
-    try {
-      const savedId = await savePlayer({
-        id: editingDraft.id,
-        name: trimmedName,
-        role: editingDraft.role,
-        linePosition: editingDraft.linePosition,
-        nationality: editingDraft.nationality,
-        club: editingDraft.club,
-        stats: draftStats(editingDraft),
-        isMonthly: editingDraft.isMonthly,
-        joinDate: editingDraft.joinDate,
-        ...(editingDraft.id ? { active: editingDraft.active } : {}),
-      }, players.find((p) => p.id === editingDraft.id));
-
-      const wasDeactivated = Boolean(editingDraft.id && !editingDraft.active);
-      setEditingDraft(null);
-      if (wasDeactivated) {
-        setSelectedId(null);
-      } else if (savedId) {
-        setSelectedId(savedId);
-      }
-    } catch {
-      setFormError("Não deu para salvar o jogador. Tente de novo.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const previewOvr = editingDraft ? displayOvr({ ...editingDraft, stats: draftStats(editingDraft) }) : 0;
 
   return (
     <Page
@@ -309,7 +156,10 @@ export function JogadoresPage() {
           <button
             type="button"
             className="button button--primary"
-            onClick={openNewPlayer}
+            onClick={() => {
+              setSelectedId(null);
+              setEditing({ player: null });
+            }}
           >
             + Jogador
           </button>
@@ -370,8 +220,6 @@ export function JogadoresPage() {
               awardMonth={awardMonth}
               photo={photos[player.id]}
               onClick={() => {
-                setEditingDraft(null);
-                setFormError("");
                 setSelectedId(player.id);
               }}
             />
@@ -379,258 +227,22 @@ export function JogadoresPage() {
         </div>
       )}
 
-      {sheetOpen && (
+      {editing && (
+        <PlayerForm player={editing.player} players={players} onClose={closeSheet} onSaved={handleSaved} />
+      )}
+
+      {detailOpen && (
         <div className="sheet-backdrop" onClick={closeSheet}>
           <div
             className="sheet"
             role="dialog"
             aria-modal="true"
-            aria-label={
-              editingDraft
-                ? editingDraft.id
-                  ? "Editar jogador"
-                  : "Novo jogador"
-                : selectedPlayer?.name ?? "Jogador"
-            }
+            aria-label={selectedPlayer?.name ?? "Jogador"}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="sheet__handle" aria-hidden="true" />
 
-            {editingDraft ? (
-              <form className="player-form" onSubmit={handleSave} noValidate>
-                <div className="sheet__header">
-                  <h2 className="sheet__title">
-                    {editingDraft.id ? "Editar jogador" : "Novo jogador"}
-                  </h2>
-                  <button
-                    type="button"
-                    className="button button--ghost"
-                    onClick={closeSheet}
-                    disabled={saving}
-                  >
-                    Fechar
-                  </button>
-                </div>
-
-                <div
-                  className={`ovr-preview ovr-preview--${cardTier(previewOvr)}`}
-                  aria-live="polite"
-                >
-                  <div className="ovr-preview__score">
-                    <span className="ovr-preview__value">
-                      {previewOvr}
-                    </span>
-                    <span className="ovr-preview__pos">
-                      {positionCode(editingDraft)}
-                    </span>
-                  </div>
-                  <div className="ovr-preview__meta">
-                    <strong>{editingDraft.name.trim() || "Novo jogador"}</strong>
-                    <span>Carta {TIER_LABELS[cardTier(previewOvr)]}</span>
-                  </div>
-                </div>
-
-                <label className="form-field">
-                  <span className="form-field__label">Nome *</span>
-                  <input
-                    type="text"
-                    className="text-input"
-                    value={editingDraft.name}
-                    onChange={(e) =>
-                      setEditingDraft({ ...editingDraft, name: e.target.value })
-                    }
-                    placeholder="Ex.: Neto"
-                    required
-                    autoFocus
-                  />
-                </label>
-
-                <label className="form-field">
-                  <span className="form-field__label">Nacionalidade</span>
-                  <select
-                    className="text-input"
-                    value={editingDraft.nationality}
-                    onChange={(e) =>
-                      setEditingDraft({
-                        ...editingDraft,
-                        nationality: e.target.value,
-                      })
-                    }
-                  >
-                    {COUNTRIES.map((country) => (
-                      <option key={country.code} value={country.code}>
-                        {country.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="form-field">
-                  <span className="form-field__label">Time do coração</span>
-                  <select
-                    className="text-input"
-                    value={editingDraft.club}
-                    onChange={(e) =>
-                      setEditingDraft({
-                        ...editingDraft,
-                        club: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="">Nenhum</option>
-                    {CLUBS.map((club) => (
-                      <option key={club.id} value={club.id}>
-                        {club.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <div className="form-field">
-                  <span className="form-field__label">Função</span>
-                  <div className="segmented" role="group" aria-label="Função">
-                    <button
-                      type="button"
-                      className={`segmented__btn${
-                        editingDraft.role === "line" ? " is-active" : ""
-                      }`}
-                      onClick={() =>
-                        setEditingDraft({ ...editingDraft, role: "line" })
-                      }
-                    >
-                      Linha
-                    </button>
-                    <button
-                      type="button"
-                      className={`segmented__btn${
-                        editingDraft.role === "keeper" ? " is-active" : ""
-                      }`}
-                      onClick={() =>
-                        setEditingDraft({ ...editingDraft, role: "keeper" })
-                      }
-                    >
-                      Goleiro
-                    </button>
-                  </div>
-                </div>
-
-                {editingDraft.role === "line" && (
-                  <div className="form-field">
-                    <span className="form-field__label">Posição</span>
-                    <div className="segmented" role="group" aria-label="Posição">
-                      {POSITIONS.map((pos) => (
-                        <button
-                          key={pos.value}
-                          type="button"
-                          className={`segmented__btn${
-                            editingDraft.linePosition === pos.value
-                              ? " is-active"
-                              : ""
-                          }`}
-                          onClick={() =>
-                            setEditingDraft({
-                              ...editingDraft,
-                              linePosition: pos.value,
-                            })
-                          }
-                        >
-                          {pos.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="form-field">
-                  <span className="form-field__label">
-                    {editingDraft.role === "keeper" ? "Notas de goleiro (0 a 100)" : "Notas (0 a 100)"}
-                  </span>
-                  {editingDraft.role === "keeper" ? (
-                    <StatInputs
-                      defs={KEEPER_STATS}
-                      values={editingDraft.keeperText}
-                      onChange={(key, value) => setStatText("keeperText", key, value)}
-                    />
-                  ) : (
-                    <StatInputs
-                      defs={LINE_STATS}
-                      values={editingDraft.lineText}
-                      onChange={(key, value) => setStatText("lineText", key, value)}
-                    />
-                  )}
-                </div>
-
-                <label className="switch-row">
-                  <span className="switch-row__label">Mensalista</span>
-                  <input
-                    type="checkbox"
-                    className="switch-row__input"
-                    checked={editingDraft.isMonthly}
-                    onChange={(e) =>
-                      setEditingDraft({
-                        ...editingDraft,
-                        isMonthly: e.target.checked,
-                      })
-                    }
-                  />
-                </label>
-
-                <label className="form-field">
-                  <span className="form-field__label">Data de entrada</span>
-                  <input
-                    type="date"
-                    className="text-input"
-                    value={editingDraft.joinDate}
-                    onChange={(e) =>
-                      setEditingDraft({
-                        ...editingDraft,
-                        joinDate: e.target.value,
-                      })
-                    }
-                  />
-                </label>
-
-                {editingDraft.id && (
-                  <label className="switch-row">
-                    <span className="switch-row__label">Ativo</span>
-                    <input
-                      type="checkbox"
-                      className="switch-row__input"
-                      checked={editingDraft.active}
-                      onChange={(e) =>
-                        setEditingDraft({
-                          ...editingDraft,
-                          active: e.target.checked,
-                        })
-                      }
-                    />
-                  </label>
-                )}
-
-                {formError && <p className="form-error">{formError}</p>}
-
-                <div className="sheet__actions">
-                  <button
-                    type="button"
-                    className="button button--ghost"
-                    onClick={closeSheet}
-                    disabled={saving}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="button button--primary"
-                    disabled={saving}
-                  >
-                    {saving ? "Salvando..." : "Salvar"}
-                  </button>
-                </div>
-              </form>
-            ) : (
-              selectedPlayer &&
-              selectedStats &&
-              selectedAppStats && (
+            {selectedPlayer && selectedStats && selectedAppStats && (
                 <div className="player-detail">
                   <div className="sheet__header">
                     <h2 className="sheet__title">{selectedPlayer.name}</h2>
@@ -761,7 +373,7 @@ export function JogadoresPage() {
                         <button
                           type="button"
                           className="button button--primary"
-                          onClick={() => openEditPlayer(selectedPlayer)}
+                          onClick={() => setEditing({ player: selectedPlayer })}
                         >
                           Editar
                         </button>
@@ -807,8 +419,7 @@ export function JogadoresPage() {
                     </>
                   )}
                 </div>
-              )
-            )}
+              )}
           </div>
         </div>
       )}
