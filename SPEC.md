@@ -73,10 +73,11 @@ Database rules:
 - `.write`: only when `auth.token.email_verified == true` and `futerca/admins/{emailKey}` exists.
 - `admins/` and `owners/` are writable only from the Firebase console.
 - `log/` is append-only: an admin can add an entry signed with their own e-mail and uid at the server's time, and nobody can edit or delete one. Only owners can read it.
-- Player writes and new match events must carry a `logId` that points to a log entry created in the same write, so a change can't skip the log. Deletes can't be forced this way, so deleting a player or undoing an event is logged by the app but not enforced by the rules.
+- Player writes and new match events must carry a `logId` that points to a log entry created in the same write, so a change can't skip the log. An existing event may change without a new `logId` only if its type, player and team stay the same. Deletes can't be forced this way, so deleting a player or undoing an event is logged by the app but not enforced by the rules.
+- `live/sessionId` can't be replaced while it points to a session whose status is `live`, so two admins confirming the teams at once make one night. The second gets a message instead.
 - `admins/` is readable only by owners. The app reads a person's own entry to know whether they are an admin.
 - `adminPlayers/`: owners read and write the whole map. An admin reads only their own entry.
-- `rebalance/votes/{emailKey}` and `rebalance/sent/{emailKey}`: readable only by that admin and the owners. An admin writes votes only while the round isn't closed, never for their own player, with integers from 0 to 100. `rebalance/round` is readable by admins and writable by owners. Under the old rules all of this would be public, so the app probes `rebalance/probe` and keeps voting closed until the probe is denied.
+- `rebalance/votes/{emailKey}` and `rebalance/sent/{emailKey}`: readable only by that admin and the owners. An admin writes votes only while the round isn't closed, never for their own player, with integers from 0 to 100. `rebalance/round` is readable by admins and writable by owners.
 - Admin e-mails never go in this public repo. They are added in the Firebase console.
 
 The Firebase web config is public by design and is committed. Rules are the only protection, so they ship in the repo as `database.rules.json`, and a change to them is a change to the app.

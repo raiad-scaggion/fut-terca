@@ -29,7 +29,7 @@ Everything Fut de Terça does today, as of version 2.4 (commit `54eaa66`, 2026-1
 - Owners (`futerca/owners`) can read the change log and run the Rebalanceamento.
 - `adminPlayers` links each admin's e-mail to their player, so nobody rates themselves.
 - The change log is append-only. Each entry carries the admin's e-mail, uid and server time. Player writes and new match events must carry a `logId` pointing to a log entry written in the same update. Only owners read the log.
-- Rebalanceamento votes are private to their author and the owners. Votes are integers from 0 to 100, accepted only while the round is open and never for the voter's own player. The app probes `rebalance/probe` and keeps voting closed until that read is denied.
+- Rebalanceamento votes are private to their author and the owners. Votes are integers from 0 to 100, accepted only while the round is open and never for the voter's own player.
 - Admin e-mails never go in the repo.
 
 ## Screens

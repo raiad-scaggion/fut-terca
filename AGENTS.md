@@ -78,6 +78,9 @@ When you add or change a script, update this block in the same commit.
 
 Newest first. Format: date, decision, one-line reason.
 
+- 2026-11-23: The rules refuse a new `live/sessionId` while the current one is live, and edits to an existing event that change its type, player or team without a log. Two admins confirming at once made a second night, and the log could be skipped.
+- 2026-11-23: A `live/matchId` left on a match that isn't running counts as free. Starting and finishing take two writes, and a lost second write used to block every new match.
+- 2026-11-23: The rebalanceamento no longer probes the rules before opening. The private-vote rules are live, checked with an anonymous read that was denied.
 - 2026-11-09: OVR is the plain average of the six stats, with no per-position weights. The group asked for it so admins rate each stat on its own, knowing every one counts the same.
 - 2026-11-09: Stats moved to 0-100 with Drible and Físico, and keepers got their own six stats. The group asked for finer ratings, and a keeper's ratings meant little on outfield scales.
 - 2026-11-09: The rebalanceamento keeps each admin's votes readable only by that admin and the owner, and only the owner calculates and publishes, after the group approves on WhatsApp. That's how the group asked for it, so nobody is swayed by others' votes.
