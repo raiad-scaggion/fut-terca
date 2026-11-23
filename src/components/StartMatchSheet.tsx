@@ -11,11 +11,13 @@ const MAX_MINUTES = 60;
 type StartMatchSheetProps = {
   session: Session;
   match: Match;
+  // Set only when the live pointer names a match that isn't running, so the start may replace it.
+  staleId: string | null;
   byId: Map<string, Player>;
   onClose: () => void;
 };
 
-export function StartMatchSheet({ session, match, byId, onClose }: StartMatchSheetProps) {
+export function StartMatchSheet({ session, match, staleId, byId, onClose }: StartMatchSheetProps) {
   const navigate = useNavigate();
   const lastPlayed = [...session.matches].reverse().find((item) => item.keepers);
   const [first, second] = session.keeperIds;
@@ -34,7 +36,7 @@ export function StartMatchSheet({ session, match, byId, onClose }: StartMatchShe
     setStarting(true);
     setError("");
     try {
-      if (await startMatch(session.id, match.id, { home: homeKeeper, away: awayKeeper }, minutes * 60)) {
+      if (await startMatch(session.id, match.id, { home: homeKeeper, away: awayKeeper }, minutes * 60, staleId)) {
         navigate("/partida");
         return;
       }

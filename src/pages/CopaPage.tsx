@@ -11,7 +11,7 @@ import { useSessions } from "../data/sessions";
 import { renderSummaryImage } from "../exports/summaryImage";
 import { getChampion, getMatchScore, getMatchWinnerId, getStandings, matchLabel } from "../lib/cup";
 import { buildNightSummary, dayLabel, sessionDate } from "../lib/nightSummary";
-import type { Match, Session, Team } from "../lib/session";
+import { runningMatch, type Match, type Session, type Team } from "../lib/session";
 
 function TeamName({ team, winner }: { team?: Team; winner: boolean }) {
   return (
@@ -170,7 +170,10 @@ export function CopaPage() {
   const summary = playersLoading ? null : buildNightSummary(session, byId);
   const group = session.matches.filter((match) => match.stage === "group");
   const knockout = session.matches.filter((match) => match.stage !== "group");
-  const canStart = isAdmin && !live.matchId && session.id === live.sessionId;
+  const running = runningMatch(session, live.matchId);
+  const canStart = isAdmin && !running && session.id === live.sessionId;
+  // If another phone starts a match while the sheet is open, its pointer must not count as stale.
+  const staleId = running ? null : live.matchId;
   const row = (match: Match) => <MatchRow key={match.id} session={session} match={match} canStart={canStart} onStart={setStarting} />;
 
   return (
@@ -237,7 +240,9 @@ export function CopaPage() {
         </section>
       )}
 
-      {starting && <StartMatchSheet session={session} match={starting} byId={byId} onClose={() => setStarting(null)} />}
+      {starting && (
+        <StartMatchSheet session={session} match={starting} staleId={staleId} byId={byId} onClose={() => setStarting(null)} />
+      )}
     </Page>
   );
 }

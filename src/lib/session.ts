@@ -97,3 +97,10 @@ export function normalizeSession(id: string, raw: Raw): Session {
       .sort((a, b) => a.number - b.number),
   };
 }
+
+// Starting and finishing a match each take two writes, so a lost signal can leave `live/matchId` on a match
+// that isn't running. Only a match marked "live" counts, and the pointer to any other is free to replace.
+export function runningMatch(session: Session | null | undefined, matchId: string | null): Match | undefined {
+  const match = session?.matches.find((item) => item.id === matchId);
+  return match?.status === "live" ? match : undefined;
+}

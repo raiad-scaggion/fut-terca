@@ -9,13 +9,17 @@ import { logOnly, writeWithLog } from "./log";
 const matchPath = (sessionId: string, matchId: string) => `sessions/${sessionId}/matches/${matchId}`;
 
 // Only one match runs at a time. The transaction stops two phones starting different matches.
+// `staleId` is a pointer the caller saw left on a match that isn't running, which may be replaced.
 export async function startMatch(
   sessionId: string,
   matchId: string,
   keepers: { home: string; away: string },
   durationSec: number,
+  staleId: string | null,
 ): Promise<boolean> {
-  const { committed } = await runTransaction(dbRef("live/matchId"), (current) => (current ? undefined : matchId));
+  const { committed } = await runTransaction(dbRef("live/matchId"), (current) =>
+    !current || current === staleId ? matchId : undefined,
+  );
   if (!committed) {
     return false;
   }

@@ -1,6 +1,6 @@
 import { AWARD_ORDER, type AwardKey, type MonthlyAwards } from "./awards";
 import { getChampion } from "./cup";
-import type { Match, Session, Team } from "./session";
+import { runningMatch, type Match, type Session, type Team } from "./session";
 
 const TUESDAY = 2;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -32,7 +32,7 @@ export function getHomeState(
   today: string,
 ): HomeState {
   const session = sessions.find((item) => item.id === live.sessionId);
-  const match = session?.matches.find((item) => item.id === live.matchId);
+  const match = runningMatch(session, live.matchId);
   if (session && match) {
     return { kind: "live", session, match };
   }

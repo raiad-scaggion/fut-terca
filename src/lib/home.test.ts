@@ -56,6 +56,12 @@ describe("getHomeState", () => {
     expect(state).toMatchObject({ kind: "live", match: { id: "m1" } });
   });
 
+  it("ignores a live pointer left on a finished match", () => {
+    const current = session("s1", "2026-11-03", [match("m1", "group", "finished"), match("m2", "group", "pending")]);
+    const state = getHomeState([current], { sessionId: "s1", matchId: "m1" }, "2026-11-03");
+    expect(state).toMatchObject({ kind: "cup", next: { id: "m2" } });
+  });
+
   it("shows the next match between games", () => {
     const current = session("s1", "2026-11-03", [match("m1", "group", "finished"), match("m2", "group", "pending")]);
     const state = getHomeState([current], { sessionId: "s1", matchId: null }, "2026-11-03");

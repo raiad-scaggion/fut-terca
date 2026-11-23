@@ -1,6 +1,6 @@
 import { onValue } from "firebase/database";
 import { useEffect, useMemo, useState } from "react";
-import type { Match, Session } from "../lib/session";
+import { runningMatch, type Match, type Session } from "../lib/session";
 import { dbRef } from "./firebase";
 import { useSessions } from "./sessions";
 
@@ -31,6 +31,6 @@ export function useLiveMatch(): { session: Session | null; match: Match | null }
 
   return useMemo(() => {
     const session = sessions.find((item) => item.id === sessionId) ?? null;
-    return { session, match: session?.matches.find((item) => item.id === matchId) ?? null };
+    return { session, match: runningMatch(session, matchId) ?? null };
   }, [sessions, sessionId, matchId]);
 }

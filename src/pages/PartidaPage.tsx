@@ -12,7 +12,7 @@ import { useMatchEffects } from "../hooks/useMatchEffects";
 import { formatClock, getRemainingMs } from "../lib/clock";
 import { getMatchScore, getMatchWinnerId, isNextRoundLocked, isTied, matchLabel, needsGoldenGoal } from "../lib/cup";
 import type { Player } from "../lib/players";
-import type { Match, MatchEvent, MatchEventType, Session, Team } from "../lib/session";
+import { runningMatch, type Match, type MatchEvent, type MatchEventType, type Session, type Team } from "../lib/session";
 
 const EVENT_LABELS: Record<MatchEventType, string> = {
   goal: "Gol",
@@ -420,7 +420,8 @@ export function PartidaPage() {
   }
 
   const session = sessions.find((item) => item.id === (params.sessionId ?? live.sessionId));
-  const match = session?.matches.find((item) => item.id === (params.matchId ?? live.matchId));
+  // A link names its match, which may be finished. Without one, only a running match counts.
+  const match = params.matchId ? session?.matches.find((item) => item.id === params.matchId) : runningMatch(session, live.matchId);
 
   if (!session || !match || match.status === "pending") {
     return (
