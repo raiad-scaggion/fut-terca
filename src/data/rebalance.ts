@@ -1,4 +1,4 @@
-import { get, onValue, serverTimestamp, set } from "firebase/database";
+import { onValue, serverTimestamp, set } from "firebase/database";
 import { useEffect, useState } from "react";
 import { emailKey } from "../lib/admin";
 import {
@@ -35,26 +35,6 @@ function useValue<T>(path: string | null, read: (raw: unknown) => T, empty: T): 
     // read and empty are module-level helpers or constants at every call site.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path]);
-
-  return state;
-}
-
-export type RulesState = "checking" | "ready" | "missing";
-
-// The 2.2 rules hide everything under "rebalance" except the paths each person may read. Under the
-// old rules this probe path is public, which means the votes would be public too, so voting waits.
-export function useRebalanceRules(): RulesState {
-  const [state, setState] = useState<RulesState>("checking");
-
-  useEffect(() => {
-    let current = true;
-    get(dbRef("rebalance/probe"))
-      .then(() => current && setState("missing"))
-      .catch(() => current && setState("ready"));
-    return () => {
-      current = false;
-    };
-  }, []);
 
   return state;
 }

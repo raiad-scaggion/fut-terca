@@ -8,7 +8,7 @@ import { useNow } from "../data/clock";
 import { useLive } from "../data/live";
 import { usePhotos } from "../data/photos";
 import { usePlayers } from "../data/players";
-import { useMyRebalance, useRebalanceRules, useRound } from "../data/rebalance";
+import { useMyRebalance, useRound } from "../data/rebalance";
 import { useSessions } from "../data/sessions";
 import { adminProgress } from "../lib/rebalance";
 import type { Player } from "../lib/players";
@@ -59,12 +59,10 @@ function LiveScore({ session, match }: { session: Session; match: Match }) {
 // Admins see the open round on Início until they send their votes.
 function RebalanceBanner({ players }: { players: Player[] }) {
   const { user, isAdmin } = useAuth();
-  const rules = useRebalanceRules();
-  const ready = isAdmin && rules === "ready";
-  const round = useRound(ready);
-  const mine = useMyRebalance(ready ? user?.email ?? null : null);
+  const round = useRound(isAdmin);
+  const mine = useMyRebalance(isAdmin ? user?.email ?? null : null);
 
-  if (!ready || round.loading || round.error || round.value.status === "closed" || mine.sent.loading || mine.sent.value || !mine.ownPlayer.value) {
+  if (!isAdmin || round.loading || round.error || round.value.status === "closed" || mine.sent.loading || mine.sent.value || !mine.ownPlayer.value) {
     return null;
   }
   const { remaining } = adminProgress(players, mine.ownPlayer.value, mine.votes.value);

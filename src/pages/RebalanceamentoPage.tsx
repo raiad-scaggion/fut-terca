@@ -14,7 +14,6 @@ import {
   setAdminPlayer,
   useMyRebalance,
   useOwnerRebalance,
-  useRebalanceRules,
   useRound,
 } from "../data/rebalance";
 import { renderRebalanceImage } from "../exports/rebalanceImage";
@@ -438,11 +437,9 @@ function OwnerPanel({ players, round }: OwnerPanelProps) {
 
 export function RebalanceamentoPage() {
   const { user, isAdmin, isOwner, loading: authLoading } = useAuth();
-  const rules = useRebalanceRules();
-  const ready = isAdmin && rules === "ready";
   const { players, loading: playersLoading, error: playersError } = usePlayers();
-  const round = useRound(ready);
-  const mine = useMyRebalance(ready ? user?.email ?? null : null);
+  const round = useRound(isAdmin);
+  const mine = useMyRebalance(isAdmin ? user?.email ?? null : null);
 
   const info = (
     <p className="page__subtitle">
@@ -452,14 +449,11 @@ export function RebalanceamentoPage() {
   );
 
   const body = () => {
-    if (authLoading || rules === "checking") {
+    if (authLoading) {
       return <EmptyState>Carregando...</EmptyState>;
     }
     if (!isAdmin) {
       return <EmptyState>Essa página é só para os admins.</EmptyState>;
-    }
-    if (rules === "missing") {
-      return <EmptyState>O rebalanceamento abre assim que as regras novas do banco estiverem ativas. Fale com o dono do app.</EmptyState>;
     }
     if (playersError) {
       return <EmptyState>{playersError}</EmptyState>;
@@ -488,8 +482,8 @@ export function RebalanceamentoPage() {
   return (
     <Page title="Rebalanceamento">
       {info}
-      {ready && isOwner && !playersLoading && <VoterStatus players={players} />}
-      {ready && <StatGlossary />}
+      {isAdmin && isOwner && !playersLoading && <VoterStatus players={players} />}
+      {isAdmin && <StatGlossary />}
       {body()}
     </Page>
   );
