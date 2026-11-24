@@ -5,6 +5,7 @@ import {
   displayOvr,
   isStatText,
   KEEPER_STATS,
+  LINE_WEIGHTS,
   levelScore,
   LINE_STATS,
   normalizeName,
@@ -103,27 +104,38 @@ describe("normalizePlayer", () => {
 });
 
 describe("OVR and card tiers", () => {
-  it("averages the six stats with the same weight", () => {
-    // Neto's old 7/6/8/8: (70 + 60 + 80 + 50 + 80 + 50) / 6 = 65
+  it("adds each position's weights up to 100%", () => {
+    for (const weights of Object.values(LINE_WEIGHTS)) {
+      expect(Object.values(weights).reduce((sum, value) => sum + value, 0)).toBe(100);
+    }
+  });
+
+  it("weights the stats by position", () => {
+    // Neto's old 7/6/8/8 as a meio: 70×15% + 60×15% + 80×30% + 50×20% + 80×10% + 50×10% = 66.5
     const neto = normalizePlayer("p69", { linePosition: "meio", ratings: { speed: 7, finishing: 6, defense: 8, passing: 8 } });
-    expect(levelScore(neto)).toBeCloseTo(65, 5);
-    expect(displayOvr(neto)).toBe(65);
+    expect(levelScore(neto)).toBeCloseTo(66.5, 5);
+    expect(displayOvr(neto)).toBe(67);
     expect(cardTier(neto)).toBe("silver");
   });
 
-  it("gives the same OVR for the same stats in any position", () => {
+  it("gives the same stats a different OVR in each position", () => {
     const stats = line(60, 70, 80, 50, 80, 50);
-    expect(displayOvr(withLine("defesa", stats))).toBe(65);
-    expect(displayOvr(withLine("ataque", stats))).toBe(65);
-    expect(displayOvr(withLine("meio", stats))).toBe(65);
+    expect(displayOvr(withLine("ataque", stats))).toBe(64);
+    expect(displayOvr(withLine("meio", stats))).toBe(67);
+    expect(displayOvr(withLine("defesa", stats))).toBe(68);
   });
 
-  it("counts defense for an ataque too", () => {
-    // (90 + 95 + 80 + 85 + 30 + 70) / 6 = 75
+  it("keeps the same OVR in every position when all stats are equal", () => {
+    expect(displayOvr(withLine("ataque", flat(70)))).toBe(70);
+    expect(displayOvr(withLine("defesa", flat(70)))).toBe(70);
+  });
+
+  it("still counts defense for an ataque, at its weight", () => {
+    // 90×20% + 95×30% + 80×10% + 85×20% + 30×10% + 70×10% = 81.5
     const xana = withLine("ataque", line(90, 95, 80, 85, 30, 70));
-    expect(displayOvr(xana)).toBe(75);
+    expect(displayOvr(xana)).toBe(82);
     expect(cardTier(xana)).toBe("gold");
-    expect(displayOvr(withLine("ataque", line(90, 95, 80, 85, 0, 70)))).toBe(70);
+    expect(displayOvr(withLine("ataque", line(90, 95, 80, 85, 0, 70)))).toBe(79);
   });
 
   it("averages a keeper by the keeper set only", () => {

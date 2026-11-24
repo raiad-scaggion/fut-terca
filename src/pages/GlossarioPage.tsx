@@ -2,7 +2,13 @@ import { Page } from "../components/Page";
 import { KEEPER_COLUMNS, LINE_COLUMNS } from "../components/rankingColumns";
 import { SpecialCardsInfo } from "../components/SpecialCardsInfo";
 import { StatList } from "../components/StatGlossary";
-import { KEEPER_STATS, LINE_STATS } from "../lib/players";
+import { KEEPER_STATS, LINE_STATS, LINE_WEIGHTS, type LinePosition } from "../lib/players";
+
+const WEIGHT_ROWS: { code: string; position: LinePosition }[] = [
+  { code: "ATA", position: "ataque" },
+  { code: "MEI", position: "meio" },
+  { code: "DEF", position: "defesa" },
+];
 
 const POSITIONS: { code: string; name: string }[] = [
   { code: "ATA", name: "Ataque" },
@@ -54,7 +60,18 @@ export function GlossarioPage() {
 
         <section className="glossary__section">
           <h2 className="draw-section__title">OVR</h2>
-          <p>É a nota geral da carta: a média das seis notas, todas com o mesmo peso. O máximo é 99.</p>
+          <p>
+            É a nota geral da carta, até 99. Na linha, cada nota tem um peso conforme a posição. O goleiro faz a média
+            simples das seis notas de goleiro.
+          </p>
+          <dl className="glossary__list glossary__list--compact">
+            {WEIGHT_ROWS.map(({ code, position }) => (
+              <div key={code} className="glossary__item">
+                <dt className="glossary__code">{code}</dt>
+                <dd>{LINE_STATS.map(({ key, short }) => `${short} ${LINE_WEIGHTS[position][key]}%`).join(", ")}</dd>
+              </div>
+            ))}
+          </dl>
         </section>
 
         <section className="glossary__section">

@@ -270,12 +270,20 @@ export function statsFromText<K extends string>(defs: StatDef<K>[], text: StatTe
 
 export type OvrInput = Pick<Player, "role" | "linePosition" | "stats">;
 
-// Plain average of the role's six stats, all with the same weight, on the same 0 to 100 scale.
+// Percent each stat counts in an outfield OVR, by position. Each row adds up to 100.
+export const LINE_WEIGHTS: Record<LinePosition, LineStats> = {
+  ataque: { vel: 20, fin: 30, pas: 10, dri: 20, def: 10, fis: 10 },
+  meio: { vel: 15, fin: 15, pas: 30, dri: 20, def: 10, fis: 10 },
+  defesa: { vel: 15, fin: 5, pas: 15, dri: 10, def: 35, fis: 20 },
+};
+
+// Outfield players use their position's weights. Keepers take the plain average of their six stats.
 export function levelScore(player: OvrInput): number {
   if (player.role === "keeper") {
     return KEEPER_STATS.reduce((sum, { key }) => sum + clampStat(player.stats.keeper[key], 50), 0) / KEEPER_STATS.length;
   }
-  return LINE_STATS.reduce((sum, { key }) => sum + clampStat(player.stats.line[key], 50), 0) / LINE_STATS.length;
+  const weights = LINE_WEIGHTS[player.linePosition];
+  return LINE_STATS.reduce((sum, { key }) => sum + clampStat(player.stats.line[key], 50) * weights[key], 0) / 100;
 }
 
 export function displayOvr(player: OvrInput): number {
