@@ -211,6 +211,13 @@
   text-align: center;
 }
 
+.standings__live {
+  margin-left: 6px;
+  color: var(--danger);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
 .cup-match__live {
   color: var(--danger);
   font-size: 0.8rem;
@@ -289,6 +296,24 @@
   justify-content: space-between;
   gap: 8px;
   width: 100%;
+}
+
+.match__minimize {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: -8px 0 -8px -10px;
+  padding: 0;
+  color: var(--text);
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.match__minimize + .match__label {
+  margin-right: auto;
 }
 
 .match__label {

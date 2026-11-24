@@ -9,7 +9,7 @@ import { useLive } from "../data/live";
 import { usePlayers } from "../data/players";
 import { useSessions } from "../data/sessions";
 import { renderSummaryImage } from "../exports/summaryImage";
-import { getChampion, getMatchScore, getMatchWinnerId, getStandings, matchLabel } from "../lib/cup";
+import { getChampion, getLiveStandings, getMatchScore, getMatchWinnerId, matchLabel } from "../lib/cup";
 import { buildNightSummary, dayLabel, sessionDate } from "../lib/nightSummary";
 import { runningMatch, type Match, type Session, type Team } from "../lib/session";
 
@@ -69,6 +69,9 @@ function MatchRow({ session, match, canStart, onStart }: MatchRowProps) {
 }
 
 function Standings({ session }: { session: Session }) {
+  const liveMatch = session.matches.find((match) => match.status === "live" && match.stage === "group");
+  const playing = (id: string) => liveMatch?.homeId === id || liveMatch?.awayId === id;
+
   return (
     <table className="standings">
       <thead>
@@ -77,6 +80,7 @@ function Standings({ session }: { session: Session }) {
             Classificação{" "}
             <InfoTip label="Como funciona a classificação e o desempate">
               <p>Vitória vale 3 pontos e empate vale 1.</p>
+              <p>A partida ao vivo já entra na tabela com o placar do momento.</p>
               <p>
                 Empate em pontos: primeiro o confronto direto entre os times empatados, depois o número de vitórias, o
                 saldo de gols e os gols marcados.
@@ -108,12 +112,13 @@ function Standings({ session }: { session: Session }) {
         </tr>
       </thead>
       <tbody>
-        {getStandings(session).map((row, index) => (
+        {getLiveStandings(session).map((row, index) => (
           <tr key={row.team.id}>
             <th scope="row" className="standings__team">
               <span className="standings__position">{index + 1}</span>
               <span className="cup-dot" style={{ background: row.team.color }} aria-hidden="true" />
               {row.team.name}
+              {playing(row.team.id) && <span className="standings__live">ao vivo</span>}
             </th>
             <td className="standings__points">{row.points}</td>
             <td>{row.played}</td>

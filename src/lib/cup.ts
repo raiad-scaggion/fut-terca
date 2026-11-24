@@ -136,6 +136,12 @@ export function getStandings(session: Session): StandingRow[] {
   return levels.flatMap((points) => breakTie(session, table.filter((row) => row.points === points)));
 }
 
+// The table with the match in progress counted as if it ended now, so people can follow it during
+// the game. Display only: the knockout draw still waits for real results.
+export function getLiveStandings(session: Session): StandingRow[] {
+  return getStandings({ ...session, matches: session.matches.map((match) => (match.status === "live" ? { ...match, status: "finished" } : match)) });
+}
+
 type PlayoffChange = {
   id: string;
   isNew: boolean;

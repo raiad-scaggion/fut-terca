@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState, type TouchEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { InfoTip } from "../components/InfoTip";
 import { EmptyState, Page } from "../components/Page";
@@ -212,6 +212,8 @@ function MatchScreen({ session, match, byId, isAdmin }: MatchScreenProps) {
   const [panel, setPanel] = useState<"finish" | "cancel" | null>(null);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState("");
+  // A swipe down on the scoreboard minimizes the match, like the arrow.
+  const swipeStart = useRef<{ x: number; y: number } | null>(null);
 
   const live = match.status === "live";
   const running = live && Boolean(match.timer?.running);
@@ -254,6 +256,19 @@ function MatchScreen({ session, match, byId, isAdmin }: MatchScreenProps) {
       setPanel(null);
     });
 
+  const onTouchStart = (event: TouchEvent) => {
+    const touch = event.touches[0];
+    swipeStart.current = { x: touch.clientX, y: touch.clientY };
+  };
+  const onTouchEnd = (event: TouchEvent) => {
+    const start = swipeStart.current;
+    const touch = event.changedTouches[0];
+    swipeStart.current = null;
+    if (live && start && touch.clientY - start.y > 80 && Math.abs(touch.clientX - start.x) < touch.clientY - start.y) {
+      navigate("/copa");
+    }
+  };
+
   const handleCancel = () =>
     attempt(async () => {
       await cancelMatch(session.id, match.id, match.timer?.durationSec ?? 600);
@@ -262,8 +277,15 @@ function MatchScreen({ session, match, byId, isAdmin }: MatchScreenProps) {
 
   return (
     <section className="match">
-      <header className="match__header">
+      <header className="match__header" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         <div className="match__top">
+          {live && (
+            <button type="button" className="match__minimize" aria-label="Minimizar a partida e ver a Copa" onClick={() => navigate("/copa")}>
+              <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          )}
           <span className="match__label">{matchLabel(match)}</span>
           {live ? (
             <div className={`match__clock${clockAlert(remaining, running)}`} role="timer">

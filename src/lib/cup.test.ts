@@ -5,6 +5,7 @@ import {
   getChampion,
   getMatchScore,
   getMatchWinnerId,
+  getLiveStandings,
   getStandings,
   isNextRoundLocked,
   matchLabel,
@@ -119,6 +120,16 @@ describe("getStandings", () => {
     const table = getStandings(read(play(started, first.id, 3, 1)));
     expect(table[0]).toMatchObject({ played: 1, wins: 1, points: 3, goalsFor: 3, goalsAgainst: 1, goalDiff: 2 });
     expect(table[0].team.id).toBe(first.homeId);
+  });
+
+  it("counts the match in progress only in the live table", () => {
+    const started = newCup();
+    const first = read(started).matches[0];
+    const scored = play(started, first.id, 2, 0);
+    const live = { ...scored, matches: { ...scored.matches, [first.id]: { ...scored.matches?.[first.id], status: "live" } } };
+    expect(getStandings(read(live)).every((row) => row.played === 0)).toBe(true);
+    expect(getLiveStandings(read(live))[0]).toMatchObject({ played: 1, points: 3, goalDiff: 2 });
+    expect(getLiveStandings(read(live))[0].team.id).toBe(first.homeId);
   });
 
   it("gives a point each for a draw", () => {

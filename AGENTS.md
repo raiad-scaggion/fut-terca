@@ -78,6 +78,7 @@ When you add or change a script, update this block in the same commit.
 
 Newest first. Format: date, decision, one-line reason.
 
+- 2026-11-24: The Copa table counts the live match with its current score (`getLiveStandings`), but the knockout draw uses `getStandings`, which counts only finished matches. Xana asked to see the table move during a match, and a goal that isn't final must not change the semis.
 - 2026-11-24: The clock starts with the match, replacing the 2026-10-30 tap on "Iniciar cronômetro". Medina asked for it, and "Pausar" still covers a team that isn't ready.
 - 2026-11-23: The rules refuse a new `live/sessionId` while the current one is live, and edits to an existing event that change its type, player or team without a log. Two admins confirming at once made a second night, and the log could be skipped.
 - 2026-11-23: A `live/matchId` left on a match that isn't running counts as free. Starting and finishing take two writes, and a lost second write used to block every new match.
