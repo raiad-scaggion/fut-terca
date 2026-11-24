@@ -14,6 +14,26 @@ export function getRemainingMs(timer: MatchTimer | undefined, now: number): numb
   return timer.durationSec * 1000 - elapsed;
 }
 
+export const WARNING_MS = 60_000;
+export const FINAL_MS = 10_000;
+
+// The class a clock gets: the last minute warns, the last 10 seconds shout, overtime stays red.
+// A paused clock stays calm, since nothing is about to end.
+export function clockAlert(ms: number, running: boolean): "" | " is-warning" | " is-final" | " is-over" {
+  if (ms < 0) {
+    return " is-over";
+  }
+  if (!running || ms > WARNING_MS) {
+    return "";
+  }
+  return ms > FINAL_MS ? " is-warning" : " is-final";
+}
+
+// True when the clock just crossed into a new second of the last 10, which is when it beeps.
+export function isFinalTick(previousMs: number, ms: number): boolean {
+  return ms > 0 && ms <= FINAL_MS && Math.ceil(previousMs / 1000) !== Math.ceil(ms / 1000);
+}
+
 // Past the end the clock keeps counting up, shown with a "+".
 export function formatClock(ms: number): string {
   const totalSeconds = Math.floor(Math.abs(ms) / 1000);

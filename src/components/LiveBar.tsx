@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useNow } from "../data/clock";
 import { useLiveMatch } from "../data/live";
-import { formatClock, getRemainingMs } from "../lib/clock";
+import { clockAlert, formatClock, getRemainingMs } from "../lib/clock";
 import { getMatchScore } from "../lib/cup";
 
 export function LiveBar() {
@@ -31,7 +31,7 @@ export function LiveBar() {
       <span className="live-bar__team" style={{ color: away?.color }}>
         {away?.name}
       </span>
-      <span className={`live-bar__clock${remaining < 0 ? " is-over" : ""}`}>{formatClock(remaining)}</span>
+      <span className={`live-bar__clock${clockAlert(remaining, Boolean(match.timer?.running))}`}>{formatClock(remaining)}</span>
     </Link>
   );
 }

@@ -53,8 +53,33 @@
 }
 
 .live-bar__clock.is-over,
-.match__clock.is-over {
+.match__clock.is-over,
+.live-bar__clock.is-warning,
+.match__clock.is-warning,
+.live-bar__clock.is-final,
+.match__clock.is-final {
   color: var(--danger);
+}
+
+.live-bar__clock.is-warning,
+.match__clock.is-warning {
+  animation: clock-pulse 1s ease-in-out infinite;
+}
+
+.live-bar__clock.is-final,
+.match__clock.is-final {
+  animation: clock-pulse 0.5s ease-in-out infinite;
+}
+
+.match__clock.is-final {
+  font-size: 2.75rem;
+}
+
+@keyframes clock-pulse {
+  50% {
+    opacity: 0.45;
+    transform: scale(1.08);
+  }
 }
 
 /* Room for the live bar at the end of every page */
@@ -517,4 +542,12 @@
   background: none;
   border: 1px solid var(--brand);
   border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-bar__clock,
+  .match__clock,
+  .home-score__clock {
+    animation: none !important;
+  }
 }

@@ -15,7 +15,7 @@ import type { Player } from "../lib/players";
 import { AWARD_LABELS, getCurrentAwards, getPlayerAward } from "../lib/awards";
 import { InfoTip } from "../components/InfoTip";
 import { SpecialCardsInfo } from "../components/SpecialCardsInfo";
-import { formatClock, getRemainingMs } from "../lib/clock";
+import { clockAlert, formatClock, getRemainingMs } from "../lib/clock";
 import { COUNTDOWN_PHRASES, countdownStage, kickoffMs, splitRemaining } from "../lib/countdown";
 import { getMatchScore, matchLabel } from "../lib/cup";
 import { getHomeState, getLastChampion, listAwardWinners, type HomeState } from "../lib/home";
@@ -51,7 +51,7 @@ function LiveScore({ session, match }: { session: Session; match: Match }) {
       <span className="home-score__team" style={{ color: away?.color }}>
         {away?.name}
       </span>
-      <span className={`home-score__clock${remaining < 0 ? " is-over" : ""}`}>{formatClock(remaining)}</span>
+      <span className={`home-score__clock${clockAlert(remaining, Boolean(match.timer?.running))}`}>{formatClock(remaining)}</span>
     </div>
   );
 }

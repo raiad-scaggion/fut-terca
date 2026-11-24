@@ -9,7 +9,7 @@ import { addEvent, cancelMatch, finishEdit, finishMatch, removeEvent, setTimerRu
 import { usePlayers } from "../data/players";
 import { useSessions } from "../data/sessions";
 import { useMatchEffects } from "../hooks/useMatchEffects";
-import { formatClock, getRemainingMs } from "../lib/clock";
+import { clockAlert, formatClock, getRemainingMs } from "../lib/clock";
 import { getMatchScore, getMatchWinnerId, isNextRoundLocked, isTied, matchLabel, needsGoldenGoal } from "../lib/cup";
 import type { Player } from "../lib/players";
 import { runningMatch, type Match, type MatchEvent, type MatchEventType, type Session, type Team } from "../lib/session";
@@ -266,7 +266,7 @@ function MatchScreen({ session, match, byId, isAdmin }: MatchScreenProps) {
         <div className="match__top">
           <span className="match__label">{matchLabel(match)}</span>
           {live ? (
-            <div className={`match__clock${remaining < 0 ? " is-over" : ""}`} role="timer">
+            <div className={`match__clock${clockAlert(remaining, running)}`} role="timer">
               {formatClock(remaining)}
             </div>
           ) : (

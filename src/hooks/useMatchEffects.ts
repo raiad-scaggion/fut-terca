@@ -1,17 +1,18 @@
 import { useEffect, useRef } from "react";
+import { isFinalTick } from "../lib/clock";
 
-function whistle(context: AudioContext) {
+function tone(context: AudioContext, frequency: number, seconds: number) {
   const oscillator = context.createOscillator();
   const gain = context.createGain();
   oscillator.type = "square";
-  oscillator.frequency.value = 2200;
+  oscillator.frequency.value = frequency;
   gain.gain.value = 0.15;
   oscillator.connect(gain).connect(context.destination);
   oscillator.start();
-  oscillator.stop(context.currentTime + 1.2);
+  oscillator.stop(context.currentTime + seconds);
 }
 
-// Keeps the screen on while it's mounted, and whistles when a running clock reaches zero.
+// Keeps the screen on while it's mounted, beeps each of the last 10 seconds and whistles at zero.
 export function useMatchEffects(remainingMs: number, running: boolean) {
   const audio = useRef<AudioContext | null>(null);
   const previous = useRef(remainingMs);
@@ -60,7 +61,12 @@ export function useMatchEffects(remainingMs: number, running: boolean) {
     if (running && previous.current > 0 && remainingMs <= 0) {
       navigator.vibrate?.([400, 150, 400]);
       if (audio.current) {
-        whistle(audio.current);
+        tone(audio.current, 2200, 1.2);
+      }
+    } else if (running && isFinalTick(previous.current, remainingMs)) {
+      navigator.vibrate?.(80);
+      if (audio.current) {
+        tone(audio.current, 1400, 0.12);
       }
     }
     previous.current = remainingMs;

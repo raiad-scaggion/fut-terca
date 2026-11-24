@@ -424,8 +424,18 @@ body {
   font-feature-settings: "tnum";
 }
 
-.home-score__clock.is-over {
+.home-score__clock.is-over,
+.home-score__clock.is-warning,
+.home-score__clock.is-final {
   color: var(--danger);
+}
+
+.home-score__clock.is-warning {
+  animation: clock-pulse 1s ease-in-out infinite;
+}
+
+.home-score__clock.is-final {
+  animation: clock-pulse 0.5s ease-in-out infinite;
 }
 
 .home__section {
