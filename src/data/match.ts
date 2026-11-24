@@ -27,7 +27,8 @@ export async function startMatch(
   await writeWithLog({ action: "match.start", sessionId, matchId }, () => ({
     [`${path}/status`]: "live",
     [`${path}/keepers`]: keepers,
-    [`${path}/timer`]: { durationSec, running: false, startedAt: 0, elapsedMs: 0 },
+    // The group asked for the clock to start with the match. "Pausar" covers a team that isn't ready.
+    [`${path}/timer`]: startTimer({ durationSec, running: false, startedAt: 0, elapsedMs: 0 }, serverNow()),
   }));
   return true;
 }
@@ -82,7 +83,8 @@ export async function cancelMatch(sessionId: string, matchId: string, durationSe
     [`${path}/status`]: "pending",
     [`${path}/keepers`]: null,
     [`${path}/events`]: null,
-    [`${path}/timer`]: { durationSec, running: false, startedAt: 0, elapsedMs: 0 },
+    // The group asked for the clock to start with the match. "Pausar" covers a team that isn't ready.
+    [`${path}/timer`]: startTimer({ durationSec, running: false, startedAt: 0, elapsedMs: 0 }, serverNow()),
     "live/matchId": null,
   }));
 }

@@ -102,7 +102,7 @@ A fixed bar above the tab bar shows the live score and clock on every page but I
 ## 6. Live match
 
 - Starting a match asks which keeper defends each side. It preselects the previous match's choice.
-- Timer with a chosen length. A started match opens with the clock stopped, and an admin starts it on the whistle. It uses Firebase's server clock offset, so every phone shows the same time. When time runs out, the phone whistles and vibrates and the clock keeps counting in red.
+- Timer with a chosen length. The clock starts with the match, and an admin can pause it if a team isn't ready. It uses Firebase's server clock offset, so every phone shows the same time. When time runs out, the phone whistles and vibrates and the clock keeps counting in red.
 - Each side lists its 4 players and its keeper with "+ Gol" and "+ Assist.". The keeper also has "+ Defesa" and "+ Frango".
 - "Gol contra" under each side opens that side's players and keeper. The own goal counts for the other side and is the player's own stat, apart from their goals.
 - "Frango" marks a goal the keeper should have saved. It's marked next to the goal or own goal and doesn't change the score.
