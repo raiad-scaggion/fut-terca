@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { InfoTip } from "../components/InfoTip";
+import { PlayerCardSheet } from "../components/PlayerCardSheet";
 import { ExportImage } from "../components/ExportImage";
 import { EmptyState, Page } from "../components/Page";
 import { StartMatchSheet } from "../components/StartMatchSheet";
@@ -10,7 +11,10 @@ import { usePlayers } from "../data/players";
 import { useSessions } from "../data/sessions";
 import { renderSummaryImage } from "../exports/summaryImage";
 import { getChampion, getLiveStandings, getMatchScore, getMatchWinnerId, matchLabel } from "../lib/cup";
+import { getCurrentAwards, getPlayerAward } from "../lib/awards";
 import { buildNightSummary, dayLabel, sessionDate } from "../lib/nightSummary";
+import { positionCode, type Player } from "../lib/players";
+import { monthLabel } from "../lib/stats";
 import { runningMatch, type Match, type Session, type Team } from "../lib/session";
 
 function TeamName({ team, winner }: { team?: Team; winner: boolean }) {
@@ -68,7 +72,53 @@ function MatchRow({ session, match, canStart, onStart }: MatchRowProps) {
   );
 }
 
-function Standings({ session }: { session: Session }) {
+type TeamPopoverProps = {
+  team: Team;
+  top: number;
+  byId: Map<string, Player>;
+  onPlayer: (player: Player) => void;
+  onClose: () => void;
+};
+
+// A small list under the tapped row, so people can check who plays when the bibs don't match the team color.
+function TeamPopover({ team, top, byId, onPlayer, onClose }: TeamPopoverProps) {
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [onClose]);
+
+  const players = team.playerIds.map((id) => byId.get(id)).filter((player): player is Player => Boolean(player));
+
+  return (
+    <div className="team-popover__backdrop" onClick={onClose}>
+      <div className="team-popover" role="dialog" aria-label={`Jogadores do ${team.name}`} style={{ top }} onClick={(event) => event.stopPropagation()}>
+        <div className="team-popover__title">
+          <span className="cup-dot" style={{ background: team.color }} aria-hidden="true" />
+          {team.name}
+        </div>
+        {players.map((player) => (
+          <button key={player.id} type="button" className="team-popover__player" onClick={() => onPlayer(player)}>
+            <span>{player.name}</span>
+            <span className="team-popover__code">{positionCode(player)}</span>
+          </button>
+        ))}
+        {players.length === 0 && <p className="team-popover__empty">Não achei os jogadores deste time.</p>}
+      </div>
+    </div>
+  );
+}
+
+type StandingsProps = {
+  session: Session;
+  onTeam: (team: Team, top: number) => void;
+};
+
+function Standings({ session, onTeam }: StandingsProps) {
   const liveMatch = session.matches.find((match) => match.status === "live" && match.stage === "group");
   const playing = (id: string) => liveMatch?.homeId === id || liveMatch?.awayId === id;
 
@@ -116,9 +166,16 @@ function Standings({ session }: { session: Session }) {
           <tr key={row.team.id}>
             <th scope="row" className="standings__team">
               <span className="standings__position">{index + 1}</span>
-              <span className="cup-dot" style={{ background: row.team.color }} aria-hidden="true" />
-              {row.team.name}
-              {playing(row.team.id) && <span className="standings__live">ao vivo</span>}
+              <button
+                type="button"
+                className="standings__team-button"
+                aria-label={`Ver jogadores do ${row.team.name}`}
+                onClick={(event) => onTeam(row.team, event.currentTarget.getBoundingClientRect().bottom)}
+              >
+                <span className="cup-dot" style={{ background: row.team.color }} aria-hidden="true" />
+                {row.team.name}
+                {playing(row.team.id) && <span className="standings__live">ao vivo</span>}
+              </button>
             </th>
             <td className="standings__points">{row.points}</td>
             <td>{row.played}</td>
@@ -139,9 +196,12 @@ export function CopaPage() {
   const { sessions, loading } = useSessions();
   const live = useLive();
   const [starting, setStarting] = useState<Match | null>(null);
+  const [openTeam, setOpenTeam] = useState<{ team: Team; top: number } | null>(null);
+  const [cardPlayer, setCardPlayer] = useState<Player | null>(null);
   const [params, setParams] = useSearchParams();
 
   const byId = useMemo(() => new Map(players.map((player) => [player.id, player])), [players]);
+  const awards = useMemo(() => getCurrentAwards(players, sessions, new Date().toLocaleDateString("en-CA")), [players, sessions]);
   const nights = useMemo(
     () => [...sessions].sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt ?? 0) - (a.createdAt ?? 0)),
     [sessions],
@@ -231,7 +291,8 @@ export function CopaPage() {
         />
       )}
 
-      <Standings session={session} />
+      {/* Keeps the popover on screen when the tapped row is near the bottom. */}
+      <Standings session={session} onTeam={(team, bottom) => setOpenTeam({ team, top: Math.min(bottom + 4, window.innerHeight - 260) })} />
 
       <section className="draw-section cup-section">
         <h2 className="draw-section__title">Fase de grupos</h2>
@@ -243,6 +304,28 @@ export function CopaPage() {
           <h2 className="draw-section__title">Mata-mata</h2>
           {knockout.map(row)}
         </section>
+      )}
+
+      {openTeam && (
+        <TeamPopover
+          team={openTeam.team}
+          top={openTeam.top}
+          byId={byId}
+          onPlayer={(player) => {
+            setOpenTeam(null);
+            setCardPlayer(player);
+          }}
+          onClose={() => setOpenTeam(null)}
+        />
+      )}
+
+      {cardPlayer && (
+        <PlayerCardSheet
+          player={cardPlayer}
+          award={getPlayerAward(awards, cardPlayer.id)}
+          awardMonth={monthLabel(awards.month).slice(0, 3)}
+          onClose={() => setCardPlayer(null)}
+        />
       )}
 
       {starting && (

@@ -1,20 +1,15 @@
 import { useState } from "react";
 
 // Each release gets a new version, so everyone sees its sheet once.
-const VERSION = "2.5";
+const VERSION = "2.6";
 const SEEN_KEY = `whats-new-seen-${VERSION}`;
 
 const NEWS = [
-  { title: "Cronômetro automático", text: "o tempo começa a contar assim que a partida começa. Se um time não estiver pronto, é só pausar." },
+  { title: "Gráfico de notas", text: "abra a carta de qualquer jogador e veja as seis notas num gráfico de radar, como no FIFA." },
   {
-    title: "Fim de jogo chamativo",
-    text: "no último minuto o cronômetro fica vermelho e pisca. Nos 10 segundos finais ele cresce e apita a cada segundo.",
+    title: "Quem joga em cada time",
+    text: "na tabela da Copa, toque num time para ver os jogadores dele. Ajuda quando o colete não bate com a cor do time.",
   },
-  {
-    title: "Minimizar a partida",
-    text: "toque na seta no alto da partida, ou arraste o placar para baixo, e veja a tabela da Copa já com o placar do jogo que está rolando.",
-  },
-  { title: "OVR com peso por posição", text: "cada nota pesa conforme a posição: ataque, meio ou defesa. Os pesos estão no Glossário." },
 ];
 
 // A browser that blocks storage would show this on every visit, so it counts as already seen.

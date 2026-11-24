@@ -5,6 +5,7 @@ import { EmptyState, Page } from "../components/Page";
 import { PhotoEditor } from "../components/PhotoEditor";
 import { PlayerCard } from "../components/PlayerCard";
 import { PlayerForm } from "../components/PlayerForm";
+import { StatRadar } from "../components/StatRadar";
 import { useAuth } from "../data/authContext";
 import { removePhoto, usePhotos } from "../data/photos";
 import { setLegend, usePlayers } from "../data/players";
@@ -282,6 +283,8 @@ export function JogadoresPage() {
                       </div>
                     )}
                   </div>
+
+                  <StatRadar player={selectedPlayer} />
 
                   <div className="baseline-section">
                     <h3 className="baseline-section__title">

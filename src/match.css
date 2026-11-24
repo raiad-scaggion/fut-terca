@@ -576,3 +576,83 @@
     animation: none !important;
   }
 }
+
+/* Tap a team in the table to see who plays for it */
+.standings__team-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.team-popover__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+}
+
+.team-popover {
+  position: fixed;
+  left: var(--gutter);
+  width: min(240px, calc(100vw - 2 * var(--gutter)));
+  padding: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.5);
+  animation: popover-in 0.15s ease-out;
+}
+
+.team-popover__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px 8px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+}
+
+.team-popover__player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 8px;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.team-popover__player:active {
+  background: var(--surface);
+}
+
+.team-popover__code {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.team-popover__empty {
+  margin: 8px;
+  color: var(--muted);
+}
+
+@keyframes popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}

@@ -78,6 +78,8 @@ When you add or change a script, update this block in the same commit.
 
 Newest first. Format: date, decision, one-line reason.
 
+- 2026-11-24: The stat radar is a hand-written SVG (`components/StatRadar.tsx`, geometry in `lib/radar.ts`), not a chart library. Six axes don't justify a dependency.
+- 2026-11-24: Tapping a team in the Copa table opens a small popover with its outfield players, not a sheet. The group wanted a quick check of who plays when the bibs don't match the team color. Keepers rotate, so they are left out.
 - 2026-11-24: Outfield OVR is weighted by position again (`LINE_WEIGHTS`), replacing the 2026-11-09 plain average. Mose asked for it with a table of weights. Keepers keep the plain average, since the table has no keeper row.
 - 2026-11-24: The Copa table counts the live match with its current score (`getLiveStandings`), but the knockout draw uses `getStandings`, which counts only finished matches. Xana asked to see the table move during a match, and a goal that isn't final must not change the semis.
 - 2026-11-24: The clock starts with the match, replacing the 2026-10-30 tap on "Iniciar cronômetro". Medina asked for it, and "Pausar" still covers a team that isn't ready.
