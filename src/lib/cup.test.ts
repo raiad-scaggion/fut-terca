@@ -218,6 +218,19 @@ describe("the whole cup", () => {
     expect(cup.status).toBe("finished");
   });
 
+  it("keeps the night open when the final is played before the 3rd place match", () => {
+    let cup = playGroup(newCup());
+    cup = play(cup, byLabel(cup, "Semifinal 1").id, 2, 0);
+    cup = play(cup, byLabel(cup, "Semifinal 2").id, 0, 1);
+
+    cup = play(cup, byLabel(cup, "Final").id, 0, 2);
+    expect(cup.championId).toBe("t3");
+    expect(cup.status).toBe("live");
+
+    cup = play(cup, byLabel(cup, "Disputa de 3º lugar").id, 1, 0);
+    expect(cup.status).toBe("finished");
+  });
+
   it("sends the higher-placed team through a tied semi", () => {
     let cup = playGroup(newCup());
     cup = play(cup, byLabel(cup, "Semifinal 1").id, 1, 1);

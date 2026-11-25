@@ -224,8 +224,11 @@ function syncCup(raw: RawSession, sessionId: string): RawSession {
   }
 
   const next = { ...raw, matches };
-  const championId = getChampionId(normalizeSession(sessionId, next));
-  return { ...next, championId, status: championId ? "finished" : "live" };
+  const synced = normalizeSession(sessionId, next);
+  const championId = getChampionId(synced);
+  // The final can be played before the 3rd place match, so the night stays open until every match is done.
+  const allDone = synced.matches.every((match) => match.status === "finished");
+  return { ...next, championId, status: championId && allDone ? "finished" : "live" };
 }
 
 function isTiedFinal(raw: RawSession, sessionId: string, matchId: string): boolean {

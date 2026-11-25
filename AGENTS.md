@@ -78,6 +78,7 @@ When you add or change a script, update this block in the same commit.
 
 Newest first. Format: date, decision, one-line reason.
 
+- 2026-11-25: The night ends when every match is finished, not when the final is. The group played the final before the 3rd place match and then couldn't start it.
 - 2026-11-24: The stat radar is a hand-written SVG (`components/StatRadar.tsx`, geometry in `lib/radar.ts`), not a chart library. Six axes don't justify a dependency.
 - 2026-11-24: Tapping a team in the Copa table opens a small popover with its outfield players, not a sheet. The group wanted a quick check of who plays when the bibs don't match the team color. Keepers rotate, so they are left out.
 - 2026-11-24: Outfield OVR is weighted by position again (`LINE_WEIGHTS`), replacing the 2026-11-09 plain average. Mose asked for it with a table of weights. Keepers keep the plain average, since the table has no keeper row.
