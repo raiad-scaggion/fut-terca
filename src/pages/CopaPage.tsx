@@ -244,7 +244,7 @@ export function CopaPage() {
   return (
     <Page
       title="Copa"
-      subtitle={past ? `Noite de ${dayLabel(sessionDate(session.date))}` : champion ? "A copa acabou" : "Fase de grupos, mata-mata e o campeão da noite"}
+      subtitle={past ? `Noite de ${dayLabel(sessionDate(session.date))}` : session.status === "finished" ? "A copa acabou" : "Fase de grupos, mata-mata e o campeão da noite"}
     >
       {nights.length > 1 && (
         <label className="form-field cup-night">
